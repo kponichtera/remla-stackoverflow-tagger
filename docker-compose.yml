@@ -25,6 +25,21 @@ services:
     depends_on:
       minio-init:
         condition: service_completed_successfully
+  pubsub:
+    image: google/cloud-sdk:385.0.0-emulators
+    ports:
+      - "8085:8085"
+    entrypoint: "gcloud beta emulators pubsub start"
+    command:
+      - "--data-dir=/data"
+    volumes:
+      - "pubsub-data:/data"
+  bigtable:
+    image: google/cloud-sdk:385.0.0-emulators
+    ports:
+      - "8086:8086"
+    entrypoint: "gcloud beta emulators bigtable start"
 
 volumes:
   minio-data: {}
+  pubsub-data: {}
