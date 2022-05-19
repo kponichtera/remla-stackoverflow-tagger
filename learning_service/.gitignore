@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 
 .DS_STORE
+report.json
+report.txt
+report.md

@@ -7,3 +7,5 @@ scikit-learn
 dvc
 mllint
 codecarbon
+dslinter
+pylint
