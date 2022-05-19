@@ -1,4 +1,4 @@
-from typing import Set, Union
+from typing import Set
 from fastapi import FastAPI
 from pydantic import BaseModel
 

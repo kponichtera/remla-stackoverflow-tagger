@@ -1,0 +1,47 @@
+version: '3'
+
+vars:
+  BUILDER_IMAGE: interface_service_image
+  PWD:
+    sh: pwd
+
+tasks:
+  prepare:
+    - task: venv_create
+    - task: venv_activate
+    - task: pip_install
+  venv_create:
+    cmds:
+      - python3 -m venv venv
+  venv_activate:
+    cmds:
+      - unameOut="$(uname -s)"
+      - if [ unameOut == "msys" ] || [ unameOut == "cygwin" ]; then source {{.PWD}}/venv/Scripts/activate; else source {{.PWD}}/venv/bin/activate; fi
+  pip_install:
+    cmds:
+      - pip install -r requirements.txt
+  build_docker:
+    deps: [prepare]
+    cmds: ["docker build -t {{.BUILDER_IMAGE}} ."]
+  docker_run:
+    deps: [build_builder]
+    interactive: true
+    vars:
+      UID:
+        sh: id -u
+      GID:
+        sh: id -g
+      EXTERNAL_PORT: 8080
+      INTERNAL_PORT: 8080
+      SERVICE_NAME:
+        sh: basename "$PWD"
+    cmds:
+      - >
+        docker run 
+        -p {{.EXTERNAL_PORT}}:{{.INTERNAL_PORT}}
+        --network host
+        --user {{.UID}}:{{.GID}}
+        --volume {{.PWD}}/models:/root/models
+        --rm
+        --name {{.SERVICE_NAME}}
+        {{.BUILDER_IMAGE}}

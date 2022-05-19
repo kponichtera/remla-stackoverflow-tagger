@@ -1,0 +1,31 @@
+version: '3'
+
+output: prefixed
+
+includes:
+  interface_service: ./interface_service
+  learning_service: ./learning_service
+
+tasks:
+  build_docker:
+    - task: interface_service:build_docker
+    - task: learning_service:build_docker
+  ########## Docker Compose ###################################################################################################
+  compose_up:
+    cmds:
+      - docker compose up -d
+  compose_down:
+    cmds:
+      - docker compose down --volumes
+  compose_start:
+    cmds:
+      - docker compose start
+  compose_stop:
+    cmds:
+      - docker compose stop
+  ########## Cleanup ###################################################################################################
+  clean:venv: find . -type d -name "venv" -exec rm -rf {} +
+  clean:pycache: find . -type d -name "__pycache__" -exec rm -rf {} +
+  clean:
+    - task: clean:venv
+    - task: clean:pycache
