@@ -4,8 +4,9 @@ nltk
 scipy
 matplotlib
 scikit-learn
-dvc
-mllint
 codecarbon
 dslinter
 pylint
+dvc
+pytest
+mllint

@@ -1,6 +1,6 @@
 # StackOverflow Tagger
 
-Project for [Release Engineering for Machine Learning Applications](https://se.ewi.tudelft.nl/remla/2022/) 
+Project for [Release Engineering for Machine Learning Applications](https://se.ewi.tudelft.nl/remla/2022/)
 (REMLA) course at TU Delft.
 
 ## Development
@@ -16,8 +16,8 @@ Project for [Release Engineering for Machine Learning Applications](https://se.e
 
 ```bash
 cd interface_service/
-virtualenv venv
-source venv/Scripts/activate # or source venv/bin/activate
+virtualenv interface_venv
+source interface_venv/Scripts/activate # or source venv/bin/activate
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
@@ -26,8 +26,8 @@ uvicorn main:app --reload
 
 ```bash
 cd learning_service/
-virtualenv venv
-source venv/Scripts/activate # or source venv/bin/activate
+virtualenv learning_venv
+source learning_venv/Scripts/activate # or source venv/bin/activate
 pip install -r requirements.txt
 ```
 

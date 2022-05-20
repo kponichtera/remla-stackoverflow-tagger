@@ -10,7 +10,7 @@ app = FastAPI(
 
 
 @app.post('/predict')
-async def predict_tags(title : str, summary="Predict tags for StackOverflow title"):
+async def predict_tags(title : str):
     """
     Create a prediction of tags for the given StackOverflow title.
 
