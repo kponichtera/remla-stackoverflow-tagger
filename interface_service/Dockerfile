@@ -1,28 +1,30 @@
-FROM python:3.10
+FROM python:3.10 AS builder
+ARG TASK_URL=https://github.com/go-task/task/releases/download/v3.12.1/task_linux_amd64.deb
 
-# Make new user as root
-WORKDIR /app
-RUN useradd -d /app appuser && chown -R appuser: /app
-
+RUN mkdir /app \
+    && useradd -d /app appuser \
+    && chown -R appuser: /app
 
 RUN apt-get update \
-&& apt-get install -y --no-install-recommends git \
-&& apt-get purge -y --auto-remove gcc libc-dev \
-&& rm -rf /var/lib/apt/lists/*
+    && apt-get install -y --no-install-recommends git curl \
+    && apt-get purge -y --auto-remove gcc libc-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# ...
-# Copy files and install dependencies still as root
-COPY . .
-RUN python -m pip install --upgrade pip &&\
-    pip install -r requirements.txt
+RUN curl -o task.deb -L ${TASK_URL} \
+    && dpkg -i task.deb \
+    && rm task.deb
 
-# Step down from being a root before calling CMD/ENTRYPOINT
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+CMD ["bash"]
+
+FROM builder AS final
+EXPOSE 8000
+
+WORKDIR /app
 USER appuser
-
 RUN mkdir models
 
 COPY . .
-
-EXPOSE 8000
-
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]

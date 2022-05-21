@@ -1,49 +1,39 @@
 version: '3'
 
 vars:
-  BUILDER_IMAGE: learning_service_image
+  LEARNING_SERVICE_BUILDER_IMAGE: remla-stackoverflow-tagger/learning-service-builder
+  LEARNING_SERVICE_IMAGE: remla-stackoverflow-tagger/learning-service
 
 tasks:
   prepare:
-    - task: venv_create
-    - task: venv_activate
-    - task: pip_install
-  venv_create:
-    cmds:
-      - python -m venv {{.PWD}}/learning_service/learning_venv
-  venv_activate:
-    cmds:
-      - unameOut="$(uname -s)"
-      - if [ unameOut == "msys" ] || [ unameOut == "cygwin" ]; then source {{.PWD}}/learning_service/learning_venv/Scripts/activate; else source {{.PWD}}/learning_service/learning_venv/bin/activate; fi
-  pip_install:
-    cmds:
-      - pip install -r {{.PWD}}/learning_service/requirements.txt
+    - python -m venv venv
+    - unameOut="$(uname -s)"
+    - if [ unameOut == "msys" ] || [ unameOut == "cygwin" ]; then source venv/Scripts/activate; else source venv/bin/activate; fi
+    - pip install -r requirements.txt
+  clean:
+    - rm -rf venv
+  build_builder:
+    cmds: ["docker build --target builder -t {{.LEARNING_SERVICE_BUILDER_IMAGE}} ."]
   build_docker:
-    deps: [prepare]
-    cmds: ["docker build -t {{.BUILDER_IMAGE}} ."]
+    cmds: ["docker build -t {{.LEARNING_SERVICE_IMAGE}} ."]
   docker_run:
-    deps: [build_docker]
+    deps: [build_builder]
     interactive: true
     vars:
       UID:
         sh: id -u
       GID:
         sh: id -g
-      PWD:
-        sh: pwd
-      SERVICE_NAME:
-        sh: basename "$PWD"
     cmds:
       - >
-        docker run -it
+        docker run -it --rm
         --network host
         --user {{.UID}}:{{.GID}}
-        --volume {{.PWD}}:/app
-        --rm
-        --name {{.SERVICE_NAME}}
-        {{.BUILDER_IMAGE}}
+        --workdir /project
+        --volume {{.PROJECT_ROOT}}/learning_service:/project
+        {{.LEARNING_SERVICE_BUILDER_IMAGE}}
+        {{.CLI_ARGS}}
   lint:
-    - >
-      pylint --rcfile={{.PWD}}/learning_service/.pylintrc {{.PWD}}/learning_service/src/
+    - pylint --rcfile=.pylintrc src/
   mllint:
     - mllint --output report.md

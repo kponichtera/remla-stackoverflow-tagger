@@ -1,46 +1,36 @@
 version: '3'
 
 vars:
-  BUILDER_IMAGE: interface_service_image
-  PWD:
-    sh: pwd
+  INTERFACE_SERVICE_BUILDER_IMAGE: remla-stackoverflow-tagger/interface-service-builder
+  INTERFACE_SERVICE_IMAGE: remla-stackoverflow-tagger/interface-service
 
 tasks:
   prepare:
-    - task: venv_create
-    - task: venv_activate
-    - task: pip_install
-  venv_create:
-    cmds:
-      - python -m venv {{.PWD}}/interface_service/interface_venv
-  venv_activate:
-    cmds:
-      - unameOut="$(uname -s)"
-      - if [ unameOut == "msys" ] || [ unameOut == "cygwin" ]; then source {{.PWD}}/interface_service/interface_venv/Scripts/activate; else source {{.PWD}}/interface_service/interface_venv/bin/activate; fi
-  pip_install:
-    cmds:
-      - pip install -r {{.PWD}}/interface_service/requirements.txt
+    - python -m venv venv
+    - unameOut="$(uname -s)"
+    - if [ unameOut == "msys" ] || [ unameOut == "cygwin" ]; then source venv/Scripts/activate; else source venv/bin/activate; fi
+    - pip install -r requirements.txt
+  clean:
+    - rm -rf venv
+  build_builder:
+    cmds: ["docker build --target builder -t {{.INTERFACE_SERVICE_BUILDER_IMAGE}} ."]
   build_docker:
-    deps: [prepare]
-    cmds: ["docker build -t {{.BUILDER_IMAGE}} ."]
+    cmds: ["docker build -t {{.INTERFACE_SERVICE_IMAGE}} ."]
   docker_run:
-    deps: [build_docker]
+    deps: [build_builder]
     interactive: true
     vars:
       UID:
         sh: id -u
       GID:
         sh: id -g
-      PORT: 8080
-      SERVICE_NAME:
-        sh: basename "$PWD"
     cmds:
       - >
-        docker run 
-        -p {{.PORT}}:{{.PORT}}
+        docker run -it --rm
         --network host
         --user {{.UID}}:{{.GID}}
-        --volume {{.PWD}}/models:/app/models
-        --rm
-        --name {{.SERVICE_NAME}}
-        {{.BUILDER_IMAGE}}
+        --workdir /project
+        --volume {{.PROJECT_ROOT}}/interface_service:/project
+        --workdir /project
+        {{.INTERFACE_SERVICE_BUILDER_IMAGE}}
+        {{.CLI_ARGS}}

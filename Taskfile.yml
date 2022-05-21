@@ -2,39 +2,29 @@ version: '3'
 
 output: prefixed
 
+vars:
+  PROJECT_ROOT:
+    sh: pwd
+
 includes:
-  interface_service: ./interface_service
-  learning_service: ./learning_service
+  interface_service:
+    dir: ./interface_service
+    taskfile: ./interface_service
+  learning_service:
+    dir: ./learning_service
+    taskfile: ./learning_service
+  dev: ./dev
+  dist: ./dist
 
 tasks:
+  prepare:
+    - task: interface_service:prepare
+    - task: learning_service:prepare
   build_docker:
     - task: interface_service:build_docker
     - task: learning_service:build_docker
-  ########## Docker Compose ###################################################################################################
-  compose_up:
-    cmds:
-      - docker compose -f docker-compose.yml up -d
-  compose_down:
-    cmds:
-      - docker compose -f docker-compose.yml down --volumes
-  compose_start:
-    cmds:
-      - docker compose -f docker-compose.yml start
-  compose_stop:
-    cmds:
-      - docker compose stop
-  compose_up_dev:
-    cmds:
-      - docker compose -f docker-compose.dev.yml up -d
-  compose_start_dev:
-    cmds:
-      - docker compose -f docker-compose.dev.yml start
-  compose_down_dev:
-    cmds:
-      - docker compose -f docker-compose.yml down --volumes
-  ########## Cleanup ###################################################################################################
-  clean:venv: find . -type d -name "venv" -exec rm -rf {} +
   clean:pycache: find . -type d -name "__pycache__" -exec rm -rf {} +
   clean:
-    - task: clean:venv
+    - task: interface_service:clean
+    - task: learning_service:clean
     - task: clean:pycache
