@@ -1,0 +1,36 @@
+.homepage {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  width: 75%;
+  max-width: 1080px;
+  margin: auto;
+
+  a {
+    text-decoration: none;
+  }
+
+  h2 {
+    font-size: 25px;
+    font-weight: 400;
+    margin: 0 0 16px;
+    padding: 0;
+  }
+
+  p {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 28px;
+    margin: 0 0 24px 0;
+    padding: 0;
+  }
+
+  mat-divider {
+    width: 100%;
+  }
+
+  mat-icon {
+    vertical-align: middle;
+  }
+}
