@@ -1,0 +1,18 @@
+services:
+  learning_service:
+    build:
+      context: ./learning_service
+      dockerfile: Dockerfile
+    image: learning_service:0
+    container_name: learning_service
+    volumes:
+    - ./learning_service:/root
+
+  interface_service:
+    build:
+      context: ./interface_service
+      dockerfile: Dockerfile
+    image: interface_service:0
+    container_name: interface_service
+    ports:
+      - 8000:8000

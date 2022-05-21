@@ -10,19 +10,19 @@ tasks:
     - task: pip_install
   venv_create:
     cmds:
-      - python3 -m venv venv
+      - python -m venv {{.PWD}}/learning_service/learning_venv
   venv_activate:
     cmds:
-      - unameOut=tolower("$(uname -s)")
-      - if [ unameOut == "msys" ] || [ unameOut == "cygwin" ]; then source venv/Scripts/activate; else source venv/bin/activate fi
+      - unameOut="$(uname -s)"
+      - if [ unameOut == "msys" ] || [ unameOut == "cygwin" ]; then source {{.PWD}}/learning_service/learning_venv/Scripts/activate; else source {{.PWD}}/learning_service/learning_venv/bin/activate; fi
   pip_install:
     cmds:
-      - pip install -r requirements.txt
+      - pip install -r {{.PWD}}/learning_service/requirements.txt
   build_docker:
     deps: [prepare]
     cmds: ["docker build -t {{.BUILDER_IMAGE}} ."]
   docker_run:
-    deps: [build_builder]
+    deps: [build_docker]
     interactive: true
     vars:
       UID:
@@ -38,27 +38,12 @@ tasks:
         docker run -it
         --network host
         --user {{.UID}}:{{.GID}}
-        --volume {{.PWD}}:/root
+        --volume {{.PWD}}:/app
         --rm
         --name {{.SERVICE_NAME}}
         {{.BUILDER_IMAGE}}
   lint:
     - >
-      pylint
-      --load-plugins=dslinter 
-      --disable=all
-      --enable=import,unnecessary-iteration-pandas,unnecessary-iteration-tensorflow,
-      nan-numpy,chain-indexing-pandas,datatype-pandas,
-      column-selection-pandas,merge-parameter-pandas,inplace-pandas,
-      dataframe-conversion-pandas,scaler-missing-scikitlearn,hyperparameters-scikitlearn,
-      hyperparameters-tensorflow,hyperparameters-pytorch,memory-release-tensorflow,
-      deterministic-pytorch,randomness-control-numpy,randomness-control-scikitlearn,
-      randomness-control-tensorflow,randomness-control-pytorch,randomness-control-dataloader-pytorch,
-      missing-mask-tensorflow,missing-mask-pytorch,tensor-array-tensorflow,
-      forward-pytorch,gradient-clear-pytorch,data-leakage-scikitlearn,
-      dependent-threshold-scikitlearn,dependent-threshold-tensorflow,dependent-threshold-pytorch
-      --output-format=json:report.json,text:report.txt,colorized
-      --reports=y
-      src/*.py
+      pylint --rcfile={{.PWD}}/learning_service/.pylintrc {{.PWD}}/learning_service/src/
   mllint:
     - mllint --output report.md

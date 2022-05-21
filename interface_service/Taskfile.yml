@@ -12,36 +12,35 @@ tasks:
     - task: pip_install
   venv_create:
     cmds:
-      - python3 -m venv venv
+      - python -m venv {{.PWD}}/interface_service/interface_venv
   venv_activate:
     cmds:
       - unameOut="$(uname -s)"
-      - if [ unameOut == "msys" ] || [ unameOut == "cygwin" ]; then source {{.PWD}}/venv/Scripts/activate; else source {{.PWD}}/venv/bin/activate; fi
+      - if [ unameOut == "msys" ] || [ unameOut == "cygwin" ]; then source {{.PWD}}/interface_service/interface_venv/Scripts/activate; else source {{.PWD}}/interface_service/interface_venv/bin/activate; fi
   pip_install:
     cmds:
-      - pip install -r requirements.txt
+      - pip install -r {{.PWD}}/interface_service/requirements.txt
   build_docker:
     deps: [prepare]
     cmds: ["docker build -t {{.BUILDER_IMAGE}} ."]
   docker_run:
-    deps: [build_builder]
+    deps: [build_docker]
     interactive: true
     vars:
       UID:
         sh: id -u
       GID:
         sh: id -g
-      EXTERNAL_PORT: 8080
-      INTERNAL_PORT: 8080
+      PORT: 8080
       SERVICE_NAME:
         sh: basename "$PWD"
     cmds:
       - >
         docker run 
-        -p {{.EXTERNAL_PORT}}:{{.INTERNAL_PORT}}
+        -p {{.PORT}}:{{.PORT}}
         --network host
         --user {{.UID}}:{{.GID}}
-        --volume {{.PWD}}/models:/root/models
+        --volume {{.PWD}}/models:/app/models
         --rm
         --name {{.SERVICE_NAME}}
         {{.BUILDER_IMAGE}}

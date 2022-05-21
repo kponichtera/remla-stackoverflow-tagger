@@ -13,16 +13,25 @@ tasks:
   ########## Docker Compose ###################################################################################################
   compose_up:
     cmds:
-      - docker compose up -d
+      - docker compose -f docker-compose.yml up -d
   compose_down:
     cmds:
-      - docker compose down --volumes
+      - docker compose -f docker-compose.yml down --volumes
   compose_start:
     cmds:
-      - docker compose start
+      - docker compose -f docker-compose.yml start
   compose_stop:
     cmds:
       - docker compose stop
+  compose_up_dev:
+    cmds:
+      - docker compose -f docker-compose.dev.yml up -d
+  compose_start_dev:
+    cmds:
+      - docker compose -f docker-compose.dev.yml start
+  compose_down_dev:
+    cmds:
+      - docker compose -f docker-compose.yml down --volumes
   ########## Cleanup ###################################################################################################
   clean:venv: find . -type d -name "venv" -exec rm -rf {} +
   clean:pycache: find . -type d -name "__pycache__" -exec rm -rf {} +
