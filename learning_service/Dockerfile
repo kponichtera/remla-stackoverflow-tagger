@@ -17,6 +17,7 @@ RUN curl -o task.deb -L ${TASK_URL} \
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+# TODO: Replace with actual application startup
 CMD ["bash"]
 
 FROM builder AS final
@@ -25,5 +26,3 @@ WORKDIR /app
 USER appuser
 
 COPY . .
-# TODO: Replace with actual application startup
-CMD ["bash"]

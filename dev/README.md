@@ -18,6 +18,12 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
+Or, to avoid creating local virtual environments and Python version discrepancies:
+
+```shell
+task interface_service:docker_run
+```
+
 ### Learning service
 
 ```bash
@@ -25,6 +31,12 @@ cd learning_service/
 virtualenv venv
 source venv/Scripts/activate # or source venv/bin/activate
 pip install -r requirements.txt
+```
+
+Or, to avoid creating local virtual environments and Python version discrepancies:
+
+```shell
+task learning_service:docker_run
 ```
 
 ## Launching development containers

@@ -17,7 +17,7 @@ RUN curl -o task.deb -L ${TASK_URL} \
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-CMD ["bash"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 FROM builder AS final
 EXPOSE 8000
@@ -27,4 +27,3 @@ USER appuser
 RUN mkdir models
 
 COPY . .
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
