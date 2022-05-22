@@ -9,6 +9,9 @@ app = FastAPI(
     version="0.0.1",
 )
 
+@app.get('/api/ping')
+async def ping():
+    return {}
 
 @app.post('/predict')
 async def predict_tags(title : str):

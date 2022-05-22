@@ -5,6 +5,9 @@ import {HomepageRoutingModule} from './homepage-routing.module';
 import {HomepageComponent} from './homepage.component';
 import {InferenceFormModule} from "../../components/inference-form/inference-form.module";
 import {MatCardModule} from "@angular/material/card";
+import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
+import {HttpClientModule} from "@angular/common/http";
+import {MatIconModule} from "@angular/material/icon";
 
 
 @NgModule({
@@ -15,7 +18,9 @@ import {MatCardModule} from "@angular/material/card";
     CommonModule,
     HomepageRoutingModule,
     InferenceFormModule,
-    MatCardModule
+    MatCardModule,
+    MatProgressSpinnerModule,
+    MatIconModule
   ]
 })
 export class HomepageModule { }

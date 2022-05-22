@@ -2,6 +2,14 @@
   <h2>StackOverflow Tagger</h2>
   <p>REMLA 2022 project (<a routerLink="/credits">credits</a>)</p>
   <mat-card>
-    <app-inference-form></app-inference-form>
+    <div *ngIf="serviceAvailable">
+      <app-inference-form></app-inference-form>
+    </div>
+    <div *ngIf="!serviceAvailable && !unrecoverableError">
+      <mat-spinner class="loading-spinner" color="primary"></mat-spinner>
+    </div>
+    <div *ngIf="!serviceAvailable && unrecoverableError">
+      <mat-icon color="warn" class="error-icon">clear</mat-icon>
+    </div>
   </mat-card>
 </main>
