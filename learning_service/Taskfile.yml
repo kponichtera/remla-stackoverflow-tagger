@@ -6,12 +6,12 @@ vars:
 
 tasks:
   prepare:
-    - python -m venv venv
+    - python -m venv learning_venv
     - unameOut="$(uname -s)"
-    - if [ unameOut == "msys" ] || [ unameOut == "cygwin" ]; then source venv/Scripts/activate; else source venv/bin/activate; fi
+    - if [ unameOut == "msys" ] || [ unameOut == "cygwin" ]; then source learning_venv/Scripts/activate; else source learning_venv/bin/activate; fi
     - pip install -r requirements.txt
   clean:
-    - rm -rf venv
+    - rm -rf learning_venv
   build_builder:
     cmds: ["docker build --target builder -t {{.LEARNING_SERVICE_BUILDER_IMAGE}} ."]
   build_docker:
@@ -37,3 +37,4 @@ tasks:
     - pylint --rcfile=.pylintrc src/
   mllint:
     - mllint --output report.md
+  test: pytest

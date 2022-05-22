@@ -23,6 +23,13 @@ tasks:
   build_docker:
     - task: interface_service:build_docker
     - task: learning_service:build_docker
+  lint:
+    - task: interface_service:lint
+    - task: learning_service:lint
+    - task: learning_service:mllint
+  test:
+    - task: interface_service:test
+    - task: learning_service:test
   clean:pycache: find . -type d -name "__pycache__" -exec rm -rf {} +
   clean:
     - task: interface_service:clean

@@ -1,3 +1,4 @@
+"""Main file for the FastAPI application."""
 from typing import Set
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -24,6 +25,11 @@ async def predict_tags(title : str):
 
 
 class Correction(BaseModel):
+    """Model for tag correction for a given title.
+
+    Args:
+        BaseModel (_type_): pydantic's base model class
+    """
     title: str
     predicted: Set[str]
     actual: Set[str]

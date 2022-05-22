@@ -4,4 +4,4 @@ starlette
 pydantic
 pytest
 requests
-pylint
+pylint==2.12.2
