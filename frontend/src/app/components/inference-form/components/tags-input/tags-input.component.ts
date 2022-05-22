@@ -15,6 +15,9 @@ export class TagsInputComponent implements OnInit {
   private _newTag: string = ''
 
   @Input()
+  disabled: boolean = false;
+
+  @Input()
   tags: string[] = []
 
   @Output()

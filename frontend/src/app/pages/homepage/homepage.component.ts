@@ -19,12 +19,11 @@ export class HomepageComponent implements OnInit {
               private _inferenceService: InferenceService) { }
 
   ngOnInit(): void {
-    setTimeout(() => this.unlockForm(), 2000);
+    this.unlockForm();
   }
 
   unlockForm() {
-    this._inferenceService.ping().subscribe(
-      {
+    this._inferenceService.ping().subscribe({
         next: _ => {
           // Service is available
           this.serviceAvailable = true;
@@ -42,9 +41,7 @@ export class HomepageComponent implements OnInit {
             this._snackBar.open('Server error, try again later.')
           }
         }
-      }
-
-    )
+      });
   }
 
 }
