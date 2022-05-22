@@ -1,0 +1,11 @@
+services:
+  learning_service:
+    build:
+      context: ../learning_service
+      dockerfile: ../learning_service/Dockerfile
+  interface_service:
+    build:
+      context: ../interface_service
+      dockerfile: ../interface_service/Dockerfile
+    ports:
+      - 8000:8000

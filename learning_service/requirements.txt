@@ -1,0 +1,12 @@
+numpy
+pandas
+nltk
+scipy
+matplotlib
+scikit-learn
+codecarbon
+dslinter
+pylint==2.12.2
+dvc
+pytest
+mllint

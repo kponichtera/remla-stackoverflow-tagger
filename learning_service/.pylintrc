@@ -1,0 +1,48 @@
+[MASTER]
+
+# Use multiple processes to speed up Pylint.
+jobs=1
+
+# Use plugins
+load-plugins=dslinter
+
+
+[MESSAGES CONTROL]
+
+# Disable all to choose the Tests one by one
+disable=all
+
+# Tests
+enable=bad-indentation,mixed-indentation,unnecessary-semicolon,unused-variable,import,unnecessary-iteration-pandas,unnecessary-iteration-tensorflow,nan-numpy,chain-indexing-pandas,datatype-pandas,column-selection-pandas,merge-parameter-pandas,inplace-pandas,dataframe-conversion-pandas,scaler-missing-scikitlearn,hyperparameters-scikitlearn,hyperparameters-tensorflow,hyperparameters-pytorch,memory-release-tensorflow,deterministic-pytorch,randomness-control-numpy,randomness-control-scikitlearn,randomness-control-tensorflow,randomness-control-pytorch,randomness-control-dataloader-pytorch,missing-mask-tensorflow,missing-mask-pytorch,tensor-array-tensorflow,forward-pytorch,gradient-clear-pytorch,data-leakage-scikitlearn,dependent-threshold-scikitlearn,dependent-threshold-tensorflow,dependent-threshold-pytorch
+
+[REPORTS]
+
+# Tells whether to display a full report or only the messages
+reports=yes
+
+# Activate the evaluation score.
+score=yes
+
+# Reports format
+output-format=json:report.json,text:report.txt,colorized
+
+[FORMAT]
+
+# Regexp for a line that is allowed to be longer than the limit.
+ignore-long-lines=^\s*(# )?<?https?://\S+>?$
+
+# Number of spaces of indent required inside a hanging or continued line.
+indent-after-paren=4
+
+# String used as indentation unit. This is usually "    " (4 spaces) or "\t" (1
+# tab).
+indent-string='    '
+
+# Maximum number of lines in a module
+max-module-lines=1000
+
+
+[EXCEPTIONS]
+
+# Exceptions that will emit a warning when being caught.
+overgeneral-exceptions=Exception

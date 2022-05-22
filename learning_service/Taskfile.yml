@@ -1,0 +1,40 @@
+version: '3'
+
+vars:
+  LEARNING_SERVICE_BUILDER_IMAGE: remla-stackoverflow-tagger/learning-service-builder
+  LEARNING_SERVICE_IMAGE: remla-stackoverflow-tagger/learning-service
+
+tasks:
+  prepare:
+    - python -m venv learning_venv
+    - unameOut="$(uname -s)"
+    - if [ unameOut == "msys" ] || [ unameOut == "cygwin" ]; then source learning_venv/Scripts/activate; else source learning_venv/bin/activate; fi
+    - pip install -r requirements.txt
+  clean:
+    - rm -rf learning_venv
+  build_builder:
+    cmds: ["docker build --target builder -t {{.LEARNING_SERVICE_BUILDER_IMAGE}} ."]
+  build_docker:
+    cmds: ["docker build -t {{.LEARNING_SERVICE_IMAGE}} ."]
+  docker_run:
+    deps: [build_builder]
+    interactive: true
+    vars:
+      UID:
+        sh: id -u
+      GID:
+        sh: id -g
+    cmds:
+      - >
+        docker run -it --rm
+        --network host
+        --user {{.UID}}:{{.GID}}
+        --workdir /project
+        --volume {{.PROJECT_ROOT}}/learning_service:/project
+        {{.LEARNING_SERVICE_BUILDER_IMAGE}}
+        {{.CLI_ARGS}}
+  lint:
+    - pylint --rcfile=.pylintrc src/
+  mllint:
+    - mllint --output report.md
+  test: pytest

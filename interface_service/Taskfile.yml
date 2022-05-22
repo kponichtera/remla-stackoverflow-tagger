@@ -1,0 +1,39 @@
+version: '3'
+
+vars:
+  INTERFACE_SERVICE_BUILDER_IMAGE: remla-stackoverflow-tagger/interface-service-builder
+  INTERFACE_SERVICE_IMAGE: remla-stackoverflow-tagger/interface-service
+
+tasks:
+  prepare:
+    - python -m venv interface_venv
+    - unameOut="$(uname -s)"
+    - if [ unameOut == "msys" ] || [ unameOut == "cygwin" ]; then source interface_venv/Scripts/activate; else source interface_venv/bin/activate; fi
+    - pip install -r requirements.txt
+  clean:
+    - rm -rf interface_venv
+  build_builder:
+    cmds: ["docker build --target builder -t {{.INTERFACE_SERVICE_BUILDER_IMAGE}} ."]
+  build_docker:
+    cmds: ["docker build -t {{.INTERFACE_SERVICE_IMAGE}} ."]
+  docker_run:
+    deps: [build_builder]
+    interactive: true
+    vars:
+      UID:
+        sh: id -u
+      GID:
+        sh: id -g
+    cmds:
+      - >
+        docker run -it --rm
+        --network host
+        --user {{.UID}}:{{.GID}}
+        --workdir /project
+        --volume {{.PROJECT_ROOT}}/interface_service:/project
+        --workdir /project
+        {{.INTERFACE_SERVICE_BUILDER_IMAGE}}
+        {{.CLI_ARGS}}
+  lint:
+    - pylint --rcfile=.pylintrc src/
+  test: pytest

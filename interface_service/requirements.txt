@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+starlette
+pydantic
+pytest
+requests
+pylint==2.12.2
