@@ -17,6 +17,9 @@ RUN curl -o task.deb -L ${TASK_URL} \
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+# mllint tries to make its file executable - can't do this unless it's root or owns the file
+RUN chown -R appuser: /usr/local/lib/python3.7/site-packages/mllint
+
 # TODO: Replace with actual application startup
 CMD ["bash"]
 
