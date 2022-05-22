@@ -1,17 +1,17 @@
 services:
   learning_service:
     build:
-      context: ../learning_service
-      dockerfile: ../learning_service/Dockerfile
+      context: learning_service
   interface_service:
     build:
-      context: ../interface_service
-      dockerfile: ../interface_service/Dockerfile
+      context: interface_service
     ports:
       - 8000:8000
   frontend:
     build:
-      context: ../frontend
-      dockerfile: ../frontend/Dockerfile
+      context: frontend
     ports:
       - 8080:80
+    environment:
+      NGINX_ENVSUBST_TEMPLATE_DIR: /etc/nginx/templates/dev
+      INTERFACE_SERVICE_PROXY_PASS_URL: http://interface_service:8000

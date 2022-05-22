@@ -26,6 +26,8 @@ RUN npm run-script build
 
 FROM nginx:1.21.6-alpine AS final
 
-COPY docker/nginx/default.conf.template /etc/nginx/templates/
+ENV NGINX_ENVSUBST_TEMPLATE_DIR /etc/nginx/templates/dist
+
+COPY docker/nginx/ /etc/nginx/templates/
 
 COPY --from=build /build/dist/remla-stackoverflow-tagger/ /usr/share/nginx/html
