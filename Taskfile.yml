@@ -13,6 +13,9 @@ includes:
   learning_service:
     dir: ./learning_service
     taskfile: ./learning_service
+  frontend:
+    dir: ./frontend
+    taskfile: ./frontend
   dev: ./dev
   dist: ./dist
 

@@ -1,0 +1,33 @@
+version: '3'
+
+vars:
+  FRONTEND_BUILDER_IMAGE: remla-stackoverflow-tagger/frontend-builder
+  FRONTEND_IMAGE: remla-stackoverflow-tagger/frontend
+
+tasks:
+  prepare:
+    - npm install
+  clean:
+    - rm -rf dist
+    - rm -rf node_modules
+  build_builder:
+    cmds: ["docker build --target builder -t {{.FRONTEND_BUILDER_IMAGE}} ."]
+  build_docker:
+    cmds: ["docker build -t {{.FRONTEND_IMAGE}} ."]
+  docker_run:
+    deps: [build_builder]
+    interactive: true
+    vars:
+      UID:
+        sh: id -u
+      GID:
+        sh: id -g
+    cmds:
+      - >
+        docker run -it --rm
+        --network host
+        --user {{.UID}}:{{.GID}}
+        --workdir /project
+        --volume {{.PROJECT_ROOT}}/frontend:/project
+        {{.FRONTEND_BUILDER_IMAGE}}
+        {{.CLI_ARGS}}
