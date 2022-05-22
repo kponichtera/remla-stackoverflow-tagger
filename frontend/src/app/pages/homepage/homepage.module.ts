@@ -1,8 +1,10 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
 
-import { HomepageRoutingModule } from './homepage-routing.module';
-import { HomepageComponent } from './homepage.component';
+import {HomepageRoutingModule} from './homepage-routing.module';
+import {HomepageComponent} from './homepage.component';
+import {InferenceFormModule} from "../../components/inference-form/inference-form.module";
+import {MatCardModule} from "@angular/material/card";
 
 
 @NgModule({
@@ -11,7 +13,9 @@ import { HomepageComponent } from './homepage.component';
   ],
   imports: [
     CommonModule,
-    HomepageRoutingModule
+    HomepageRoutingModule,
+    InferenceFormModule,
+    MatCardModule
   ]
 })
 export class HomepageModule { }
