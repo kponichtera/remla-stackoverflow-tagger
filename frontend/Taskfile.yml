@@ -10,6 +10,8 @@ tasks:
   clean:
     - rm -rf dist
     - rm -rf node_modules
+    - rm -rf .angular/cache
+  lint: ["npm run-script lint"]
   build_builder:
     cmds: ["docker build --target builder -t {{.FRONTEND_BUILDER_IMAGE}} ."]
   build_docker:

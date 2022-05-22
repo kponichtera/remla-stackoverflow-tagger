@@ -23,13 +23,16 @@ tasks:
   prepare:
     - task: interface_service:prepare
     - task: learning_service:prepare
+    - task: frontend:prepare
   build_docker:
     - task: interface_service:build_docker
     - task: learning_service:build_docker
+    - task: frontend:build_docker
   lint:
     - task: interface_service:lint
     - task: learning_service:lint
     - task: learning_service:mllint
+    - task: frontend:lint
   test:
     - task: interface_service:test
     - task: learning_service:test
@@ -37,4 +40,5 @@ tasks:
   clean:
     - task: interface_service:clean
     - task: learning_service:clean
+    - task: frontend:clean
     - task: clean:pycache

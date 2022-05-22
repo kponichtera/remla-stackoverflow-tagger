@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {CorrectionRequest, InferenceService, PredictionRequest} from "../../services/inference.service";
 
@@ -7,7 +7,7 @@ import {CorrectionRequest, InferenceService, PredictionRequest} from "../../serv
   templateUrl: './inference-form.component.html',
   styleUrls: ['./inference-form.component.scss']
 })
-export class InferenceFormComponent implements OnInit {
+export class InferenceFormComponent  {
 
   title: string = '';
   tags: string[] = [];
@@ -20,11 +20,8 @@ export class InferenceFormComponent implements OnInit {
               private _inferenceService: InferenceService) {
   }
 
-  ngOnInit(): void {
-  }
-
   query(): void {
-    if (this.title.trim() == '') {
+    if (this.title.trim() === '') {
       this._snackBar.open('Title is missing!', 'Close', {duration: 3000})
       return;
     }

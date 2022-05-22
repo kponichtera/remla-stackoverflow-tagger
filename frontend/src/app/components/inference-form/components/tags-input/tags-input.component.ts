@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {MatChipInputEvent} from "@angular/material/chips";
 import {FormControl} from "@angular/forms";
 import {COMMA, ENTER} from "@angular/cdk/keycodes";
@@ -8,7 +8,7 @@ import {COMMA, ENTER} from "@angular/cdk/keycodes";
   templateUrl: './tags-input.component.html',
   styleUrls: ['./tags-input.component.scss']
 })
-export class TagsInputComponent implements OnInit {
+export class TagsInputComponent  {
 
   separatorKeysCodes: number[] = [ENTER, COMMA];
 
@@ -27,9 +27,6 @@ export class TagsInputComponent implements OnInit {
   newTagChange = new EventEmitter<string>();
 
   constructor() { }
-
-  ngOnInit(): void {
-  }
 
   add(): void {
     const value = this._newTag.trim();
