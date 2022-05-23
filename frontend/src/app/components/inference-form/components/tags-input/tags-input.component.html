@@ -1,0 +1,17 @@
+<mat-form-field class="tags-form-field" appearance="outline">
+  <mat-label>Tags</mat-label>
+  <mat-chip-list #tagChipList [disabled]="disabled">
+    <mat-chip *ngFor="let tag of tags" (removed)="remove(tag)">
+      {{tag}}
+      <button matChipRemove>
+        <mat-icon>cancel</mat-icon>
+      </button>
+    </mat-chip>
+  </mat-chip-list>
+  <input placeholder="New tag..."
+         [(ngModel)]="newTag"
+         [disabled]="disabled"
+         [matChipInputFor]="tagChipList"
+         [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+         (matChipInputTokenEnd)="add()">
+</mat-form-field>

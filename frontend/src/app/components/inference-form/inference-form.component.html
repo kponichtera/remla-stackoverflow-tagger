@@ -1,0 +1,28 @@
+<div class="form-container">
+  <div class="form-input">
+    <mat-form-field class="title-form-field" appearance="outline">
+      <mat-label>Title</mat-label>
+      <input matInput type="text"
+             [disabled]="processedTitle !== ''"
+             [(ngModel)]="title">
+    </mat-form-field>
+  </div>
+  <div class="form-button">
+    <button mat-raised-button color="primary"
+            [disabled]="processedTitle !== ''"
+            (click)="query()">Query
+    </button>
+  </div>
+  <div class="form-input">
+      <app-tags-input
+                  [disabled]="processedTitle === ''"
+                  [(tags)]="tags"
+                  [(newTag)]="newTag"></app-tags-input>
+  </div>
+  <div class="form-button">
+      <button mat-button  color="primary"
+          [disabled]="processedTitle === ''"
+          (click)="submitFeedback()">Submit feedback
+  </button>
+  </div>
+</div>

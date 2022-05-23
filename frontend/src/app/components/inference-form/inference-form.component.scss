@@ -1,0 +1,21 @@
+.form-container {
+  display: grid;
+  place-items: center;
+  gap: 10px 10px;
+  width: 100%;
+}
+
+.form-input {
+  grid-column: 1 / span 2;
+  place-self: center stretch;
+  width: 100%;
+}
+
+.form-button {
+  grid-column: 3 / 3;
+  place-self: center;
+}
+
+.title-form-field {
+  width: 100%;
+}

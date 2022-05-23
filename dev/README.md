@@ -5,6 +5,8 @@
 * Python 3.10 or later
 * Docker 20.10 or later
 * [Task](https://taskfile.dev/) build tool
+* (Optional) Node.js and npm
+    * Can be skipped by using Task's Docker tasks
 
 ## Running locally
 
@@ -37,6 +39,21 @@ Or, to avoid creating local virtual environments and Python version discrepancie
 
 ```shell
 task learning_service:docker_run
+```
+
+### Frontend
+
+```bash
+cd frontend/
+npm ci
+npm start
+```
+
+Or, to avoid Node and NPM version discrepancies:
+
+```shell
+task frontend:docker_run -- npm ci
+task frontend:docker_run
 ```
 
 ## Launching development containers

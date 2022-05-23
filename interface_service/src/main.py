@@ -1,5 +1,6 @@
 """Main file for the FastAPI application."""
 from typing import Set
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 
@@ -10,21 +11,36 @@ app = FastAPI(
 )
 
 
-@app.post('/predict')
-async def predict_tags(title : str):
+@app.get('/api/ping')
+async def ping():
+    return {}
+
+
+class PredictionRequest(BaseModel):
+    title: str
+
+
+class PredictionResult(BaseModel):
+    title: str
+    classifier: str
+    tags: Set[str]
+
+
+@app.post('/api/predict')
+async def predict_tags(request: PredictionRequest):
     """
     Create a prediction of tags for the given StackOverflow title.
 
     - **title**: title of the StackOverflow question
     """
-    return {
-        "result": ["java", "OOP"],
-        "classifier": "decision tree",
-        "title": title,
-    }
+    return PredictionResult(
+        title=request.title,
+        classifier="decision tree",
+        tags=["java", "OOP"],
+    )
 
 
-class Correction(BaseModel):
+class CorrectionRequest(BaseModel):
     """Model for tag correction for a given title.
 
     Args:
@@ -35,10 +51,8 @@ class Correction(BaseModel):
     actual: Set[str]
 
 
-@app.post('/correct',
-        response_model=Correction,
-        summary="Correct the tags to the model",)
-def correct_prediction(correction : Correction):
+@app.post('/api/correct', summary="Correct the tags to the model",)
+def correct_prediction(request: CorrectionRequest):
     """
     Correct a prediction of tags for models to learn in the future.
 
@@ -46,4 +60,4 @@ def correct_prediction(correction : Correction):
     - **predicted**: prediction of tags for the title
     - **actual**: actual tags for the title
     """
-    return correction
+    return

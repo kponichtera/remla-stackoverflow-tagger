@@ -31,7 +31,6 @@ tasks:
         --user {{.UID}}:{{.GID}}
         --workdir /project
         --volume {{.PROJECT_ROOT}}/interface_service:/project
-        --workdir /project
         {{.INTERFACE_SERVICE_BUILDER_IMAGE}}
         {{.CLI_ARGS}}
   lint:
