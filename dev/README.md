@@ -45,14 +45,14 @@ task learning_service:docker_run
 
 ```bash
 cd frontend/
-npm install
+npm ci
 npm start
 ```
 
 Or, to avoid Node and NPM version discrepancies:
 
 ```shell
-task frontend:docker_run -- npm install
+task frontend:docker_run -- npm ci
 task frontend:docker_run
 ```
 

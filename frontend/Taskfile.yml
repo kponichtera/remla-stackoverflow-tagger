@@ -6,7 +6,7 @@ vars:
 
 tasks:
   prepare:
-    - npm install
+    - npm ci
   clean:
     - rm -rf dist
     - rm -rf node_modules

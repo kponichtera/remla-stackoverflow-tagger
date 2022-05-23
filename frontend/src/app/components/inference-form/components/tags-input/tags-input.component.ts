@@ -18,10 +18,10 @@ export class TagsInputComponent  {
   disabled: boolean = false;
 
   @Input()
-  tags: string[] = []
+  tags: Set<string> = new Set<string>();
 
   @Output()
-  tagsChange = new EventEmitter<string[]>();
+  tagsChange = new EventEmitter<Set<string>>();
 
   @Output()
   newTagChange = new EventEmitter<string>();
@@ -32,7 +32,7 @@ export class TagsInputComponent  {
     const value = this._newTag.trim();
 
     if (value) {
-      this.tags.push(value);
+      this.tags.add(value);
       this.tagsChange.emit(this.tags);
     }
 
@@ -41,9 +41,8 @@ export class TagsInputComponent  {
   }
 
   remove(tag: string): void {
-    const index = this.tags.indexOf(tag);
-    if (index >= 0) {
-      this.tags.splice(index, 1);
+    let removed = this.tags.delete(tag)
+    if (removed) {
       this.tagsChange.emit(this.tags)
     }
   }

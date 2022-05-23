@@ -1,7 +1,7 @@
 """Main file for the FastAPI application."""
 from typing import Set
+
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 app = FastAPI(

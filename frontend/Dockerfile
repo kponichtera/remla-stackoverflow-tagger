@@ -16,7 +16,7 @@ WORKDIR /build
 # Warm up the cache
 ENV npm_config_cache /npm-cache
 COPY package.json package-lock.json ./
-RUN npm install \
+RUN npm ci \
     && chmod -R 777 ${npm_config_cache}
 
 CMD ["npm", "start"]

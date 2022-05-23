@@ -10,11 +10,11 @@ import {CorrectionRequest, InferenceService, PredictionRequest} from "../../serv
 export class InferenceFormComponent  {
 
   title: string = '';
-  tags: string[] = [];
+  tags: Set<string> = new Set<string>();
   newTag: string = '';
 
   processedTitle: string = '';
-  predictedTags: string[] = [];
+  predictedTags: Set<string> = new Set<string>();
 
   constructor(private _snackBar: MatSnackBar,
               private _inferenceService: InferenceService) {
@@ -33,8 +33,10 @@ export class InferenceFormComponent  {
     this._inferenceService.predict(request).subscribe({
       next: response => {
         this.processedTitle = response.title;
-        this.predictedTags = response.tags;
-        this.tags = response.tags;
+        response.tags.forEach(tag => {
+          this.predictedTags.add(tag);
+          this.tags.add(tag);
+        });
       },
       error: _ => {
         this._snackBar.open('Error has occurred', 'Close', {duration: 3000})
@@ -46,8 +48,8 @@ export class InferenceFormComponent  {
   submitFeedback() {
     let request: CorrectionRequest = {
       title: this.processedTitle,
-      predicted: this.predictedTags,
-      actual: this.tags
+      predicted: Array.from(this.predictedTags.values()),
+      actual: Array.from(this.tags.values())
     }
     this._inferenceService.correctPrediction(request).subscribe({
       next: _ => {
@@ -64,8 +66,8 @@ export class InferenceFormComponent  {
     this.title = '';
     this.newTag = '';
     this.processedTitle = '';
-    this.tags = [];
-    this.predictedTags = [];
+    this.tags.clear();
+    this.predictedTags.clear();
   }
 
 }
