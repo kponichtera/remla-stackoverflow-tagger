@@ -11,7 +11,8 @@ tasks:
     - rm -rf dist
     - rm -rf node_modules
     - rm -rf .angular/cache
-  lint: ["npm run-script lint"]
+  lint: ["npm run lint"]
+  test: ["npm run test"]
   build_builder:
     cmds: ["docker build --target builder -t {{.FRONTEND_BUILDER_IMAGE}} ."]
   build_docker:
