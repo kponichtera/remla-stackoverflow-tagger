@@ -3,16 +3,26 @@ name: Pylint
 on: [push]
 
 jobs:
-  build:
+
+  learning-service:
+    name: Build and lint the learning service
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.8", "3.9", "3.10"]
     steps:
-    - uses: actions/checkout@v3
-    - name: Prepare builder
-      uses: ./.github/actions/builder
-    - name: Lint
-      uses: ./.github/actions/builder_run
-      with:
-        command: pylint $(git ls-files '*.py')
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - name: Login to image registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Docker image
+        uses: ./.github/actions/build_and_push
+        with:
+          context: ./learning_service
+          file: ./learning_service/Dockerfile
+          img: ${{ env.REGISTRY }}/${{ env.IMG }}/learning_service
+      - name: Lint
+        uses: ./.github/actions/builder_run
+        with:
+          command: pylint $(git ls-files '*.py')
