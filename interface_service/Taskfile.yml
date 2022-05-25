@@ -3,13 +3,25 @@ version: '3'
 vars:
   INTERFACE_SERVICE_BUILDER_IMAGE: remla-stackoverflow-tagger/interface-service-builder
   INTERFACE_SERVICE_IMAGE: remla-stackoverflow-tagger/interface-service
+  PYTHON_BIN: python
+  ENV: interface_venv
 
 tasks:
+  create_venv:
+    status:
+      - "test -f ${{.ENV}}/bin/activate"
+    cmds:
+      - "{{.PYTHON_BIN}} -m venv {{.ENV}}"
+      - "{{.ENV}}/bin/python3 -m pip install -U pip setuptools wheel"
   prepare:
-    - python -m venv interface_venv
-    - unameOut="$(uname -s)"
-    - if [ unameOut == "msys" ] || [ unameOut == "cygwin" ]; then source interface_venv/Scripts/activate; else source interface_venv/bin/activate; fi
-    - pip install -r requirements.txt
+    sources:
+      - "{{.ENV}}/bin/activate"
+    deps:
+      - task: create_venv
+        vars:
+          ENV: "{{.ENV}}"
+    cmds:
+      - "{{.ENV}}/bin/pip install -r requirements.txt"
   clean:
     - rm -rf interface_venv
   build_builder:
@@ -34,5 +46,6 @@ tasks:
         {{.INTERFACE_SERVICE_BUILDER_IMAGE}}
         {{.CLI_ARGS}}
   lint:
-    - pylint --rcfile=.pylintrc src/
-  test: pytest
+    - "{{.ENV}}/bin/pylint --rcfile=.pylintrc src/"
+  test:
+    - "{{.ENV}}/bin/pytest"
