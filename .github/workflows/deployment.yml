@@ -8,8 +8,10 @@ env:
   IMG: ${{ github.repository }}
   REGISTRY: ghcr.io
 
-# Learning service
+
 jobs:
+
+  # Learning service
   learning-service:
     # Only run on master
     if: github.event.base_ref=='refs/heads/master'
@@ -31,7 +33,7 @@ jobs:
           file: ./learning_service/Dockerfile
           img: ${{ env.REGISTRY }}/${{ env.IMG }}/learning_service
 
-# Other service
+  # Interface service
   interface-service:
     name: Build and push the interface service
     # Only run on master
