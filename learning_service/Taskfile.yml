@@ -3,21 +3,33 @@ version: '3'
 vars:
   LEARNING_SERVICE_BUILDER_IMAGE: remla-stackoverflow-tagger/learning-service-builder
   LEARNING_SERVICE_IMAGE: remla-stackoverflow-tagger/learning-service
+  PYTHON_BIN: python3.8
+  ENV: learning_venv
 
 tasks:
+  create_venv:
+    status:
+      - "test -f ${{.ENV}}/bin/activate"
+    cmds:
+      - "{{.PYTHON_BIN}} -m venv {{.ENV}}"
+      - "{{.ENV}}/bin/python3 -m pip install -U pip setuptools wheel"
   prepare:
-    - python -m venv learning_venv
-    - unameOut="$(uname -s)"
-    - if [ unameOut == "msys" ] || [ unameOut == "cygwin" ]; then source learning_venv/Scripts/activate; else source learning_venv/bin/activate; fi
-    - pip install -r requirements.txt
+    sources:
+      - "{{.ENV}}/bin/activate"
+    deps:
+      - task: create_venv
+        vars:
+          ENV: "{{.ENV}}"
+    cmds:
+      - "{{.ENV}}/bin/pip install -r requirements.txt"
   clean:
     - rm -rf learning_venv
   build_builder:
-    cmds: ["docker build --target builder -t {{.LEARNING_SERVICE_BUILDER_IMAGE}} ."]
+    cmds: [ "docker build --target builder -t {{.LEARNING_SERVICE_BUILDER_IMAGE}} ." ]
   build_docker:
-    cmds: ["docker build -t {{.LEARNING_SERVICE_IMAGE}} ."]
+    cmds: [ "docker build -t {{.LEARNING_SERVICE_IMAGE}} ." ]
   docker_run:
-    deps: [build_builder]
+    deps: [ build_builder ]
     interactive: true
     vars:
       UID:
@@ -34,7 +46,8 @@ tasks:
         {{.LEARNING_SERVICE_BUILDER_IMAGE}}
         {{.CLI_ARGS}}
   lint:
-    - pylint --rcfile=.pylintrc src/
+    - "{{.ENV}}/bin/pylint --rcfile=.pylintrc src/"
   mllint:
-    - mllint --output report.md
-  test: pytest
+    - "{{.ENV}}/bin/mllint --output report.md"
+  test:
+    - "{{.ENV}}/bin/pytest"

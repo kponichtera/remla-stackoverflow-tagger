@@ -25,11 +25,11 @@ tasks:
   clean:
     - rm -rf interface_venv
   build_builder:
-    cmds: ["docker build --target builder -t {{.INTERFACE_SERVICE_BUILDER_IMAGE}} ."]
+    cmds: [ "docker build --target builder -t {{.INTERFACE_SERVICE_BUILDER_IMAGE}} ." ]
   build_docker:
-    cmds: ["docker build -t {{.INTERFACE_SERVICE_IMAGE}} ."]
+    cmds: [ "docker build -t {{.INTERFACE_SERVICE_IMAGE}} ." ]
   docker_run:
-    deps: [build_builder]
+    deps: [ build_builder ]
     interactive: true
     vars:
       UID:
