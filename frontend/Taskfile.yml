@@ -6,13 +6,22 @@ vars:
 
 tasks:
   prepare:
-    - npm ci
+    cmds: ["npm ci"]
+    sources:
+      - package.json
+      - package-lock.json
+    generates:
+      - node_modules/**
   clean:
     - rm -rf dist
     - rm -rf node_modules
     - rm -rf .angular/cache
-  lint: ["npm run lint"]
-  test: ["npm run test"]
+  lint:
+    deps: ["prepare"]
+    cmds: ["npm run lint"]
+  test:
+    deps: ["prepare"]
+    cmds: ["npm run test"]
   build_builder:
     cmds: ["docker build --target builder -t {{.FRONTEND_BUILDER_IMAGE}} ."]
   build_docker:

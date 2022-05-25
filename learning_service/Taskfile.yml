@@ -6,10 +6,15 @@ vars:
 
 tasks:
   prepare:
-    - python -m venv learning_venv
-    - unameOut="$(uname -s)"
-    - if [ unameOut == "msys" ] || [ unameOut == "cygwin" ]; then source learning_venv/Scripts/activate; else source learning_venv/bin/activate; fi
-    - pip install -r requirements.txt
+    cmds:
+      - python -m venv learning_venv
+      - unameOut="$(uname -s)"
+      - if [ unameOut == "msys" ] || [ unameOut == "cygwin" ]; then source learning_venv/Scripts/activate; else source learning_venv/bin/activate; fi
+      - pip install -r requirements.txt
+    sources:
+      - requirements.txt
+    generates:
+      - learning_venv/**
   clean:
     - rm -rf learning_venv
   build_builder:
@@ -34,7 +39,7 @@ tasks:
         {{.LEARNING_SERVICE_BUILDER_IMAGE}}
         {{.CLI_ARGS}}
   lint:
-    - pylint --rcfile=.pylintrc src/
+    - pylint --rcfile=.pylintrc src/**
   mllint:
     - mllint --output report.md
   test: pytest

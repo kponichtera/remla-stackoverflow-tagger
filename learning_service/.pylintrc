@@ -17,14 +17,7 @@ enable=bad-indentation,mixed-indentation,unnecessary-semicolon,unused-variable,i
 
 [REPORTS]
 
-# Tells whether to display a full report or only the messages
-reports=yes
-
-# Activate the evaluation score.
-score=yes
-
-# Reports format
-output-format=json:report.json,text:report.txt,colorized
+output-format=colorized
 
 [FORMAT]
 
