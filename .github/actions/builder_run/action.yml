@@ -11,6 +11,6 @@ runs:
   steps:
     - uses: addnab/docker-run-action@v3
       with:
-        image: stackoverflow-tagger:latest
+        image: stackoverflow-tagger-builder:latest
         options: -w /project -v ${{ github.workspace }}:/project
         run: ${{ inputs.command }}
