@@ -27,8 +27,8 @@ jobs:
       - name: Build and push Docker image
         uses: ./.github/actions/build_and_push
         with:
-          context: ./src
-          file: ./src/Dockerfile
+          context: ./learning_service
+          file: ./learning_service/Dockerfile
           img: ${{ env.REGISTRY }}/${{ env.IMG }}/learning_service
 
 # Other service
