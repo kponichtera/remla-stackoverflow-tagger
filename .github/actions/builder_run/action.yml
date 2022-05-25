@@ -1,16 +1,16 @@
-name: "Run command in builder"
-description: "Runs the command in the builder container"
+name: Run command in builder
+description: Runs the command in the builder container
 
 inputs:
   image:
-    description: "Name of the builder image"
+    description: Name of the builder image
     required: true
   command:
-    description: "Command to run inside the builder container"
+    description: Command to run inside the builder container
     required: true
 
 runs:
-  using: "composite"
+  using: composite
   steps:
     - uses: addnab/docker-run-action@v3
       with:

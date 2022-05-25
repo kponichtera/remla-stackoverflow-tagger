@@ -1,24 +1,24 @@
-name: "Build builder"
-description: "Builds the Docker builder image using BuildKit and GitHub Actions cache"
+name: Build builder
+description: Builds the Docker builder image using BuildKit and GitHub Actions cache
 
 inputs:
   name:
-    description: "Name of the builder image"
+    description: Name of the builder image
     required: true
   context:
-    description: "Path to the build context"
+    description: Path to the build context
     required: false
     default: "."
   file:
-    description: "Path to Dockerfile with the builder stage"
+    description: Path to Dockerfile with the builder stage
     required: true
   target:
-    description: "Name of the target to build"
+    description: Name of the target to build
     required: false
-    default: "builder"
+    default: builder
 
 runs:
-  using: "composite"
+  using: composite
   steps:
     - name: Build builder
       uses: docker/build-push-action@v3

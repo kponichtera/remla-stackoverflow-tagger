@@ -8,7 +8,7 @@ inputs:
   file:
     description: Path to the dockerfile
     required: true
-  img:
+  image:
     description: The name of the image
     required: true
   push:
@@ -16,13 +16,13 @@ inputs:
     required: true
 
 runs:
-  using: "composite"
+  using: composite
   steps:
     - name: Gather metadata
       id: metadata
       uses: docker/metadata-action@v4
       with:
-        images: ${{ inputs.img }}
+        images: ${{ inputs.image }}
         tags: |
           type=semver,pattern={{version}}
           type=semver,pattern={{major}}.{{minor}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.0.') }}

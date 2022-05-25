@@ -7,8 +7,7 @@ on:
     tags: [ 'v*.*.*' ]
 
 env:
-  IMAGE_NAME_BASE: ${{ env.REGISTRY }}/${{ github.repository }}
-  REGISTRY: ghcr.io
+  IMAGE_NAME_BASE: ghcr.io/${{ github.repository }}
 
 jobs:
   learning-service:
@@ -29,7 +28,7 @@ jobs:
         with:
           context: ./learning_service
           file: ./learning_service/Dockerfile
-          img: ${{ env.REGISTRY }}/${{ env.IMG }}/learning-service
+          image: ${{ env.IMAGE_NAME_BASE }}/learning-service
           push: ${{ github.event_name != 'pull_request' }}
   interface-service:
     name: Build interface service
@@ -49,7 +48,7 @@ jobs:
         with:
           context: ./interface_service
           file: ./interface_service/Dockerfile
-          img: ${{ env.REGISTRY }}/${{ env.IMG }}/interface-service
+          image: ${{ env.IMAGE_NAME_BASE }}/interface-service
           push: ${{ github.event_name != 'pull_request' }}
   frontend:
     name: Build frontend
@@ -69,5 +68,5 @@ jobs:
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
-          img: ${{ env.REGISTRY }}/${{ env.IMG }}/frontend
+          image: ${{ env.IMAGE_NAME_BASE }}/frontend
           push: ${{ github.event_name != 'pull_request' }}
