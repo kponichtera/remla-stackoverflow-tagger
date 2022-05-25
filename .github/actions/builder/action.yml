@@ -23,7 +23,7 @@ runs:
     - name: Build builder
       uses: docker/build-push-action@v3
       with:
-        dockerfile: ${{ inputs.dockerfile }}
+        file: ${{ inputs.dockerfile }}
         context: ${{ inputs.context }}
         target: ${{ inputs.target }}
         tags: ${{ inputs.name }}
