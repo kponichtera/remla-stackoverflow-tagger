@@ -9,7 +9,7 @@ inputs:
     description: "Path to the build context"
     required: false
     default: "."
-  dockerfile:
+  file:
     description: "Path to Dockerfile with the builder stage"
     required: true
   target:
@@ -23,7 +23,7 @@ runs:
     - name: Build builder
       uses: docker/build-push-action@v3
       with:
-        file: ${{ inputs.dockerfile }}
+        file: ${{ inputs.file }}
         context: ${{ inputs.context }}
         target: ${{ inputs.target }}
         tags: ${{ inputs.name }}

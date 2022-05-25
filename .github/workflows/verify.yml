@@ -8,7 +8,7 @@ env:
   FRONTEND_BUILDER_NAME: frontend-builder:latest
 
 jobs:
-  lint_interface_service:
+  lint-interface-service:
     name: Lint interface service
     runs-on: ubuntu-latest
     steps:
@@ -17,7 +17,7 @@ jobs:
       - name: Prepare builder
         uses: ./.github/actions/builder
         with:
-          dockerfile: interface_service/Dockerfile
+          file: interface_service/Dockerfile
           context: interface_service
           name: ${{ env.INTERFACE_SERVICE_BUILDER_NAME }}
       - name: Lint interface service
@@ -25,7 +25,7 @@ jobs:
         with:
           image: ${{ env.INTERFACE_SERVICE_BUILDER_NAME }}
           command: task interface_service:lint
-  lint_learning_service:
+  lint-learning-service:
     name: Lint learning service
     runs-on: ubuntu-latest
     steps:
@@ -34,7 +34,7 @@ jobs:
       - name: Prepare builder
         uses: ./.github/actions/builder
         with:
-          dockerfile: learning_service/Dockerfile
+          file: learning_service/Dockerfile
           context: learning_service
           name: ${{ env.LEARNING_SERVICE_BUILDER_NAME }}
       - name: Lint learning service
@@ -42,7 +42,7 @@ jobs:
         with:
           image: ${{ env.LEARNING_SERVICE_BUILDER_NAME }}
           command: task learning_service:lint
-  lint_frontend:
+  lint-frontend:
     name: Lint frontend
     runs-on: ubuntu-latest
     steps:
@@ -51,7 +51,7 @@ jobs:
       - name: Prepare builder
         uses: ./.github/actions/builder
         with:
-          dockerfile: frontend/Dockerfile
+          file: frontend/Dockerfile
           context: frontend
           name: ${{ env.FRONTEND_BUILDER_NAME }}
       - name: Lint learning service

@@ -15,7 +15,6 @@ inputs:
     description: Whether to push the image to the registry
     required: true
 
-
 runs:
   using: "composite"
   steps:
@@ -36,6 +35,7 @@ runs:
         file: ${{ inputs.file }}
         push: ${{ inputs.push }}  
         tags: ${{ steps.metadata.outputs.tags }}  
+        labels: ${{ steps.metadata.outputs.labels }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
         
