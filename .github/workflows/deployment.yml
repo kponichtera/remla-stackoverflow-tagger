@@ -33,6 +33,7 @@ jobs:
           context: ./learning_service
           file: ./learning_service/Dockerfile
           img: ${{ env.REGISTRY }}/${{ env.IMG }}/learning_service
+          push: ${{ github.event_name != 'pull_request' }}
 
   # Interface service
   interface-service:
@@ -54,3 +55,4 @@ jobs:
           context: ./interface_service
           file: ./interface_service/Dockerfile
           img: ${{ env.REGISTRY }}/${{ env.IMG }}/interface_service
+          push: ${{ github.event_name != 'pull_request' }}
