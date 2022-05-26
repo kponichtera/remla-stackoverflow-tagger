@@ -13,14 +13,23 @@ app = FastAPI(
 
 @app.get('/api/ping')
 async def ping():
+    """
+    Used to test the connection.
+    """
     return {}
 
 
 class PredictionRequest(BaseModel):
+    """
+    Defines the model of a prediction request.
+    """
     title: str
 
 
 class PredictionResult(BaseModel):
+    """
+    Defines the model of a prediction result.
+    """
     title: str
     classifier: str
     tags: Set[str]
@@ -51,7 +60,7 @@ class CorrectionRequest(BaseModel):
     actual: Set[str]
 
 
-@app.post('/api/correct', summary="Correct the tags to the model",)
+@app.post('/api/correct', summary="Correct the tags to the model", )
 def correct_prediction(request: CorrectionRequest):
     """
     Correct a prediction of tags for models to learn in the future.
@@ -60,4 +69,4 @@ def correct_prediction(request: CorrectionRequest):
     - **predicted**: prediction of tags for the title
     - **actual**: actual tags for the title
     """
-    return
+    return request
