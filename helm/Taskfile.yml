@@ -4,12 +4,11 @@ vars:
   HELM_BUILDER_IMAGE: remla-stackoverflow-tagger/helm-builder
   # Overridden by GitHub Actions
   VERSION: '{{ .VERSION | default "1.0.0-DEV" }}'
-  HELM_PACKAGE_DIR: helm/charts
 
 tasks:
-  lint: "helm lint helm/stackoverflow-tagger"
-  package: "helm package helm/stackoverflow-tagger --version 0.0.1 --app-version {{.VERSION}} -d {{.HELM_PACKAGE_DIR}}"
-  build_builder: "docker build --target builder -t {{.HELM_BUILDER_IMAGE}} -f helm/Dockerfile ."
+  lint: "helm lint stackoverflow-tagger"
+  package: "helm package stackoverflow-tagger --version 0.0.1 --app-version {{.VERSION}} -d charts"
+  build_builder: "docker build --target builder -t {{.HELM_BUILDER_IMAGE}} ."
   docker_run:
     deps: [ build_builder ]
     interactive: true
@@ -28,4 +27,4 @@ tasks:
         {{.HELM_BUILDER_IMAGE}}
         {{.CLI_ARGS}}
   clean:
-    - rm -rf {{.HELM_PACKAGE_DIR}}
+    - rm -rf charts

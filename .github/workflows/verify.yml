@@ -64,7 +64,7 @@ jobs:
           image: ${{ env.FRONTEND_BUILDER_NAME }}
           command: task frontend:lint
   lint-helm:
-    name: Lint Helm
+    name: Lint Helm Chart
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
