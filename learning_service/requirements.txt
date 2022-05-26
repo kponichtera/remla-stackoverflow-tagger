@@ -11,3 +11,4 @@ dvc
 pytest
 mllint
 joblib
+tensorflow-data-validation
