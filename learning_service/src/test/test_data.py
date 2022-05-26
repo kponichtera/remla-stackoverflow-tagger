@@ -17,7 +17,7 @@ class DataTest(unittest.TestCase):
         self.test_data_dir = os.path.join(base_dir.parent.parent, 'data', 'train.tsv')
         self.stats_options = tfdv.StatsOptions(enable_semantic_domain_stats=True)
 
-    def train_no_anomalies(self):
+    def test_no_anomalies(self):
         """Uses the tensorflow data validation library to look for anomalies in the train dataset"""
         train_stats = tfdv.generate_statistics_from_csv(self.test_data_dir, delimiter='\t',
                                                         stats_options=self.stats_options)
