@@ -2,12 +2,12 @@ version: '3'
 
 vars:
   HELM_BUILDER_IMAGE: remla-stackoverflow-tagger/helm-builder
-  # Overridden by GitHub Actions
+  # Overridden by CI/CD pipeline
   VERSION: '{{ .VERSION | default "1.0.0-DEV" }}'
 
 tasks:
   lint: "helm lint stackoverflow-tagger"
-  package: "helm package stackoverflow-tagger --version 0.0.1 --app-version {{.VERSION}} -d charts"
+  package: "helm package stackoverflow-tagger --version {{.VERSION}} --app-version {{.VERSION}} -d charts"
   build_builder: "docker build --target builder -t {{.HELM_BUILDER_IMAGE}} ."
   docker_run:
     deps: [ build_builder ]

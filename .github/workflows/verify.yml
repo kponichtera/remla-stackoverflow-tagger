@@ -2,8 +2,8 @@ name: Verify
 
 on:
   push:
-    branches-ignore:
-      - gh-pages
+    tags-ignore: [ 'v*.*.*' ]
+    branches-ignore: [ 'gh-pages' ]
 
 env:
   INTERFACE_SERVICE_BUILDER_NAME: interface-service-builder:latest
