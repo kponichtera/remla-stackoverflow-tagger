@@ -32,4 +32,11 @@ spec:
                 name: {{ include "stackoverflow-tagger.frontend.fullname" $ }}
                 port:
                   number: {{ $.Values.frontend.service.port }}
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "stackoverflow-tagger.interfaceService.fullname" $ }}
+                port:
+                  number: {{ $.Values.interfaceService.service.port }}
     {{- end }}
