@@ -10,3 +10,4 @@ pylint==2.12.2
 dvc
 pytest
 mllint
+joblib
