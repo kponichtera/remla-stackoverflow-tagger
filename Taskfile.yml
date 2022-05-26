@@ -16,6 +16,9 @@ includes:
   frontend:
     dir: ./frontend
     taskfile: ./frontend
+  helm:
+    dir: ./helm
+    taskfile: ./helm
   dev: ./dev
   dist: ./dist
 
@@ -33,6 +36,7 @@ tasks:
     - task: learning_service:lint
     - task: learning_service:mllint
     - task: frontend:lint
+    - task: helm:lint
   test:
     - task: interface_service:test
     - task: learning_service:test
@@ -42,3 +46,4 @@ tasks:
     - task: learning_service:clean
     - task: frontend:clean
     - task: clean:pycache
+    - task: helm:pycache
