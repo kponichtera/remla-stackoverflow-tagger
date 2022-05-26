@@ -12,7 +12,6 @@ tasks:
       - "test -f ${{.ENV}}/bin/activate"
     cmds:
       - "{{.PYTHON_BIN}} -m venv {{.ENV}}"
-      - "{{.ENV}}/bin/python3 -m pip install -U pip setuptools wheel"
   prepare:
     sources:
       - "{{.ENV}}/bin/activate"
