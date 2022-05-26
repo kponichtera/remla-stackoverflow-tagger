@@ -46,8 +46,14 @@ tasks:
         {{.LEARNING_SERVICE_BUILDER_IMAGE}}
         {{.CLI_ARGS}}
   lint:
-    - "{{.ENV}}/bin/pylint --rcfile=.pylintrc src/"
+    deps: [ prepare ]
+    cmds:
+      - "{{.ENV}}/bin/pylint --rcfile=.pylintrc src/"
   mllint:
-    - "{{.ENV}}/bin/mllint --output report.md"
+    deps: [ prepare ]
+    cmds:
+      - "{{.ENV}}/bin/mllint --output report.md"
   test:
-    - "{{.ENV}}/bin/pytest"
+    deps: [ prepare ]
+    cmds:
+      - "{{.ENV}}/bin/pytest"
