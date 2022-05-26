@@ -16,9 +16,7 @@ includes:
   frontend:
     dir: ./frontend
     taskfile: ./frontend
-  helm:
-    dir: ./helm
-    taskfile: ./helm
+  helm: ./helm
   dev: ./dev
   dist: ./dist
 

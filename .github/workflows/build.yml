@@ -81,7 +81,6 @@ jobs:
       - frontend
     env:
       CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      CR_PACKAGE_PATH: helm/charts
       CR_OWNER: remla2022
       CR_GIT_REPO: stackoverflow-tagger
     steps:
@@ -103,7 +102,7 @@ jobs:
         uses: ./.github/actions/builder_run
         with:
           image: ${{ env.HELM_BUILDER_NAME }}
-          command: task helm:package
+          command: task helm:package HELM_PACKAGE_DIR=.cr-release-packages
       - name: Upload release
         run: cr upload
       - name: Update Helm repository index

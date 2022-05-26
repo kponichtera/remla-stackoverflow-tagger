@@ -4,10 +4,12 @@ vars:
   HELM_BUILDER_IMAGE: remla-stackoverflow-tagger/helm-builder
   VERSION:
     sh: git describe --tags --always --first-parent | sed 's/v//'
+  # Overridden by GitHub Actions to point at Helm Chart Releaser directory
+  HELM_PACKAGE_DIR: helm/charts
 
 tasks:
-  lint: "helm lint stackoverflow-tagger"
-  package: "helm package stackoverflow-tagger --version {{.VERSION}} --app-version {{.VERSION}} -d charts"
+  lint: "helm lint helm/stackoverflow-tagger"
+  package: "helm package helm/stackoverflow-tagger --version {{.VERSION}} --app-version {{.VERSION}} -d {{.HELM_PACKAGE_DIR}}"
   build_builder: "docker build --target builder -t {{.HELM_BUILDER_IMAGE}} ."
   docker_run:
     deps: [ build_builder ]
@@ -27,4 +29,4 @@ tasks:
         {{.HELM_BUILDER_IMAGE}}
         {{.CLI_ARGS}}
   clean:
-    - rm -rf charts
+    - rm -rf {{.HELM_PACKAGE_DIR}}
