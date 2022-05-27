@@ -1,4 +1,7 @@
-### Task ###
+### Custom venvs
+*_venv/
+
+### Task checksums
 .task/
 
 ### JetBrains ###
