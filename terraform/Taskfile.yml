@@ -1,0 +1,74 @@
+version: '3'
+
+vars:
+  PROJECT_ID: '{{.PROJECT_ID}}'
+  # Can be fetched with command: gcloud beta billing accounts list
+  BILLING_ACCOUNT_ID: '{{.BILLING_ACCOUNT_ID}}'
+  GCLOUD_API_SERVICES: >
+    dns.googleapis.com
+    compute.googleapis.com
+  TERRAFORM_SERVICE_ACCOUNT_EMAIL: 'terraform@{{.PROJECT_ID}}.iam.gserviceaccount.com'
+  TERRAFORM_SERVICE_ACCOUNT_ROLES: >-
+    roles/editor
+    roles/iam.roleAdmin
+    roles/resourcemanager.projectIamAdmin
+  TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE: terraform-credentials.json
+  TERRAFORM_STATE_BUCKET_URL: 'gs://terraform-{{.PROJECT_ID}}/'
+
+env:
+  CLOUDSDK_CORE_PROJECT: '{{.PROJECT_ID}}'
+  CLOUDSDK_COMPUTE_REGION: europe-west4
+  CLOUDSDK_COMPUTE_ZONE: europe-west4-a
+
+tasks:
+  project:create:
+    cmds: [ "gcloud projects create {{.PROJECT_ID}}" ]
+    status: [ "gcloud projects describe {{.PROJECT_ID}}" ]
+  billing-account:link:
+    deps: [ project:create ]
+    cmds: [ "gcloud beta billing projects link {{.PROJECT_ID}} --billing-account={{.BILLING_ACCOUNT_ID}}" ]
+    status: ["[ $(gcloud beta billing projects describe {{.PROJECT_ID}} --format='value(billingEnabled)') = 'True' ]"]
+  services:enable:
+    deps: [billing-account:link]
+    cmds: [ "gcloud services enable {{.GCLOUD_API_SERVICES}}" ]
+  service-account:create:
+    deps: [project:create]
+    cmds: ['gcloud iam service-accounts create terraform --display-name "Terraform service account"']
+    status: ['[ $(gcloud iam service-accounts list --filter={{.TERRAFORM_SERVICE_ACCOUNT_EMAIL}} --format="value(EMAIL)") = {{.TERRAFORM_SERVICE_ACCOUNT_EMAIL}} ]']
+  service-account:add-roles:
+    deps: [service-account:create]
+    cmds:
+      - |
+        for ROLE in {{.TERRAFORM_SERVICE_ACCOUNT_ROLES}}; do
+          gcloud projects add-iam-policy-binding {{.PROJECT_ID}} \
+            --member "serviceAccount:{{.TERRAFORM_SERVICE_ACCOUNT_EMAIL}}" \
+            --role "$ROLE"
+        done
+  service-account:create-key:
+    deps: [service-account:create]
+    cmds: ['gcloud iam service-accounts keys create {{.TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE}} --iam-account={{.TERRAFORM_SERVICE_ACCOUNT_EMAIL}}']
+    status: ['test -f {{.TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE}}']
+  state-bucket:create:
+    deps: [project:create]
+    cmds: ['gsutil mb -p {{.PROJECT_ID}} -c regional -l $CLOUDSDK_COMPUTE_REGION {{.TERRAFORM_STATE_BUCKET_URL}}']
+    status: ['gsutil ls {{.TERRAFORM_STATE_BUCKET_URL}}']
+  state-bucket:configure:
+    deps: [state-bucket:create]
+    vars:
+      PROJECT_NUMBER:
+        sh: 'gcloud projects list --filter={{.PROJECT_ID}} --format="value(PROJECT_NUMBER)"'
+    cmds:
+      # Giving object admin rights to the Terraform service account
+      - 'gsutil iam ch "serviceAccount:{{.TERRAFORM_SERVICE_ACCOUNT_EMAIL}}:objectAdmin" {{.TERRAFORM_STATE_BUCKET_URL}}'
+      # Taking away the access to the bucket from the project viewers
+      - 'gsutil acl ch -d "viewers-{{.PROJECT_NUMBER}}" {{.TERRAFORM_STATE_BUCKET_URL}}'
+      # Making bucket uniform access only
+      - 'gsutil ubla set on {{.TERRAFORM_STATE_BUCKET_URL}}'
+      # Enabling bucket object versioning
+      - 'gsutil versioning set on {{.TERRAFORM_STATE_BUCKET_URL}}'
+  provision:
+    - task: project:create
+    - task: service-account:create-key
+    - task: state-bucket:configure
+
+

@@ -19,6 +19,9 @@ includes:
   helm:
     dir: ./helm
     taskfile: ./helm
+  terraform:
+    dir: ./terraform
+    taskfile: ./terraform
   dev: ./dev
   dist: ./dist
 
