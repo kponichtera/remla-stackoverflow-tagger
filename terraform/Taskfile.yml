@@ -4,10 +4,8 @@ vars:
   PROJECT_ID: '{{.PROJECT_ID}}'
   # Can be fetched with command: gcloud beta billing accounts list
   BILLING_ACCOUNT_ID: '{{.BILLING_ACCOUNT_ID}}'
-  GCLOUD_API_SERVICES: >
-    dns.googleapis.com
-    compute.googleapis.com
   TERRAFORM_SERVICE_ACCOUNT_EMAIL: 'terraform@{{.PROJECT_ID}}.iam.gserviceaccount.com'
+  # TODO: Terraform could technically manage its own roles through resources, if it has IAM management role
   TERRAFORM_SERVICE_ACCOUNT_ROLES: >-
     roles/editor
     roles/iam.roleAdmin
@@ -15,20 +13,25 @@ vars:
   TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE: terraform-credentials.json
   TERRAFORM_STATE_BUCKET: 'terraform-{{.PROJECT_ID}}'
   TERRAFORM_STATE_BUCKET_URL: 'gs://{{.TERRAFORM_STATE_BUCKET}}/'
+  TERRAFORM_CMD: terraform -chdir=project
+  GCLOUD_REGION: '{{.GCLOUD_REGION | default "europe-west4"}}'
+  GCLOUD_ZONE: '{{.GCLOUD_ZONE | default "europe-west4-a"}}'
 
 env:
   CLOUDSDK_CORE_PROJECT: '{{.PROJECT_ID}}'
-  CLOUDSDK_COMPUTE_REGION: europe-west4
-  CLOUDSDK_COMPUTE_ZONE: europe-west4-a
-  GOOGLE_CREDENTIALS: '{{.TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE}}'
+  CLOUDSDK_COMPUTE_REGION: '{{.GCLOUD_REGION}}'
+  CLOUDSDK_COMPUTE_ZONE: '{{.GCLOUD_ZONE}}'
+  GOOGLE_CREDENTIALS: '../{{.TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE}}'
+  TF_VAR_project_id: '{{.PROJECT_ID}}'
+  TF_VAR_region: '{{.GCLOUD_REGION}}'
+  TF_VAR_zone: '{{.GCLOUD_ZONE}}'
 
 tasks:
-  run: ['terraform {{.CLI_ARGS}}']
+  run: ['{{.TERRAFORM_CMD}} {{.CLI_ARGS}}']
 
   project:
     - task: project:create
     - task: project:link-billing-account
-    - task: project:enable-services
   project:create:
     run: once
     cmds: [ "gcloud projects create {{.PROJECT_ID}}" ]
@@ -38,10 +41,6 @@ tasks:
     deps: [ project:create ]
     cmds: [ "gcloud beta billing projects link {{.PROJECT_ID}} --billing-account={{.BILLING_ACCOUNT_ID}}" ]
     status: [ "[ $(gcloud beta billing projects describe {{.PROJECT_ID}} --format='value(billingEnabled)') = 'True' ]" ]
-  project:enable-services:
-    run: once
-    deps: [ project:link-billing-account ]
-    cmds: [ "gcloud services enable {{.GCLOUD_API_SERVICES}}" ]
 
   service-account:
     - task: service-account:create
@@ -99,8 +98,13 @@ tasks:
     - task: state-bucket
 
   init:
-    deps: [ provision ]
-    cmds: [ 'terraform init --backend-config="bucket={{.TERRAFORM_STATE_BUCKET}}"' ]
+    cmds: [ '{{.TERRAFORM_CMD}} init --backend-config="bucket={{.TERRAFORM_STATE_BUCKET}}" {{.CLI_ARGS}}' ]
+  plan:
+    cmds: [ '{{.TERRAFORM_CMD}} plan {{.CLI_ARGS}}' ]
+  apply:
+    cmds: [ '{{.TERRAFORM_CMD}} apply {{.CLI_ARGS}}' ]
+  destroy:
+    cmds: [ '{{.TERRAFORM_CMD}} destroy {{.CLI_ARGS}}' ]
 
 
 
