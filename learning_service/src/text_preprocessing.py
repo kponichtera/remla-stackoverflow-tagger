@@ -5,7 +5,6 @@ Creates files `preprocessor.joblib` and `preprocessed_data.joblib`
 import os
 import re
 import nltk
-import string
 import numpy as np
 import pandas as pd
 from nltk.corpus import stopwords
@@ -20,6 +19,7 @@ REPLACE_BY_SPACE_RE = re.compile('[/(){}\[\]\|@,;]')
 BAD_SYMBOLS_RE = re.compile('[^0-9a-z #+_]')
 STOP_WORDS = set(stopwords.words('english'))
 DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataset")
+np.random.seed(12321)
 
 def load_data(filename: str, sep='\t'):
     """Loads data from a file.
@@ -31,11 +31,14 @@ def load_data(filename: str, sep='\t'):
     Returns:
         pd.DataFrame: pandas' DataFrame
     """
-    messages = pd.read_csv(
+    text_data = pd.read_csv(
         os.path.join(DATA_PATH, filename),
-        sep=sep
+        sep=sep,
+        names=['titles', 'tags'],
+        dtype={'titles': 'str', 'tags': 'str'}
     )
-    return messages
+    text_data = text_data[['titles', 'tags']]
+    return text_data
 
 def text_process(text : str, stemming=False):
     """Text processor that removes bad characters and stop words.

@@ -13,7 +13,7 @@ def copy_data():
     a `dataset/` folder which dvc will read from.
     """
     if not os.path.exists(DATASET_DIR):
-      os.mkdir(DATASET_DIR)
+        os.mkdir(DATASET_DIR)
     shutil.copytree(DATA_PATH, DATASET_DIR, dirs_exist_ok=True)
 
 if __name__=='__main__':

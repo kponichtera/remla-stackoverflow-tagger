@@ -39,7 +39,13 @@ def read_data_from_file(filename: str, sep='\t'):
     Returns:
         pd.DataFrame: DataFrame generated from the file
     """    
-    data = pd.read_csv(os.path.join(DATA_PATH, filename), sep=sep)
+    data = pd.read_csv(
+        os.path.join(DATA_PATH, filename),
+        sep=sep,
+        names=['titles', 'tags'],
+        dtype={'titles': 'str', 'tags': 'str'}
+    )
+    data = data[['titles', 'tags']]
     return data
 
 def display_data_schema(filename: str):
