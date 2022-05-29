@@ -13,6 +13,8 @@ vars:
   TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE: terraform-credentials.json
   TERRAFORM_STATE_BUCKET: 'terraform-{{.PROJECT_ID}}'
   TERRAFORM_STATE_BUCKET_URL: 'gs://{{.TERRAFORM_STATE_BUCKET}}/'
+  TERRAFORM_BUILDER_IMAGE: remla-stackoverflow-tagger/terraform-builder
+  TERRAFORM_GCLOUD_AUTH_CONTAINER: remla-stackoverflow-tagger-gcloud-config
   TERRAFORM_CMD: terraform -chdir=project
   GCLOUD_REGION: '{{.GCLOUD_REGION | default "europe-west4"}}'
   GCLOUD_ZONE: '{{.GCLOUD_ZONE | default "europe-west4-a"}}'
@@ -120,7 +122,25 @@ tasks:
     - rm -rf {{.TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE}}
     - rm -rf project/.terraform
 
-
+  build_builder:
+    cmds: [ "docker build --target builder -t {{.TERRAFORM_BUILDER_IMAGE}} ." ]
+  docker_run:
+    deps: [ build_builder ]
+    interactive: true
+    vars:
+      UID:
+        sh: id -u
+      GID:
+        sh: id -g
+    cmds:
+      - >
+        docker run -it --rm
+        --user {{.UID}}:{{.GID}}
+        --workdir /project
+        --volume {{.PROJECT_ROOT}}/terraform:/project
+        --volume ~/.config/gcloud:/home/cloudsdk/.config/gcloud
+        {{.TERRAFORM_BUILDER_IMAGE}}
+        {{.CLI_ARGS}}
 
 
 
