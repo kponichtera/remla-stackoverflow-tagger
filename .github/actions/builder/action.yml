@@ -16,6 +16,10 @@ inputs:
     description: Name of the target to build
     required: false
     default: builder
+  cache_key:
+    description: Key of the GitHub Actions cache
+    required: false
+    default: ${{ runner.os }}-${{ github.job }}-${{ github.ref_name }}
 
 runs:
   using: composite
@@ -23,10 +27,11 @@ runs:
     - name: Cache Docker layers
       uses: actions/cache@v3
       with:
-        path: /tmp/.buildx-${{ inputs.name }}-cache
-        key: ${{ runner.os }}-buildx-${{ inputs.name }}-${{ github.sha }}
+        path: /tmp/buildx-cache/${{ inputs.cache_key }}
+        key: ${{ inputs.cache_key }}-${{ github.sha }}
         restore-keys: |
-            ${{ runner.os }}-buildx-${{ inputs.name }}-
+            ${{ runner.os }}-${{ github.job }}-${{ github.ref_name }}-
+            ${{ runner.os }}-${{ github.job }}-
     - name: Build builder
       uses: docker/build-push-action@v3
       with:
@@ -35,10 +40,10 @@ runs:
         target: ${{ inputs.target }}
         tags: ${{ inputs.name }}
         load: true
-        cache-from: type=local,src=/tmp/.buildx-${{ inputs.name }}-cache
-        cache-to: type=local,dest=/tmp/.buildx-${{ inputs.name }}-cache-new,mode=max
+        cache-from: type=local,src=/tmp/buildx-cache/${{ inputs.cache_key }}
+        cache-to: type=local,dest=/tmp/buildx-cache/${{ inputs.cache_key }}-new,mode=max
     - name: Use new cache
       shell: bash
       run: |
-          rm -rf /tmp/.buildx-${{ inputs.name }}-cache
-          mv /tmp/.buildx-${{ inputs.name }}-cache-new /tmp/.buildx-${{ inputs.name }}-cache
+          rm -rf /tmp/buildx-cache/${{ inputs.cache_key }}
+          mv /tmp/buildx-cache/${{ inputs.cache_key }}-new /tmp/buildx-cache/${{ inputs.cache_key }}

@@ -6,10 +6,10 @@ on:
     branches-ignore: [ 'gh-pages' ]
 
 env:
-  INTERFACE_SERVICE_BUILDER_NAME: interface-service-builder:latest
-  LEARNING_SERVICE_BUILDER_NAME: learning-service-builder:latest
-  FRONTEND_BUILDER_NAME: frontend-builder:latest
-  HELM_BUILDER_NAME: helm-builder:latest
+  INTERFACE_SERVICE_BUILDER_NAME: interface-service-builder
+  LEARNING_SERVICE_BUILDER_NAME: learning-service-builder
+  FRONTEND_BUILDER_NAME: frontend-builder
+  HELM_BUILDER_NAME: helm-builder
 
 jobs:
   lint-interface-service:

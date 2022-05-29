@@ -11,7 +11,7 @@ on:
       - terraform/**
 
 env:
-  TERRAFORM_BUILDER_NAME: terraform-builder:latest
+  TERRAFORM_BUILDER_NAME: terraform-builder
 
 jobs:
   verify-formatting:
