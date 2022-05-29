@@ -116,16 +116,21 @@ tasks:
   destroy:
     cmds: [ '{{.TERRAFORM_CMD}} destroy {{.CLI_ARGS}}' ]
 
+  fmt:
+    cmds: [ '{{.TERRAFORM_CMD}} fmt {{.CLI_ARGS}}' ]
+  validate:
+    cmds: [ '{{.TERRAFORM_CMD}} validate {{.CLI_ARGS}}' ]
+
   cleanup:
     - task: state-bucket:remove
     - task: service-account:remove
     - rm -rf {{.TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE}}
     - rm -rf project/.terraform
 
-  build_builder:
+  build-builder:
     cmds: [ "docker build --target builder -t {{.TERRAFORM_BUILDER_IMAGE}} ." ]
-  docker_gcloud_login:
-    deps: [ build_builder ]
+  docker-gcloud-login:
+    deps: [ build-builder ]
     interactive: true
     vars:
       UID:
@@ -141,11 +146,11 @@ tasks:
         {{.TERRAFORM_BUILDER_IMAGE}}
         gcloud auth login
     status: ['docker inspect {{.TERRAFORM_GCLOUD_AUTH_CONTAINER}}']
-  docker_gcloud_logout:
+  docker-gcloud-logout:
     cmds: [ "docker rm --volumes {{.TERRAFORM_GCLOUD_AUTH_CONTAINER}}" ]
     status: [ '[ ! $(docker container ls -aq --filter={{.TERRAFORM_GCLOUD_AUTH_CONTAINER}}) ]' ]
-  docker_run:
-    deps: [ build_builder ]
+  docker-run:
+    deps: [ build-builder ]
     interactive: true
     vars:
       UID:
