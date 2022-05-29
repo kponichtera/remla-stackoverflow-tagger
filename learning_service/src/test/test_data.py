@@ -1,8 +1,6 @@
 import os
-import unittest
-from pathlib import Path
-
 import pytest
+import unittest
 import tensorflow_data_validation as tfdv
 
 
@@ -12,9 +10,18 @@ class DataTest(unittest.TestCase):
     @pytest.fixture(autouse=True)
     def prepare_fixture(self):
         """Fixture to generate test app."""
-        base_dir = Path(os.path.dirname(__file__))
+        base_dir = os.path.join(
+            os.path.dirname(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.abspath(__file__)
+                    )
+                )
+            ),
+            "data"
+        )
         # TODO: these paths have to be changed later on when a proper workflow is set
-        self.test_data_dir = os.path.join(base_dir.parent.parent, 'data', 'train.tsv')
+        self.test_data_dir = os.path.join(base_dir, 'train.tsv')
         self.stats_options = tfdv.StatsOptions(enable_semantic_domain_stats=True)
 
     def test_no_anomalies(self):

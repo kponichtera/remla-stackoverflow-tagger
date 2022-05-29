@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
+from typing import List
 nltk.download('stopwords')
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.preprocessing import FunctionTransformer
@@ -21,25 +22,6 @@ STOP_WORDS = set(stopwords.words('english'))
 DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataset")
 np.random.seed(12321)
 
-def load_data(filename: str, sep='\t'):
-    """Loads data from a file.
-
-    Args:
-        filename (str): name of a file to be loaded.
-        sep (str, optional): delimiter for file. Defaults to '\t'.
-
-    Returns:
-        pd.DataFrame: pandas' DataFrame
-    """
-    text_data = pd.read_csv(
-        os.path.join(DATA_PATH, filename),
-        sep=sep,
-        names=['titles', 'tags'],
-        dtype={'titles': 'str', 'tags': 'str'}
-    )
-    text_data = text_data[['titles', 'tags']]
-    return text_data
-
 def text_process(text : str, stemming=False):
     """Text processor that removes bad characters and stop words.
     If needed, stemming can be performed
@@ -49,21 +31,21 @@ def text_process(text : str, stemming=False):
         stemming (bool, optional): flag to enable or disable stemming. Defaults to False.
 
     Returns:
-        list[str]: processed text into a list of strings
+        List[str]: processed text into a list of strings
     """
     processed_text = text.lower()
     processed_text = re.sub(REPLACE_BY_SPACE_RE, " ", processed_text)
     processed_text = re.sub(BAD_SYMBOLS_RE, "", processed_text)
     processed_text = [word for word in processed_text.split() if not word in STOP_WORDS]
     if stemming:
-        stemmed = ''
+        stemmed = []
         for word in processed_text:
             stemmer = SnowballStemmer('english')
-            stemmed.join(stemmer.stem(word) + ' ')
-        processed_text = stemmed.split()
+            stemmed.append(stemmer.stem(word))
+        processed_text = stemmed
     return processed_text
 
-def extract_processed_text_len(data: list[str]):
+def extract_processed_text_len(data: List[str]):
     """A extractor of lengths for list of words and
     reshapes it with numpy so that it works with `make_union`.
 
@@ -74,7 +56,7 @@ def extract_processed_text_len(data: list[str]):
      [2]]
 
     Args:
-        data (list[str]): list of words
+        data (List[str]): list of words
 
     Returns:
         np.array: numpy array for `make_union` to process
@@ -95,7 +77,6 @@ def _preprocess(messages):
         # append the message length feature to the vector
         FunctionTransformer(extract_processed_text_len, validate=False)
     )
-
     preprocessed_data = preprocessor.fit_transform(messages['message'])
     dump(preprocessor, 'output/preprocessor.joblib')
     dump(preprocessed_data, 'output/preprocessed_data.joblib')

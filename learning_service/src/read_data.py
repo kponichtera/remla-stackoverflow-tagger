@@ -28,19 +28,19 @@ def read_labeled_data(filename: str, sep='\t') :
     data['tags'] = data['tags'].apply(literal_eval)
     return data
 
-def read_data_from_file(filename: str, sep='\t'):
-    """
-    Reads data from a file from `dataset/` folder.
+def read_data_from_file(filename: str, sep='\t', root_path=DATA_PATH):
+    """Loads data from a file.
 
     Args:
-        filename (str): File to be read from.
-        sep (str, optional): File separator. Defaults to '\t'.
+        filename (str): name of a file to be loaded.
+        sep (str, optional): delimiter for file. Defaults to '\t'.
+        root_path (_type_, optional): root path where the file should be found. Defaults to DATA_PATH.
 
     Returns:
-        pd.DataFrame: DataFrame generated from the file
-    """    
+        pd.DataFrame: pandas' DataFrame of StackOverflow's titles and tags
+    """  
     data = pd.read_csv(
-        os.path.join(DATA_PATH, filename),
+        os.path.join(root_path, filename),
         sep=sep,
         names=['titles', 'tags'],
         dtype={'titles': 'str', 'tags': 'str'}

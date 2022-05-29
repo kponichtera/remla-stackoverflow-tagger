@@ -57,4 +57,4 @@ tasks:
   test:
     deps: [ prepare ]
     cmds:
-      - "{{.ENV}}/bin/pytest"
+      - "{{.ENV}}/bin/pytest -n {{.CORE_COUNT}}"

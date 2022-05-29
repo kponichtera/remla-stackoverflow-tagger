@@ -5,6 +5,8 @@ output: prefixed
 vars:
   PROJECT_ROOT:
     sh: pwd
+  CORE_COUNT:
+    sh: nproc --all
 
 includes:
   interface_service:
