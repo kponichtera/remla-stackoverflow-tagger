@@ -124,6 +124,26 @@ tasks:
 
   build_builder:
     cmds: [ "docker build --target builder -t {{.TERRAFORM_BUILDER_IMAGE}} ." ]
+  docker_gcloud_login:
+    deps: [ build_builder ]
+    interactive: true
+    vars:
+      UID:
+        sh: id -u
+      GID:
+        sh: id -g
+    cmds:
+      - >
+        docker run -it
+        -e UID={{.UID}}
+        -e GID={{.GID}}
+        --name {{.TERRAFORM_GCLOUD_AUTH_CONTAINER}}
+        {{.TERRAFORM_BUILDER_IMAGE}}
+        gcloud auth login
+    status: ['docker inspect {{.TERRAFORM_GCLOUD_AUTH_CONTAINER}}']
+  docker_gcloud_logout:
+    cmds: [ "docker rm {{.TERRAFORM_GCLOUD_AUTH_CONTAINER}}" ]
+    status: [ '[ ! $(docker container ls -aq --filter={{.TERRAFORM_GCLOUD_AUTH_CONTAINER}}) ]' ]
   docker_run:
     deps: [ build_builder ]
     interactive: true
@@ -135,10 +155,11 @@ tasks:
     cmds:
       - >
         docker run -it --rm
-        --user {{.UID}}:{{.GID}}
+        -e UID={{.UID}}
+        -e GID={{.GID}}
         --workdir /project
         --volume {{.PROJECT_ROOT}}/terraform:/project
-        --volume ~/.config/gcloud:/home/cloudsdk/.config/gcloud
+        --volumes-from {{.TERRAFORM_GCLOUD_AUTH_CONTAINER}}
         {{.TERRAFORM_BUILDER_IMAGE}}
         {{.CLI_ARGS}}
 
