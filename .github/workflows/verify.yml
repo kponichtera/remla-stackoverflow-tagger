@@ -31,6 +31,7 @@ jobs:
           command: task interface_service:lint
   lint-learning-service:
     name: Lint learning service
+    if: 'false'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
