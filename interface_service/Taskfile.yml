@@ -12,7 +12,6 @@ tasks:
       - "test -f ${{.ENV}}/bin/activate"
     cmds:
       - "{{.PYTHON_BIN}} -m venv {{.ENV}}"
-      - "{{.ENV}}/bin/python3 -m pip install -U pip setuptools wheel"
   prepare:
     sources:
       - "{{.ENV}}/bin/activate"
@@ -46,6 +45,10 @@ tasks:
         {{.INTERFACE_SERVICE_BUILDER_IMAGE}}
         {{.CLI_ARGS}}
   lint:
-    - "{{.ENV}}/bin/pylint --rcfile=.pylintrc src/"
+    deps: [ prepare ]
+    cmds:
+      - "{{.ENV}}/bin/pylint --rcfile=.pylintrc src/"
   test:
-    - "{{.ENV}}/bin/pytest"
+    deps: [ prepare ]
+    cmds:
+      - "{{.ENV}}/bin/pytest"

@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-* Python 3.10 or later
+* Python 3.8 or 3.9 (`mllint` not supported by 3.10)
 * Docker 20.10 or later
 * [Task](https://taskfile.dev/) build tool
 * (Optional) Node.js and npm
@@ -15,7 +15,7 @@
 ```bash
 cd interface_service/
 virtualenv venv
-source venv/Scripts/activate # or source venv/bin/activate
+source venv/bin/activate # or source venv/Scripts/activate
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
@@ -31,7 +31,7 @@ task interface_service:docker_run
 ```bash
 cd learning_service/
 virtualenv venv
-source venv/Scripts/activate # or source venv/bin/activate
+source venv/bin/activate # or source venv/Scripts/activate
 pip install -r requirements.txt
 ```
 

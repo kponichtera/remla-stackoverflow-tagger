@@ -3,7 +3,7 @@ version: '3'
 vars:
   LEARNING_SERVICE_BUILDER_IMAGE: remla-stackoverflow-tagger/learning-service-builder
   LEARNING_SERVICE_IMAGE: remla-stackoverflow-tagger/learning-service
-  PYTHON_BIN: python3.8
+  PYTHON_BIN: python3
   ENV: learning_venv
 
 tasks:
@@ -12,7 +12,6 @@ tasks:
       - "test -f ${{.ENV}}/bin/activate"
     cmds:
       - "{{.PYTHON_BIN}} -m venv {{.ENV}}"
-      - "{{.ENV}}/bin/python3 -m pip install -U pip setuptools wheel"
   prepare:
     sources:
       - "{{.ENV}}/bin/activate"
@@ -46,8 +45,14 @@ tasks:
         {{.LEARNING_SERVICE_BUILDER_IMAGE}}
         {{.CLI_ARGS}}
   lint:
-    - "{{.ENV}}/bin/pylint --rcfile=.pylintrc src/"
+    deps: [ prepare ]
+    cmds:
+      - "{{.ENV}}/bin/pylint --rcfile=.pylintrc src/"
   mllint:
-    - "{{.ENV}}/bin/mllint --output report.md"
+    deps: [ prepare ]
+    cmds:
+      - "{{.ENV}}/bin/mllint --output report.md"
   test:
-    - "{{.ENV}}/bin/pytest"
+    deps: [ prepare ]
+    cmds:
+      - "{{.ENV}}/bin/pytest"

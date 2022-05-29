@@ -1,36 +1,32 @@
-name: Build and push Docker image
-description: Builds and pushes docker images for the given details
+name: Build builder
+description: Builds the Docker builder image using BuildKit and GitHub Actions cache
 
 inputs:
+  name:
+    description: Name of the builder image
+    required: true
   context:
-    description: Docker context for the build-push action
-    required: true
+    description: Path to the build context
+    required: false
+    default: "."
   file:
-    description: Path to the dockerfile
+    description: Path to Dockerfile with the builder stage
     required: true
-  img:
-    description: The name of the image
-    required: true
+  target:
+    description: Name of the target to build
+    required: false
+    default: builder
 
 runs:
-  using: "composite"
+  using: composite
   steps:
-    - name: Gather metadata
-      id: metadata
-      uses: docker/metadata-action@v4
-      with:
-        images: ${{ inputs.img }}
-        tags: |
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}-latest
-          type=semver,pattern={{major}}-latest
-          latest
-    - name: Build and push
+    - name: Build builder
       uses: docker/build-push-action@v3
       with:
-        context: ${{ inputs.context }}
         file: ${{ inputs.file }}
-        tags: ${{ steps.metadata.outputs.tags }}
-        push: true    
+        context: ${{ inputs.context }}
+        target: ${{ inputs.target }}
+        tags: ${{ inputs.name }}
+        load: true
         cache-from: type=gha
         cache-to: type=gha,mode=max
