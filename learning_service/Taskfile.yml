@@ -3,7 +3,8 @@ version: '3'
 vars:
   LEARNING_SERVICE_BUILDER_IMAGE: remla-stackoverflow-tagger/learning-service-builder
   LEARNING_SERVICE_IMAGE: remla-stackoverflow-tagger/learning-service
-  PYTHON_BIN: python3
+  PYTHON_BIN: python
+  PATH: learning_service
   ENV: learning_venv
 
 tasks:
@@ -20,6 +21,7 @@ tasks:
         vars:
           ENV: "{{.ENV}}"
     cmds:
+      - "{{.ENV}}/bin/pip install --upgrade pip"
       - "{{.ENV}}/bin/pip install -r requirements.txt"
   clean:
     - rm -rf learning_venv

@@ -4,6 +4,7 @@ vars:
   INTERFACE_SERVICE_BUILDER_IMAGE: remla-stackoverflow-tagger/interface-service-builder
   INTERFACE_SERVICE_IMAGE: remla-stackoverflow-tagger/interface-service
   PYTHON_BIN: python
+  PATH: interface_service
   ENV: interface_venv
 
 tasks:
@@ -20,6 +21,7 @@ tasks:
         vars:
           ENV: "{{.ENV}}"
     cmds:
+      - "{{.ENV}}/bin/pip install --upgrade pip"
       - "{{.ENV}}/bin/pip install -r requirements.txt"
   clean:
     - rm -rf interface_venv

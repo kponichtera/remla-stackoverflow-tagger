@@ -21,6 +21,7 @@ includes:
 
 tasks:
   prepare:
+    - source python-version.sh
     - task: interface_service:prepare
     - task: learning_service:prepare
     - task: frontend:prepare

@@ -12,3 +12,6 @@ pytest
 mllint
 joblib
 tensorflow-data-validation
+ipython
+termgraph
+tensorflow-data-validation[visualization]
