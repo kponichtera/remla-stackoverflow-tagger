@@ -14,3 +14,8 @@ module "gke_cluster" {
 
   depends_on = [module.gcloud_services]
 }
+
+module "data_model_bucket" {
+  source = "../modules/gcloud-bucket"
+  name = "data-model"
+}
