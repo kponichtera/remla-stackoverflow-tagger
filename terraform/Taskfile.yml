@@ -15,7 +15,6 @@ vars:
   TERRAFORM_STATE_BUCKET_URL: 'gs://{{.TERRAFORM_STATE_BUCKET}}/'
   TERRAFORM_BUILDER_IMAGE: remla-stackoverflow-tagger/terraform-builder
   TERRAFORM_GCLOUD_AUTH_CONTAINER: remla-stackoverflow-tagger-gcloud-config
-  TERRAFORM_CMD: terraform -chdir=project
   GCLOUD_REGION: '{{.GCLOUD_REGION | default "europe-west4"}}'
   GCLOUD_ZONE: '{{.GCLOUD_ZONE | default "europe-west4-a"}}'
 
@@ -29,7 +28,7 @@ env:
   TF_VAR_zone: '{{.GCLOUD_ZONE}}'
 
 tasks:
-  run: [ '{{.TERRAFORM_CMD}} {{.CLI_ARGS}}' ]
+  run: [ 'terraform {{.CLI_ARGS}}' ]
 
   project:
     - task: project:create
@@ -108,18 +107,18 @@ tasks:
     - task: state-bucket
 
   init:
-    cmds: [ '{{.TERRAFORM_CMD}} init --backend-config="bucket={{.TERRAFORM_STATE_BUCKET}}" {{.CLI_ARGS}}' ]
+    cmds: [ 'terraform -chdir=project init --backend-config="bucket={{.TERRAFORM_STATE_BUCKET}}" {{.CLI_ARGS}}' ]
   plan:
-    cmds: [ '{{.TERRAFORM_CMD}} plan {{.CLI_ARGS}}' ]
+    cmds: [ 'terraform -chdir=project plan {{.CLI_ARGS}}' ]
   apply:
-    cmds: [ '{{.TERRAFORM_CMD}} apply {{.CLI_ARGS}}' ]
+    cmds: [ 'terraform -chdir=project apply {{.CLI_ARGS}}' ]
   destroy:
-    cmds: [ '{{.TERRAFORM_CMD}} destroy {{.CLI_ARGS}}' ]
+    cmds: [ 'terraform -chdir=project destroy {{.CLI_ARGS}}' ]
 
   fmt:
-    cmds: [ '{{.TERRAFORM_CMD}} fmt {{.CLI_ARGS}}' ]
+    cmds: [ 'terraform fmt --recursive {{.CLI_ARGS}}' ]
   validate:
-    cmds: [ '{{.TERRAFORM_CMD}} validate {{.CLI_ARGS}}' ]
+    cmds: [ 'terraform validate {{.CLI_ARGS}}' ]
 
   cleanup:
     - task: state-bucket:remove
