@@ -17,5 +17,17 @@ module "gke_cluster" {
 
 module "data_model_bucket" {
   source = "../modules/gcloud-bucket"
-  name = "data-model"
+  name   = "data-model"
+}
+
+module "pubsub_feedback" {
+  source = "../modules/gcloud-pubsub"
+  name = "feedback"
+  message_retention_duration = "432000s" # 5 days
+}
+
+module "pubsub_new_model" {
+  source = "../modules/gcloud-pubsub"
+  name = "new-model"
+  message_retention_duration = "3600s" # 1 hour
 }

@@ -2,9 +2,9 @@ data "google_project" "project" {}
 data "google_client_config" "config" {}
 
 locals {
-  project_name   = data.google_project.project.project_id
-  region         = data.google_client_config.config.region
-  bucket_name    = "${local.project_name}-${var.name}"
+  project_name = data.google_project.project.project_id
+  region       = data.google_client_config.config.region
+  bucket_name  = "${local.project_name}-${var.name}"
 }
 
 resource "google_storage_bucket" "bucket" {
@@ -21,8 +21,8 @@ resource "google_service_account" "service_account" {
 }
 
 resource "google_storage_bucket_iam_member" "service_account_member" {
-  bucket      = google_storage_bucket.bucket.name
-  role = "roles/storage.admin"
+  bucket = google_storage_bucket.bucket.name
+  role   = "roles/storage.admin"
   member = "serviceAccount:${google_service_account.service_account.email}"
 }
 
