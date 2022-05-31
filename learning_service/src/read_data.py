@@ -42,10 +42,9 @@ def read_data_from_file(filename: str, sep='\t', root_path=DATA_PATH):
     data = pd.read_csv(
         os.path.join(root_path, filename),
         sep=sep,
-        names=['titles', 'tags'],
-        dtype={'titles': 'str', 'tags': 'str'}
+        dtype={'title': 'str', 'tags': 'str'}
     )
-    data = data[['titles', 'tags']]
+    data = data[["title", "tags"]]
     return data
 
 def display_data_schema(filename: str):
