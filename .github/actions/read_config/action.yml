@@ -1,0 +1,19 @@
+name: Read Config
+description: Reads a JSON configuration and populates the GHA environment accordingly
+
+inputs:
+  config:
+    description: The location of the configuration file
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Push to env
+      shell: bash
+      id: putsh_to_env
+      run: |
+        for OUTPUT in $(cat ${{ inputs.config }} | jq 'keys[] as $k | "\($k)=\(.[$k])"' | tr -d '"')
+        do
+          echo $OUTPUT >> $GITHUB_ENV
+        done
