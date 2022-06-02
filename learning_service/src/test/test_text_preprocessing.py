@@ -8,7 +8,7 @@ from typing import Dict, List, Union, Tuple, Any
 from parameterized import parameterized
 from learning_service.src.text_preprocessing import text_process, \
     extract_processed_text_len, preprocess_bag_of_words, \
-        prepare_from_processor
+        prepare_from_processor, prepare_labels
 from learning_service.src.read_data import read_data_from_file
 
 CWD = os.path.dirname(os.path.abspath(__file__))
@@ -180,4 +180,48 @@ class PreprocessingTest(unittest.TestCase):
         preprocessed_bag_of_words_from_file = prepare_from_processor(data_frame[["title"]], CWD)
         self.assertEqual(preprocessed_bag_of_words.shape, preprocessed_bag_of_words_from_file.shape)
         self.assertEqual(preprocessed_bag_of_words.nnz, preprocessed_bag_of_words_from_file.nnz)
+
+    @parameterized.expand([
+        [
+            {
+                "tags":[['php', 'sql'], ['OOP']]
+            },
+            [[0, 1, 1], [1, 0, 0]]
+        ],
+        [
+            {
+                "tags":[['php', 'sql']]
+            },
+            [[1, 1]]
+        ],
+        [
+            {
+                "tags":[['sql']]
+            },
+            [[1]]
+        ],
+        [
+            {
+                "tags":[['php', 'sql'], ['OOP'], ['python']]
+            },
+            [[0, 1, 0, 1],[1, 0, 0, 0], [0, 0, 1, 0]]
+        ]
+    ])
+    def test_preprocessing_labels(
+        self,
+        pd_df_dict:Dict[str, List[Union[str,List[str]]]],
+        output:List[str]
+        ):
+        """Tests preprocessing of labels.
+
+        Args:
+            pd_df_dict (Dict[str, List[Union[str,List[str]]]]): dictionary for data
+            output (List[str]): output answer
+        """
+        data_frame = pd.DataFrame(pd_df_dict)
+        labels = prepare_labels(data_frame[['tags']])
+        processed_labels = np.array(output)
+        print(labels)
+        print(processed_labels)
+        self.assertTrue(np.array_equal(processed_labels, labels))
         

@@ -12,8 +12,9 @@ from nltk.stem import SnowballStemmer
 from typing import List
 nltk.download('stopwords')
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.preprocessing import FunctionTransformer
-from sklearn.pipeline import make_union, make_pipeline
+from sklearn.pipeline import make_union
 from joblib import dump, load
 from learning_service.src.read_data import read_data_from_file
 
@@ -21,6 +22,7 @@ REPLACE_BY_SPACE_RE = re.compile('[/(){}\[\]\|@,;]')
 BAD_SYMBOLS_RE = re.compile('[^0-9a-z #+_]')
 STOP_WORDS = set(stopwords.words('english'))
 PREPROCESSOR_FILE_NAME = "preprocessor_bag_of_words.joblib"
+PREPROCESSOR_LABELS_FILE_NAME = "preprocessor_labels.joblib"
 DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataset")
 np.random.seed(12321)
 
@@ -128,6 +130,30 @@ def prepare_from_processor(titles:pd.DataFrame, save_path:str):
     preprocessor = load(os.path.join(save_path,PREPROCESSOR_FILE_NAME))
     return preprocessor.transform([item[0] for item in titles.values])
 
+def prepare_labels(labels:pd.DataFrame, save_path=None):
+    """Prepares labels for multi label classifier.
+
+    Args:
+        labels (pd.DataFrame): labels DataFrame
+        save_path (str, optional): path where the preprocessor exists in. Defaults to None.
+
+    Returns:
+        ndarray[float64] | Any | ndarray: processed data
+    """
+    tags_lists = [item[0] for item in labels.values]
+    tags_counts = {}
+    for tags in tags_lists:
+        for tag in tags:
+            if tag in tags_counts:
+                tags_counts[tag] += 1
+            else:
+                tags_counts[tag] = 1
+    mlb = MultiLabelBinarizer(classes=sorted(tags_counts.keys()))
+    preprocessed_tags = mlb.fit_transform(tags_lists)
+    if save_path is not None and save_path != "":
+        dump(mlb, os.path.join(save_path, PREPROCESSOR_LABELS_FILE_NAME))
+        dump(preprocessed_tags, os.path.join(save_path, 'preprocessed_preprocessed_tags.joblib'))
+    return preprocessed_tags
 
 def main():
     """Main function to run preprocessors.
