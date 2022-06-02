@@ -11,15 +11,16 @@ from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 from typing import List
 nltk.download('stopwords')
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.pipeline import make_union, make_pipeline
 from joblib import dump, load
-from read_data import read_data_from_file
+from learning_service.src.read_data import read_data_from_file
 
 REPLACE_BY_SPACE_RE = re.compile('[/(){}\[\]\|@,;]')
 BAD_SYMBOLS_RE = re.compile('[^0-9a-z #+_]')
 STOP_WORDS = set(stopwords.words('english'))
+PREPROCESSOR_FILE_NAME = "preprocessor_bag_of_words.joblib"
 DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataset")
 np.random.seed(12321)
 
@@ -64,43 +65,54 @@ def extract_processed_text_len(data: List[str]):
     """
     return np.array([len(item) for item in data]).reshape(-1, 1)
 
-def create_bag_of_words_preprocessor(save_path):
+def create_bag_of_words_preprocessor(min_df=5, max_df=0.8):
     """Creates a bag of words preprocessor. The processor works through:
     1. Conversion of word tokens from processed title text into a bag of words
-    2. Conversion of bag of words representation into tfidf vectorized representation for each title text
+    2. Conversion of bag of words representation into TF-IDF vectorized representation
+    for each title text
     3. Addition of message length
 
     Args:
-        save_path str: save path for words preprocessor. If None or empty string,
-                        no saving is perfomed.
+        min_df (int, optional): TfidfVectorizer's min_df. Defaults to 5.
+        max_df (float, optional): TfidfVectorizer's max_df. Defaults to 0.8.
+
+    Returns:
+        _type_: _description_
     """
     preprocessor = make_union(
-        make_pipeline(
-            CountVectorizer(analyzer=text_process),
-            TfidfTransformer()
+        TfidfVectorizer(
+            min_df=min_df,
+            max_df=max_df,
+            sublinear_tf=True,
+            ngram_range = (1,2),
+            token_pattern='(\S+)',
+            use_idf=True
         ),
         FunctionTransformer(extract_processed_text_len, validate=False)
     )
-    if save_path is not None and save_path != "":
-        dump(preprocessor, f'{save_path}/preprocessor_bag_of_words.joblib')
     return preprocessor
 
-def preprocess_bag_of_words(titles:pd.DataFrame, data_name:str, save_path=None):
+def preprocess_bag_of_words(titles:pd.DataFrame, data_name='', save_path=None, min_df=5, max_df=0.8):
     """Preprocesses titles of questions into bag of words processor.
 
     Args:
         titles (pd.DataFrame): DataFrame of titles of StackOverflow questions
+        data_name (str, optional): _description_. Defaults to ''.
         save_path (str|None, optional): place where to save the data and preprocessor.
                                         Defaults to None.
+        min_df (int, optional): TfidfVectorizer's min_df. Defaults to 5.
+        max_df (float, optional): TfidfVectorizer's max_df. Defaults to 0.8.
 
     Returns:
         ndarray[float64] | Any | ndarray: processed data
     """
-    preprocessor = create_bag_of_words_preprocessor(save_path)
-    preprocessed_data = preprocessor.fit_transform(titles)
+    preprocessor = create_bag_of_words_preprocessor(min_df, max_df)
+    preprocessed_data = preprocessor.fit_transform([item[0] for item in titles.values])
 
     if save_path is not None and save_path != "":
-        dump(preprocessed_data, f'{save_path}/preprocessed_{data_name}_data.joblib')
+        final_data_name = f'{data_name}_' if data_name != '' else ''
+        dump(preprocessor, os.path.join(save_path, PREPROCESSOR_FILE_NAME))
+        dump(preprocessed_data, os.path.join(save_path, f'preprocessed_{final_data_name}data.joblib'))
     return preprocessed_data
 
 def prepare_from_processor(titles:pd.DataFrame, save_path:str):
@@ -108,13 +120,13 @@ def prepare_from_processor(titles:pd.DataFrame, save_path:str):
 
     Args:
         titles (pd.DataFrame): DataFrame of titles of StackOverflow questions
-        save_path (str): save path for the preprocessor
+        save_path (str): path where the preprocessor exists in
 
     Returns:
         ndarray[float64] | Any | ndarray: processed data
     """
-    preprocessor = load(f'{save_path}/preprocessor_bag_of_words.joblib')
-    return preprocessor.transform(titles)
+    preprocessor = load(os.path.join(save_path,PREPROCESSOR_FILE_NAME))
+    return preprocessor.transform([item[0] for item in titles.values])
 
 
 def main():

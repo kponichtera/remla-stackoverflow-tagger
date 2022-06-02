@@ -1,22 +1,37 @@
 import os
 import pytest
-import unittest
 import collections
 import numpy as np
-from typing import List
+import pandas as pd
+import unittest
+from typing import Dict, List, Union, Tuple, Any
 from parameterized import parameterized
-from ..text_preprocessing import text_process, extract_processed_text_len
-from ..read_data import read_data_from_file
+from learning_service.src.text_preprocessing import text_process, \
+    extract_processed_text_len, preprocess_bag_of_words, \
+        prepare_from_processor
+from learning_service.src.read_data import read_data_from_file
 
-
-
+CWD = os.path.dirname(os.path.abspath(__file__))
 
 class PreprocessingTest(unittest.TestCase):
-    """Testing model related parameters"""
+    """Testing model related parameters
+
+    Args:
+        unittest (unittest): testing module
+    """
     
+    def tearDown(self):
+        """Tear down method when the test method finishes
+        """
+        files = os.listdir(CWD)
+        for item in files:
+            if item.endswith(".joblib"):
+                os.remove(os.path.join(CWD, item))
+        
     @pytest.fixture(autouse=True)
     def prepare_fixture(self):
-        """Fixture to load up data"""
+        """Fixture to load up data
+        """
         base_dir = os.path.join(
             os.path.dirname(
                 os.path.dirname(
@@ -93,3 +108,76 @@ class PreprocessingTest(unittest.TestCase):
         """
         output = extract_processed_text_len(text_arr_input)
         self.assertTrue(np.array_equal(output, np.array(text_len_arr_output)))
+
+    @parameterized.expand([
+            [
+                {
+                    "title": ["Why odbc_exec always fail?"],
+                    "tags":[['php', 'sql']]
+                },
+                (1,8)
+            ],
+            [
+                {
+                    "title": ["Why odbc_exec always fail?", "How to do OOP?"],
+                    "tags":[['php', 'sql'], ['OOP']]
+                },
+                (2,15)
+            ]
+        ]
+    )
+    def test_processing_bag_of_words(
+        self,
+        pd_df_dict:Dict[str, List[Union[str,List[str]]]],
+        shape_tuple:Tuple[int]
+        ):
+        """Tests processing of data through bag of words method.
+
+        Args:
+            pd_df_dict (Dict[str, List[Union[str,List[str]]]]): simulated dict data
+            shape_tuple (Tuple[int]): asserted shape
+        """
+        data_frame = pd.DataFrame(pd_df_dict)
+        preprocessed_bag_of_words = preprocess_bag_of_words(
+            data_frame[["title"]],
+            min_df=1,
+            max_df=1
+        )
+        self.assertEqual(shape_tuple, preprocessed_bag_of_words.shape)
+
+
+    @parameterized.expand([
+            [
+                {
+                    "title": ["Why odbc_exec always fail?"],
+                    "tags":[['php', 'sql']]
+                }
+            ],
+            [
+                {
+                    "title": ["Why odbc_exec always fail?", "How to do OOP?"],
+                    "tags":[['php', 'sql'], ['OOP']]
+                }
+            ]
+        ]
+    )
+    def test_processing_bag_of_words_same_output(
+        self,
+        pd_df_dict:Dict[str, List[Union[str,List[str]]]]
+        ):
+        """Test that the saved processor outputs same results.
+
+        Args:
+            pd_df_dict (Dict[str, List[Union[str,List[str]]]]): simulated dict data
+        """
+        data_frame = pd.DataFrame(pd_df_dict)
+        preprocessed_bag_of_words = preprocess_bag_of_words(
+            data_frame[["title"]],
+            save_path=CWD,
+            min_df=1,
+            max_df=1
+        )
+        preprocessed_bag_of_words_from_file = prepare_from_processor(data_frame[["title"]], CWD)
+        self.assertEqual(preprocessed_bag_of_words.shape, preprocessed_bag_of_words_from_file.shape)
+        self.assertEqual(preprocessed_bag_of_words.nnz, preprocessed_bag_of_words_from_file.nnz)
+        
