@@ -1,8 +1,21 @@
+"""
+Provides download and upload functionality
+For interfacing with Google Cloud Storage buckets
+"""
+
 from google.cloud import storage
 from google.oauth2 import service_account
 from config import settings
 
 def authenticate():
+    """Authenticates to the Google Cloud environment
+    Using environment variables returns the corresponding blob
+    For the desired project and bucket.
+
+    Returns:
+        Blob: The blob of the corresponding file to be uploaded
+    """
+
     # Get credentials from env variables
     credentials_dict = {
         "client_email": settings["CLIENT_EMAIL"],
@@ -24,11 +37,15 @@ def authenticate():
     return mybucket.blob(settings["BLOB_NAME"])
 
 def upload_model():
+    """Uploads a file to the Google Cloud Storage bucket.
+    """
     blob = authenticate()
     # Upload the file
     blob.upload_from_filename(settings["UPLOAD_FILE_PATH"])
 
 def download_model():
+    """Downloads a file from the Google Cloud Storage bucket.
+    """
     blob = authenticate()
     # Download to file
     blob.download_to_filename(settings["DOWNLOAD_FILE_PATH"])
