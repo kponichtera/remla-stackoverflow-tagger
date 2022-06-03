@@ -12,3 +12,5 @@ pytest
 mllint
 joblib
 tensorflow-data-validation
+dynaconf
+jinja2
