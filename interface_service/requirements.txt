@@ -7,3 +7,5 @@ requests
 pylint==2.12.2
 dynaconf
 jinja2
+google-cloud-storage
+google-auth
