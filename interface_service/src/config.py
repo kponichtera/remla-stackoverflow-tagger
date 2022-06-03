@@ -2,7 +2,7 @@
 Provides a configuration management object.
 """
 
-from dynaconf import Dynaconf, Validator
+from dynaconf import Dynaconf
 
 settings = Dynaconf(
     # variables exported in .env as `REMLA_FOO=bar` becomes `settings.FOO == "bar"`
