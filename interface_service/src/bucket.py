@@ -1,6 +1,6 @@
 """
 Provides download and upload functionality
-For interfacing with Google Cloud Storage buckets
+For interfacing with MinIO buckets
 """
 from minio import Minio
 from config import settings
