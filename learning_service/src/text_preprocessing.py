@@ -94,16 +94,17 @@ def create_bag_of_words_preprocessor(min_df=5, max_df=0.8):
     )
     return preprocessor
 
-def preprocess_bag_of_words(titles:pd.DataFrame, data_name='', save_path=None, min_df=5, max_df=0.8):
+def preprocess_bag_of_words(titles:pd.DataFrame, data_name='', save_path=None, min_df=5, max_df=0.8, processor_prefix=""):
     """Preprocesses titles of questions into bag of words processor.
 
     Args:
         titles (pd.DataFrame): DataFrame of titles of StackOverflow questions
-        data_name (str, optional): _description_. Defaults to ''.
+        data_name (str, optional): additional name parameter for data. Defaults to ''.
         save_path (str|None, optional): place where to save the data and preprocessor.
                                         Defaults to None.
         min_df (int, optional): TfidfVectorizer's min_df. Defaults to 5.
         max_df (float, optional): TfidfVectorizer's max_df. Defaults to 0.8.
+        processor_prefix (str, optional): Prefix for processor. Defaults to "".
 
     Returns:
         ndarray[float64] | Any | ndarray: processed data
@@ -113,11 +114,11 @@ def preprocess_bag_of_words(titles:pd.DataFrame, data_name='', save_path=None, m
 
     if save_path is not None and save_path != "":
         final_data_name = f'{data_name}_' if data_name != '' else ''
-        dump(preprocessor, os.path.join(save_path, PREPROCESSOR_FILE_NAME))
+        dump(preprocessor, os.path.join(save_path, f'{processor_prefix}_{PREPROCESSOR_FILE_NAME}'))
         dump(preprocessed_data, os.path.join(save_path, f'preprocessed_{final_data_name}data.joblib'))
     return preprocessed_data
 
-def prepare_from_processor(titles:pd.DataFrame, save_path:str):
+def prepare_from_processor(titles:pd.DataFrame, save_path:str, processor_prefix=''):
     """Loads a preprocessor from a file and runs it on data.
 
     Args:
@@ -127,7 +128,7 @@ def prepare_from_processor(titles:pd.DataFrame, save_path:str):
     Returns:
         ndarray[float64] | Any | ndarray: processed data
     """
-    preprocessor = load(os.path.join(save_path,PREPROCESSOR_FILE_NAME))
+    preprocessor = load(os.path.join(save_path, f'{processor_prefix}_{PREPROCESSOR_FILE_NAME}'))
     return preprocessor.transform([item[0] for item in titles.values])
 
 def prepare_labels(labels:pd.DataFrame, save_path=None):

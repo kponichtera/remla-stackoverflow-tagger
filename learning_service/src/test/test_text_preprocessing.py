@@ -138,12 +138,20 @@ class PreprocessingTest(unittest.TestCase):
             shape_tuple (Tuple[int]): asserted shape
         """
         data_frame = pd.DataFrame(pd_df_dict)
+        processor_prefix = self.id()
         preprocessed_bag_of_words = preprocess_bag_of_words(
             data_frame[["title"]],
             min_df=1,
-            max_df=1
+            max_df=1,
+            processor_prefix=processor_prefix,
+            data_name=processor_prefix
         )
         self.assertEqual(shape_tuple, preprocessed_bag_of_words.shape)
+        
+        files = os.listdir(CWD)
+        for item in files:
+            if processor_prefix in item:
+                os.remove(os.path.join(CWD, item))
 
 
     @parameterized.expand([
@@ -171,15 +179,23 @@ class PreprocessingTest(unittest.TestCase):
             pd_df_dict (Dict[str, List[Union[str,List[str]]]]): simulated dict data
         """
         data_frame = pd.DataFrame(pd_df_dict)
+        processor_prefix = self.id()
         preprocessed_bag_of_words = preprocess_bag_of_words(
             data_frame[["title"]],
             save_path=CWD,
             min_df=1,
-            max_df=1
+            max_df=1,
+            processor_prefix=processor_prefix,
+            data_name=processor_prefix
         )
-        preprocessed_bag_of_words_from_file = prepare_from_processor(data_frame[["title"]], CWD)
+        preprocessed_bag_of_words_from_file = prepare_from_processor(data_frame[["title"]], CWD, processor_prefix=processor_prefix)
         self.assertEqual(preprocessed_bag_of_words.shape, preprocessed_bag_of_words_from_file.shape)
         self.assertEqual(preprocessed_bag_of_words.nnz, preprocessed_bag_of_words_from_file.nnz)
+        
+        files = os.listdir(CWD)
+        for item in files:
+            if processor_prefix in item:
+                os.remove(os.path.join(CWD, item))
 
     @parameterized.expand([
         [
