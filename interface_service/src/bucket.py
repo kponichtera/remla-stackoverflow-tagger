@@ -2,50 +2,42 @@
 Provides download and upload functionality
 For interfacing with Google Cloud Storage buckets
 """
-
-from google.cloud import storage
-from google.oauth2 import service_account
+from minio import Minio
 from config import settings
 
+
 def authenticate():
-    """Authenticates to the Google Cloud environment
-    Using environment variables returns the corresponding blob
-    For the desired project and bucket.
+    """Authenticates to MinIO.
 
     Returns:
-        Blob: The blob of the corresponding file to be uploaded
+        Minio: The MinIO client object.
     """
 
     # Get credentials from env variables
-    credentials_dict = {
-        "client_email": settings["CLIENT_EMAIL"],
-        "token_uri": settings["TOKEN_URI"],
-        # Backslashes are doubled in the environment
-        "private_key": settings["PRIVATE_KEY"].replace('\\n', '\n')
-    }
+    return Minio(
+        settings["MINIO_ENDPOINT"],
+        access_key=settings["MINIO_ACCESS_KEY"],
+        secret_key=settings["MINIO_SECRET_KEY"],
+        # Without this, certificates are required
+        secure=False
+    )
 
-    # Build credentials object from dict
-    credentials = service_account.Credentials.from_service_account_info(credentials_dict)
-
-    # Build the client with the project and the credentials
-    client = storage.Client(project=settings["PROJECT_NAME"], credentials=credentials)
-
-    # Get the bucket
-    mybucket = client.get_bucket(settings["BUCKET_NAME"])
-
-    # Get the blob
-    return mybucket.blob(settings["BLOB_NAME"])
 
 def upload_model():
-    """Uploads a file to the Google Cloud Storage bucket.
+    """Uploads a file to the MinIO bucket.
     """
-    blob = authenticate()
-    # Upload the file
-    blob.upload_from_filename(settings["UPLOAD_FILE_PATH"])
+    client = authenticate()
+    if not client.bucket_exists(settings["BUCKET_NAME"]):
+        client.make_bucket(settings["BUCKET_NAME"])
+    client.fput_object(settings["BUCKET_NAME"],
+                       settings["OBJECT_NAME"], settings["UPLOAD_FILE_NAME"])
+
 
 def download_model():
-    """Downloads a file from the Google Cloud Storage bucket.
+    """Downloads a file from the MinIO bucket.
     """
-    blob = authenticate()
-    # Download to file
-    blob.download_to_filename(settings["DOWNLOAD_FILE_PATH"])
+    client = authenticate()
+    if not client.bucket_exists(settings["BUCKET_NAME"]):
+        return
+    client.fget_object(settings["BUCKET_NAME"],
+                       settings["OBJECT_NAME"], settings["DOWNLOAD_FILE_NAME"])
