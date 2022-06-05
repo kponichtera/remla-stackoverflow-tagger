@@ -14,13 +14,27 @@ VALIDATION_DATA_FILE = 'validation.tsv'
 TEST_DATA_FILE = 'test.tsv'
 MAIN_COLOR = 94
 
+def read_unlabeled_data_from_file(filename: str, sep='\t', root_path=DATA_PATH):
+    """Reads unlabeled data from a file.
+
+    Args:
+        filename (str): File to be read from.
+        sep (str, optional): File separator. Defaults to '\t'.
+    """
+    data = pd.read_csv(
+        os.path.join(root_path, filename),
+        sep=sep,
+        dtype={'title': 'str'}
+    )
+    return data
+
 def read_labeled_data(filename: str, sep='\t') :
     """Reads labeled data from a file.
 
     Args:
         filename (str): File to be read from.
         sep (str, optional): File separator. Defaults to '\t'.
-    
+
     Returns:
         pd.DataFrame: DataFrame generated from the labeled data file
     """
@@ -34,17 +48,19 @@ def read_data_from_file(filename: str, sep='\t', root_path=DATA_PATH):
     Args:
         filename (str): name of a file to be loaded.
         sep (str, optional): delimiter for file. Defaults to '\t'.
-        root_path (_type_, optional): root path where the file should be found. Defaults to DATA_PATH.
+        root_path (_type_, optional): root path where the file should be found.
+                            Defaults to DATA_PATH.
 
     Returns:
         pd.DataFrame: pandas' DataFrame of StackOverflow's titles and tags
-    """  
+    """
     data = pd.read_csv(
         os.path.join(root_path, filename),
         sep=sep,
         dtype={'title': 'str', 'tags': 'str'}
     )
     data = data[["title", "tags"]]
+    data['tags'] = data['tags'].apply(literal_eval)
     return data
 
 def display_data_schema(filename: str):
