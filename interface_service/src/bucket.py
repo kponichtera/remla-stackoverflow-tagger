@@ -3,11 +3,12 @@ Provides download and upload functionality
 For interfacing with MinIO buckets
 """
 from minio import Minio
-from config import settings
+from src.config import settings
+from src.var_names import VarNames
 
 
 def authenticate():
-    """Authenticates to MinIO.
+    """Authenticates to the object storage environment.
 
     Returns:
         Minio: The MinIO client object.
@@ -15,29 +16,35 @@ def authenticate():
 
     # Get credentials from env variables
     return Minio(
-        settings["MINIO_ENDPOINT"],
-        access_key=settings["MINIO_ACCESS_KEY"],
-        secret_key=settings["MINIO_SECRET_KEY"],
+        settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
+        access_key=settings[VarNames.OBJECT_STORAGE_ACCESS_KEY.value],
+        secret_key=settings[VarNames.OBJECT_STORAGE_SECRET_KEY.value],
         # Without this, certificates are required
-        secure=False
+        secure=settings[VarNames.OBJECT_STORAGE_TLS.value]
     )
 
 
 def upload_model():
-    """Uploads a file to the MinIO bucket.
+    """Uploads a file to the object storage bucket.
     """
     client = authenticate()
-    if not client.bucket_exists(settings["BUCKET_NAME"]):
-        client.make_bucket(settings["BUCKET_NAME"])
-    client.fput_object(settings["BUCKET_NAME"],
-                       settings["OBJECT_NAME"], settings["UPLOAD_FILE_NAME"])
+    if not client.bucket_exists(settings[VarNames.BUCKET_NAME.value]):
+        client.make_bucket(settings[VarNames.BUCKET_NAME.value])
+    client.fput_object(settings[VarNames.BUCKET_NAME.value],
+                       settings[VarNames.MODEL_OBJECT_KEY.value],
+                       settings[VarNames.MODEL_LOCAL_PATH.value])
 
 
 def download_model():
-    """Downloads a file from the MinIO bucket.
+    """Downloads a file from the object storage bucket.
+
+    Returns:
+        bool: Whether the download was successful.
     """
     client = authenticate()
-    if not client.bucket_exists(settings["BUCKET_NAME"]):
-        return
-    client.fget_object(settings["BUCKET_NAME"],
-                       settings["OBJECT_NAME"], settings["DOWNLOAD_FILE_NAME"])
+    if not client.bucket_exists(settings[VarNames.BUCKET_NAME.value]):
+        return False
+    client.fget_object(settings[VarNames.BUCKET_NAME.value],
+                       settings[VarNames.MODEL_OBJECT_KEY.value],
+                       settings[VarNames.MODEL_LOCAL_PATH.value])
+    return True
