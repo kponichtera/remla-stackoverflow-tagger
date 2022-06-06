@@ -42,7 +42,14 @@ def train_classifier(X_train, y_train, penalty='l1', C=1.0):
     Returns:
         OneVsRestClassifier: classifier
     """
-    clf = LogisticRegression(penalty=penalty, C=C, dual=False, solver='liblinear', verbose=1)
+    clf = LogisticRegression(
+        penalty=penalty,
+        C=C,
+        dual=False,
+        solver='liblinear',
+        verbose=1,
+        n_jobs=-1
+    )
     clf = OneVsRestClassifier(clf, n_jobs=-1)
     print("###################### TRAINING ######################")
     clf.fit(X_train, y_train)

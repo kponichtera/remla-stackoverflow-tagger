@@ -40,7 +40,6 @@ def read_labeled_data(filename: str, sep='\t') :
         pd.DataFrame: DataFrame generated from the labeled data file
     """
     data = read_data_from_file(filename, sep=sep)
-    data['tags'] = data['tags'].apply(literal_eval)
     return data
 
 def read_data_from_file(filename: str, sep='\t', root_path=DATA_PATH):
@@ -103,7 +102,7 @@ def display_data_information():
     )
     display_data_schema(VALIDATION_DATA_FILE)
     
-    test = read_data_from_file(TEST_DATA_FILE)
+    test = read_unlabeled_data_from_file(TEST_DATA_FILE)
     print(
         f'\033[{MAIN_COLOR}m',
         "\n++++++++++++++++++++++Test Data++++++++++++++++++++++\033[0m\n",
