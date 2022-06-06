@@ -1,3 +1,6 @@
+venv
+interface_venv
+
 ### JetBrains ###
 .idea
 
