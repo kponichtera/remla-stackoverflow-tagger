@@ -1,0 +1,28 @@
+{{- if .Values.interfaceService.autoscaling.enabled }}
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "stackoverflow-tagger.interfaceService.fullname" . }}
+  labels:
+    {{- include "stackoverflow-tagger.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "stackoverflow-tagger.interfaceService.fullname" . }}
+  minReplicas: {{ .Values.interfaceService.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.interfaceService.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.interfaceService.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: {{ .Values.interfaceService.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.interfaceService.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: {{ .Values.interfaceService.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}

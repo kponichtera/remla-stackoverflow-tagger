@@ -1,0 +1,30 @@
+version: '3'
+
+vars:
+  HELM_BUILDER_IMAGE: remla-stackoverflow-tagger/helm-builder
+  # Overridden by CI/CD pipeline
+  VERSION: '{{ .VERSION | default "1.0.0-DEV" }}'
+
+tasks:
+  lint: "helm lint stackoverflow-tagger"
+  package: "helm package stackoverflow-tagger --version {{.VERSION}} --app-version {{.VERSION}} -d charts"
+  build_builder: "docker build --target builder -t {{.HELM_BUILDER_IMAGE}} ."
+  docker_run:
+    deps: [ build_builder ]
+    interactive: true
+    vars:
+      UID:
+        sh: id -u
+      GID:
+        sh: id -g
+    cmds:
+      - >
+        docker run -it --rm
+        --network host
+        --user {{.UID}}:{{.GID}}
+        --workdir /project
+        --volume {{.PROJECT_ROOT}}:/project
+        {{.HELM_BUILDER_IMAGE}}
+        {{.CLI_ARGS}}
+  clean:
+    - rm -rf charts

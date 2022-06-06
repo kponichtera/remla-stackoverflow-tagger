@@ -1,11 +1,15 @@
 name: Verify
 
-on: [push]
+on:
+  push:
+    tags-ignore: [ 'v*.*.*' ]
+    branches-ignore: [ 'gh-pages' ]
 
 env:
-  INTERFACE_SERVICE_BUILDER_NAME: interface-service-builder:latest
-  LEARNING_SERVICE_BUILDER_NAME: learning-service-builder:latest
-  FRONTEND_BUILDER_NAME: frontend-builder:latest
+  INTERFACE_SERVICE_BUILDER_NAME: interface-service-builder
+  LEARNING_SERVICE_BUILDER_NAME: learning-service-builder
+  FRONTEND_BUILDER_NAME: frontend-builder
+  HELM_BUILDER_NAME: helm-builder
 
 jobs:
   lint-interface-service:
@@ -54,8 +58,24 @@ jobs:
           file: frontend/Dockerfile
           context: frontend
           name: ${{ env.FRONTEND_BUILDER_NAME }}
-      - name: Lint learning service
+      - name: Lint Helm Chart
         uses: ./.github/actions/builder_run
         with:
           image: ${{ env.FRONTEND_BUILDER_NAME }}
           command: task frontend:lint
+  lint-helm:
+    name: Lint Helm Chart
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - name: Prepare builder
+        uses: ./.github/actions/builder
+        with:
+          file: helm/Dockerfile
+          name: ${{ env.HELM_BUILDER_NAME }}
+      - name: Lint learning service
+        uses: ./.github/actions/builder_run
+        with:
+          image: ${{ env.HELM_BUILDER_NAME }}
+          command: task helm:lint

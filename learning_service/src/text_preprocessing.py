@@ -14,7 +14,7 @@ from typing import List
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import MultiLabelBinarizer
 from joblib import dump, load
-from src.read_data import read_data_from_file, read_unlabeled_data_from_file
+from learning_service.src.read_data import read_data_from_file, read_unlabeled_data_from_file
 nltk.download('stopwords')
 
 

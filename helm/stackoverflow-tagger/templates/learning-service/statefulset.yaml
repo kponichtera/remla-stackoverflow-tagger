@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "stackoverflow-tagger.learningService.fullname" . }}
+  labels:
+    {{- include "stackoverflow-tagger.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  serviceName: {{ include "stackoverflow-tagger.learningService.fullname" . }}
+  selector:
+    matchLabels:
+      {{- include "stackoverflow-tagger.learningService.selectorLabels" . | nindent 6 }}
+  volumeClaimTemplates:
+    - metadata:
+        name: cache
+        labels:
+          {{- include "stackoverflow-tagger.labels" . | nindent 10 }}
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: {{ .Values.learningService.persistence.storageClassName }}
+        resources:
+          requests:
+            storage: {{ .Values.learningService.persistence.size }}
+  template:
+    metadata:
+      {{- with .Values.learningService.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "stackoverflow-tagger.learningService.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "stackoverflow-tagger.learningService.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.learningService.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.learningService.securityContext | nindent 12 }}
+          image: "{{ .Values.learningService.image.repository }}:{{ .Values.learningService.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.learningService.image.pullPolicy }}
+          volumeMounts:
+            - name: cache
+              mountPath: /app/cache
+          # TODO: Expose endpoints for liveness and readiness checking (might be done alongside Prometheus metrics)
+          #livenessProbe:
+          #  httpGet:
+          #    path: /
+          #    port: http
+          #readinessProbe:
+          #  httpGet:
+          #    path: /
+          #    port: http
+          resources:
+            {{- toYaml .Values.learningService.resources | nindent 12 }}
+      {{- with .Values.learningService.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.learningService.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.learningService.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
