@@ -34,11 +34,6 @@ services:
       - "--data-dir=/data"
     volumes:
       - "pubsub-data:/data"
-  bigtable:
-    image: google/cloud-sdk:385.0.0-emulators
-    ports:
-      - "8086:8086"
-    entrypoint: "gcloud beta emulators bigtable start"
 
 volumes:
   minio-data: {}

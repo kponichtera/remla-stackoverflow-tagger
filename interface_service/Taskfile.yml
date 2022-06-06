@@ -9,26 +9,23 @@ vars:
 
 tasks:
   create_venv:
-    status:
-      - "test -f ${{.ENV}}/bin/activate"
-    cmds:
-      - "{{.PYTHON_BIN}} -m venv {{.ENV}}"
+    preconditions:
+      - sh: 'python -c "import sys; assert sys.version_info.major == 3 and 6 <= sys.version_info.minor <= 9"'
+        msg: 'Requires Python version >=3.6 and <=3.9'
+    status: ["test -d {{.VENV}}"]
+    cmds: ["python -m venv {{.VENV}}"]
   prepare:
-    sources:
-      - "{{.ENV}}/bin/activate"
-    deps:
-      - task: create_venv
-        vars:
-          ENV: "{{.ENV}}"
+    deps: [create_venv]
     cmds:
-      - "{{.ENV}}/bin/pip install --upgrade pip"
-      - "{{.ENV}}/bin/pip install -r requirements.txt"
-  clean:
-    - rm -rf interface_venv
+      - "{{.VENV}}/bin/pip install --upgrade pip wheel"
+      - "{{.VENV}}/bin/pip install -r requirements.txt"
+  clean: "rm -rf {{.VENV}}"
+  lint: "pylint --rcfile=.pylintrc src/"
+  test: "pytest -n auto"
   build_builder:
     cmds: [ "docker build --target builder -t {{.INTERFACE_SERVICE_BUILDER_IMAGE}} ." ]
   build_docker:
-    cmds: [ "docker build -t {{.INTERFACE_SERVICE_IMAGE}} ." ]
+    cmds: [ "docker build --target final -t {{.INTERFACE_SERVICE_IMAGE}} ." ]
   docker_run:
     deps: [ build_builder ]
     interactive: true
@@ -46,11 +43,3 @@ tasks:
         --volume {{.PROJECT_ROOT}}/interface_service:/project
         {{.INTERFACE_SERVICE_BUILDER_IMAGE}}
         {{.CLI_ARGS}}
-  lint:
-    deps: [ prepare ]
-    cmds:
-      - "{{.ENV}}/bin/pylint --rcfile=.pylintrc src/"
-  test:
-    deps: [ prepare ]
-    cmds:
-      - "{{.ENV}}/bin/pytest -n auto"

@@ -27,9 +27,6 @@ includes:
 
 tasks:
   prepare:
-    preconditions:
-    - source python-version.sh
-    cmds:
     - task: interface_service:prepare
     - task: learning_service:prepare
     - task: frontend:prepare
