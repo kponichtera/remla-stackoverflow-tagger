@@ -1,0 +1,9 @@
+development:
+  name: development
+  OBJECT_STORAGE_ENDPOINT: localhost:9000
+  OBJECT_STORAGE_ACCESS_KEY: root
+  OBJECT_STORAGE_SECRET_KEY: remla2022
+  OBJECT_STORAGE_TLS: false
+  BUCKET_NAME: stackoverflow-tagger
+  MODEL_OBJECT_KEY: filename
+  MODEL_LOCAL_PATH: filename

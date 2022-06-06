@@ -1,0 +1,172 @@
+version: '3'
+
+vars:
+  PROJECT_ID: '{{.PROJECT_ID}}'
+  # Can be fetched with command: gcloud beta billing accounts list
+  BILLING_ACCOUNT_ID: '{{.BILLING_ACCOUNT_ID}}'
+  TERRAFORM_SERVICE_ACCOUNT_EMAIL: 'terraform@{{.PROJECT_ID}}.iam.gserviceaccount.com'
+  # TODO: Terraform could technically manage its own roles through resources, if it has IAM management role
+  TERRAFORM_SERVICE_ACCOUNT_ROLES: >-
+    roles/editor
+    roles/iam.roleAdmin
+    roles/resourcemanager.projectIamAdmin
+  TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE: terraform-credentials.json
+  TERRAFORM_STATE_BUCKET: 'terraform-{{.PROJECT_ID}}'
+  TERRAFORM_STATE_BUCKET_URL: 'gs://{{.TERRAFORM_STATE_BUCKET}}/'
+  TERRAFORM_BUILDER_IMAGE: remla-stackoverflow-tagger/terraform-builder
+  TERRAFORM_GCLOUD_AUTH_CONTAINER: remla-stackoverflow-tagger-gcloud-config
+  TERRAFORM_CMD: terraform -chdir=project
+  GCLOUD_REGION: '{{.GCLOUD_REGION | default "europe-west4"}}'
+  GCLOUD_ZONE: '{{.GCLOUD_ZONE | default "europe-west4-a"}}'
+
+env:
+  CLOUDSDK_CORE_PROJECT: '{{.PROJECT_ID}}'
+  CLOUDSDK_COMPUTE_REGION: '{{.GCLOUD_REGION}}'
+  CLOUDSDK_COMPUTE_ZONE: '{{.GCLOUD_ZONE}}'
+  GOOGLE_CREDENTIALS: '../{{.TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE}}'
+  TF_VAR_project_id: '{{.PROJECT_ID}}'
+  TF_VAR_region: '{{.GCLOUD_REGION}}'
+  TF_VAR_zone: '{{.GCLOUD_ZONE}}'
+
+tasks:
+  run: [ '{{.TERRAFORM_CMD}} {{.CLI_ARGS}}' ]
+
+  project:
+    - task: project:create
+    - task: project:link-billing-account
+  project:create:
+    run: once
+    cmds: [ "gcloud projects create {{.PROJECT_ID}}" ]
+    status: [ "gcloud projects describe {{.PROJECT_ID}}" ]
+  project:link-billing-account:
+    run: once
+    deps: [ project:create ]
+    cmds: [ "gcloud beta billing projects link {{.PROJECT_ID}} --billing-account={{.BILLING_ACCOUNT_ID}}" ]
+    status: [ "[ $(gcloud beta billing projects describe {{.PROJECT_ID}} --format='value(billingEnabled)') = 'True' ]" ]
+
+  service-account:
+    - task: service-account:create
+    - task: service-account:add-roles
+  service-account:create:
+    run: once
+    deps: [ project:create ]
+    cmds: [ 'gcloud iam service-accounts create terraform --display-name "Terraform service account"' ]
+    status: [ '[ $(gcloud iam service-accounts list --filter={{.TERRAFORM_SERVICE_ACCOUNT_EMAIL}} --format="value(EMAIL)") = {{.TERRAFORM_SERVICE_ACCOUNT_EMAIL}} ]' ]
+  service-account:add-roles:
+    run: once
+    deps: [ service-account:create ]
+    cmds:
+      - |
+        for ROLE in {{.TERRAFORM_SERVICE_ACCOUNT_ROLES}}; do
+          gcloud projects add-iam-policy-binding {{.PROJECT_ID}} \
+            --member "serviceAccount:{{.TERRAFORM_SERVICE_ACCOUNT_EMAIL}}" \
+            --role "$ROLE"
+        done
+  service-account:create-key:
+    run: once
+    deps: [ service-account:create ]
+    cmds: [ 'gcloud iam service-accounts keys create {{.TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE}} --iam-account={{.TERRAFORM_SERVICE_ACCOUNT_EMAIL}}' ]
+    status: [ 'test -f {{.TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE}}' ]
+  service-account:remove:
+    run: once
+    cmds: [ 'gcloud iam service-accounts delete {{.TERRAFORM_SERVICE_ACCOUNT_EMAIL}}' ]
+    status: [ '[ ! $(gcloud iam service-accounts list --filter={{.TERRAFORM_SERVICE_ACCOUNT_EMAIL}} --format="value(EMAIL)") ]' ]
+
+  state-bucket:
+    - task: state-bucket:create
+    - task: state-bucket:configure
+  state-bucket:create:
+    run: once
+    deps: [ project:create ]
+    cmds: [ 'gsutil mb -p {{.PROJECT_ID}} -c regional -l $CLOUDSDK_COMPUTE_REGION {{.TERRAFORM_STATE_BUCKET_URL}}' ]
+    status: [ 'gsutil ls {{.TERRAFORM_STATE_BUCKET_URL}}' ]
+  state-bucket:configure:
+    run: once
+    deps: [ state-bucket:create ]
+    vars:
+      PROJECT_NUMBER:
+        sh: 'gcloud projects list --filter={{.PROJECT_ID}} --format="value(PROJECT_NUMBER)"'
+    ignore_error: true
+    cmds:
+      # Giving object admin rights to the Terraform service account
+      - 'gsutil iam ch "serviceAccount:{{.TERRAFORM_SERVICE_ACCOUNT_EMAIL}}:objectAdmin" {{.TERRAFORM_STATE_BUCKET_URL}}'
+      # Taking away the access to the bucket from the project viewers
+      # TODO: Even though -f is passed, the command still fails on subsequent calls
+      - 'gsutil acl ch -f -d "viewers-{{.PROJECT_NUMBER}}" {{.TERRAFORM_STATE_BUCKET_URL}} || true'
+      # Making bucket uniform access only
+      - 'gsutil ubla set on {{.TERRAFORM_STATE_BUCKET_URL}}'
+      # Enabling bucket object versioning
+      - 'gsutil versioning set on {{.TERRAFORM_STATE_BUCKET_URL}}'
+  state-bucket:remove:
+    run: once
+    cmds: [ 'gsutil -m rm -r {{.TERRAFORM_STATE_BUCKET_URL}}' ]
+    status: [ '[ ! $(gsutil ls | grep {{.TERRAFORM_STATE_BUCKET_URL}}) ]' ]
+
+  provision:
+    - task: project
+    - task: service-account
+    - task: state-bucket
+
+  init:
+    cmds: [ '{{.TERRAFORM_CMD}} init --backend-config="bucket={{.TERRAFORM_STATE_BUCKET}}" {{.CLI_ARGS}}' ]
+  plan:
+    cmds: [ '{{.TERRAFORM_CMD}} plan {{.CLI_ARGS}}' ]
+  apply:
+    cmds: [ '{{.TERRAFORM_CMD}} apply {{.CLI_ARGS}}' ]
+  destroy:
+    cmds: [ '{{.TERRAFORM_CMD}} destroy {{.CLI_ARGS}}' ]
+
+  fmt:
+    cmds: [ '{{.TERRAFORM_CMD}} fmt {{.CLI_ARGS}}' ]
+  validate:
+    cmds: [ '{{.TERRAFORM_CMD}} validate {{.CLI_ARGS}}' ]
+
+  cleanup:
+    - task: state-bucket:remove
+    - task: service-account:remove
+    - rm -rf {{.TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE}}
+    - rm -rf project/.terraform
+
+  build-builder:
+    cmds: [ "docker build --target builder -t {{.TERRAFORM_BUILDER_IMAGE}} ." ]
+  docker-gcloud-login:
+    deps: [ build-builder ]
+    interactive: true
+    vars:
+      UID:
+        sh: id -u
+      GID:
+        sh: id -g
+    cmds:
+      - >
+        docker run -it
+        -e UID={{.UID}}
+        -e GID={{.GID}}
+        --name {{.TERRAFORM_GCLOUD_AUTH_CONTAINER}}
+        {{.TERRAFORM_BUILDER_IMAGE}}
+        gcloud auth login
+    status: ['docker inspect {{.TERRAFORM_GCLOUD_AUTH_CONTAINER}}']
+  docker-gcloud-logout:
+    cmds: [ "docker rm --volumes {{.TERRAFORM_GCLOUD_AUTH_CONTAINER}}" ]
+    status: [ '[ ! $(docker container ls -aq --filter={{.TERRAFORM_GCLOUD_AUTH_CONTAINER}}) ]' ]
+  docker-run:
+    deps: [ build-builder ]
+    interactive: true
+    vars:
+      UID:
+        sh: id -u
+      GID:
+        sh: id -g
+    cmds:
+      - >
+        docker run -it --rm
+        -e UID={{.UID}}
+        -e GID={{.GID}}
+        --workdir /project
+        --volume {{.PROJECT_ROOT}}/terraform:/project
+        --volumes-from {{.TERRAFORM_GCLOUD_AUTH_CONTAINER}}
+        {{.TERRAFORM_BUILDER_IMAGE}}
+        {{.CLI_ARGS}}
+
+
+

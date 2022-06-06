@@ -6,3 +6,6 @@ pytest
 requests
 pytest-xdist
 pylint==2.12.2
+dynaconf
+jinja2
+minio==7.1.8
