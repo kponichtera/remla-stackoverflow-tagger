@@ -26,6 +26,7 @@ def read_unlabeled_data_from_file(filename: str, sep='\t', root_path=DATA_PATH):
         sep=sep,
         dtype={'title': 'str'}
     )
+    data = data[["title"]]
     return data
 
 def read_labeled_data(filename: str, sep='\t') :

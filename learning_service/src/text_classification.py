@@ -7,13 +7,11 @@ import json
 import scipy
 import pandas as pd
 from typing import List, Any
-from scipy import sparse as sp_sparse
 from joblib import load, dump
 from read_data import read_data_from_file
-from sklearn.model_selection import train_test_split
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, f1_score, average_precision_score, roc_auc_score as roc_auc
+from sklearn.metrics import accuracy_score, f1_score, average_precision_score, roc_auc_score
 
 pd.set_option('display.max_colwidth', None)
 
@@ -27,8 +25,6 @@ VALIDATION_LABELS_FILE_PATH = os.path.join(OUTPUT_PATH, "val_preprocessed_labels
 
 LABEL_PREPROCESSOR = os.path.join(OUTPUT_PATH, "preprocessor_labels.joblib")
 DATA_PREPROCESSOR = os.path.join(OUTPUT_PATH, "preprocessor_data.joblib")
-
-
 
 
 def train_classifier(X_train, y_train, penalty='l1', C=1.0):
@@ -97,20 +93,20 @@ def get_evaluation_scores(
     f1_score_num = f1_score(actual_labels, predicted_labels, average='weighted')
     precision_score  = average_precision_score(actual_labels, predicted_labels, average='macro')
     predicted_scores = classifier.decision_function(actual_data)
-    roc_auc_score = roc_auc(actual_labels, predicted_scores, multi_class='ovo')
+    roc_auc_score_num = roc_auc_score(actual_labels, predicted_scores, multi_class='ovo')
 
     if print_stats:
         print('\n############### Evaluation Scores ###############\n')
         print('Accuracy score           :', accuracy_score_num)
         print('F1 score                 :', f1_score_num)
         print('Average precision score  :', precision_score)
-        print('ROC curve score          :', roc_auc_score)
+        print('ROC curve score          :', roc_auc_score_num)
 
     return {
         "accuracy_score": accuracy_score_num,
         "f1_score": f1_score_num,
         "average_precision_score": precision_score,
-        "roc_auc": roc_auc_score,
+        "roc_auc": roc_auc_score_num,
     }
 
 
