@@ -15,6 +15,7 @@ RUN curl -o task.deb -L ${TASK_URL} \
     && rm task.deb
 
 COPY requirements.txt .
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # mllint tries to make its file executable - can't do this unless it's root or owns the file

@@ -98,7 +98,6 @@ keras==2.9.0
 Keras-Preprocessing==1.1.2
 kiwisolver==1.4.2
 lazy-object-proxy==1.7.1
--e git+ssh://git@github.com/remla2022/stackoverflow-tagger.git@f994997d8f56b5669ca233d40545f1f3d5fad664#egg=learning_service&subdirectory=learning_service
 libclang==14.0.1
 mailchecker==4.1.17
 Markdown==3.3.7
@@ -110,16 +109,16 @@ multidict==6.0.2
 mypy==0.931
 mypy-extensions==0.4.3
 nanotime==0.5.2
-networkx==2.8.2
+networkx==2.6.3
 nltk==3.7
-numpy==1.22.4
+numpy==1.21.6
 oauth2client==4.1.3
 oauthlib==3.2.0
 opt-einsum==3.3.0
 orjson==3.7.1
 overrides==6.1.0
 packaging==21.3
-pandas==1.4.2
+pandas==1.3.5
 parameterized==0.8.1
 parso==0.8.3
 pathspec==0.9.0
