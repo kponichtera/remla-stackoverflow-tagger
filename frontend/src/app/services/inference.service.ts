@@ -34,7 +34,7 @@ export class InferenceService {
   }
 
   correctPrediction(request: CorrectionRequest): Observable<any> {
-    return this.http.post('api/predict', request);
+    return this.http.post('api/correct', request);
   }
 
 }
