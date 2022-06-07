@@ -6,6 +6,7 @@ import uuid
 import json
 import scipy
 import pandas as pd
+from config import settings, ROOT_DIR
 from typing import List, Any
 from joblib import load, dump
 from read_data import read_data_from_file
@@ -15,7 +16,7 @@ from sklearn.metrics import accuracy_score, f1_score, average_precision_score, r
 
 pd.set_option('display.max_colwidth', None)
 
-OUTPUT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
+OUTPUT_PATH = os.path.join(ROOT_DIR, settings.OUTPUT_DIR)
 
 TRAIN_DATA_FILE_PATH = os.path.join(OUTPUT_PATH, "train_preprocessed_data.joblib")
 TRAIN_LABELS_FILE_PATH = os.path.join(OUTPUT_PATH, "train_preprocessed_labels.joblib")

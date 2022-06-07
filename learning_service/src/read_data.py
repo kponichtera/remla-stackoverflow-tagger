@@ -6,8 +6,9 @@ from ast import literal_eval
 import pandas as pd
 import tensorflow_data_validation as tfdv
 from termgraph import termgraph as tg
+from config import settings, ROOT_DIR
 
-DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataset")
+DATA_PATH = os.path.join(ROOT_DIR, settings.DATASET_FOR_TRAINING_DIR)
 
 TRAIN_DATA_FILE = 'train.tsv'
 VALIDATION_DATA_FILE = 'validation.tsv'

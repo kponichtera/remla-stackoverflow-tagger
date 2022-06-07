@@ -8,6 +8,7 @@ import nltk
 import json
 import numpy as np
 import pandas as pd
+from config import settings, ROOT_DIR
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 from typing import List
@@ -25,8 +26,8 @@ STOP_WORDS = set(stopwords.words('english'))
 PREPROCESSOR_DATA_FILE_NAME = "preprocessor_data.joblib"
 PREPROCESSOR_LABELS_FILE_NAME = "preprocessor_labels.joblib"
 
-DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataset")
-OUTPUT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
+DATA_PATH = os.path.join(ROOT_DIR, settings.DATASET_FOR_TRAINING_DIR)
+OUTPUT_PATH = os.path.join(ROOT_DIR, settings.OUTPUT_DIR)
 
 np.random.seed(12321)
 
