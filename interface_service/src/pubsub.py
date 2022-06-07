@@ -4,6 +4,7 @@
 
 import uuid
 
+from google.auth.credentials import AnonymousCredentials
 from google.cloud import pubsub_v1
 from google.api_core.exceptions import AlreadyExists
 
@@ -29,7 +30,15 @@ def subscribe(unique_subscription_name: bool = False):
         message.ack()
 
     # Create the client
-    subscriber = pubsub_v1.SubscriberClient()
+    pubsub_host = settings[VarNames.PUBSUB_HOST]
+    if pubsub_host is None:
+        subscriber = pubsub_v1.SubscriberClient()
+    else:
+        # Connect to configured (emulator) PubSub
+        subscriber = pubsub_v1.SubscriberClient(
+            client_options={"api_endpoint": pubsub_host},
+            credentials=AnonymousCredentials()
+        )
 
     # Wrap the subscriber in a 'with' block to automatically call close() to
     # close the underlying gRPC channel when done.
@@ -74,4 +83,6 @@ def subscribe(unique_subscription_name: bool = False):
         # Subscribe to the topic
         subscriber.subscribe(subscription_path, callback=callback)
 
-subscribe()
+
+if __name__ == '__main__':
+    subscribe()
