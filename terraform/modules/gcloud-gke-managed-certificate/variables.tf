@@ -1,3 +1,5 @@
 variable "name" {}
-variable "namespace" {}
+variable "namespace" {
+  default = "default"
+}
 variable "domain" {}

@@ -3,7 +3,7 @@ variable "name" {
 }
 
 variable "namespace" {
-  default = "stackoverflow-tagger"
+  default = "default"
 }
 
 variable "chart_version" {

@@ -13,11 +13,9 @@ resource "helm_release" "release" {
   chart      = "stackoverflow-tagger"
   version    = var.chart_version
   repository = "https://remla2022.github.io/stackoverflow-tagger"
+  namespace  = var.namespace
 
   values = [local.chart_values]
-
-  namespace        = var.namespace
-  create_namespace = true
 
   # TODO: Consider changing to true if all services are able to startup immediately
   wait = false
