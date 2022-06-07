@@ -11,7 +11,7 @@ from src.config import settings
 from src.var_names import VarNames
 
 
-def subscribe(unique_subscription_name: bool = True):
+def subscribe(unique_subscription_name: bool = False):
     """Subscribes to a Pub/Sub topic.
 
     Args:
@@ -40,12 +40,12 @@ def subscribe(unique_subscription_name: bool = True):
             settings[VarNames.PUBSUB_PROJECT_ID.value],
             settings[VarNames.PUBSUB_TOPIC_ID.value])
 
-        suffix = str(uuid.uuid4()) if unique_subscription_name else ''
+        suffix = "-" + str(uuid.uuid4()) if unique_subscription_name else ''
 
         # Get the subscriber path
         subscription_path = subscriber.subscription_path(
             settings[VarNames.PUBSUB_PROJECT_ID.value],
-            settings[VarNames.PUBSUB_SUBSCRIPTION_ID.value] + "-" + suffix)
+            settings[VarNames.PUBSUB_SUBSCRIPTION_ID.value] + suffix)
 
         # If the subscription name is unique, no need
         # To check if the topic already exists.
@@ -55,6 +55,7 @@ def subscribe(unique_subscription_name: bool = True):
             subscriber.create_subscription(
                 request={"name": subscription_path, "topic": topic_path}
             )
+
         else:
             try:
 
@@ -62,6 +63,7 @@ def subscribe(unique_subscription_name: bool = True):
                 subscriber.create_subscription(
                     request={"name": subscription_path, "topic": topic_path}
                 )
+
             except AlreadyExists:
 
                 # If the subscription already exists, retrieve it
