@@ -1,0 +1,19 @@
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: ${STATIC_IP_NAME}
+    networking.gke.io/managed-certificates: ${INGRESS_MANAGED_CERTIFICATE_NAME}
+  hosts:
+    - ${HOSTNAME}
+
+interfaceService:
+  replicaCount: ${INTERFACE_SERVICE_REPLICA_COUNT}
+  service:
+    # Required for GKE Ingress
+    type: NodePort
+
+frontend:
+  replicaCount: ${FRONTEND_REPLICA_COUNT}
+  service:
+    # Required for GKE Ingress
+    type: NodePort
