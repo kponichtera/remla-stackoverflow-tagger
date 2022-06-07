@@ -1,0 +1,14 @@
+version: '3'
+
+tasks:
+  run: [ 'terraform {{.CLI_ARGS}}' ]
+  init: [ 'terraform init --backend-config="bucket={{.TERRAFORM_STATE_BUCKET}}" {{.CLI_ARGS}}' ]
+  plan: [ 'terraform plan {{.CLI_ARGS}}' ]
+  apply: [ 'terraform apply {{.CLI_ARGS}}' ]
+  destroy: [ 'terraform destroy {{.CLI_ARGS}}' ]
+  cleanup:bucket:
+    status: ['[ ! $(gsutil ls -L {{.TERRAFORM_STATE_BUCKET_URL}}/kubernetes) ]']
+    cmds: ['gsutil -m rm -r {{.TERRAFORM_STATE_BUCKET_URL}}/kubernetes']
+  cleanup:
+    - task: cleanup:bucket
+    - 'rm -rf .terraform'

@@ -8,6 +8,7 @@ terraform {
   }
 
   backend "gcs" {
-    prefix = "state"
+    prefix = "kubernetes"
   }
+
 }
