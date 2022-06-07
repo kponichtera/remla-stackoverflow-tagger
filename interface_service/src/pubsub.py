@@ -6,7 +6,7 @@ import uuid
 
 from google.auth.credentials import AnonymousCredentials
 from google.cloud import pubsub_v1
-from google.api_core.exceptions import AlreadyExists
+from google.api_core.exceptions import NotFound
 
 from src.config import settings
 from src.var_names import VarNames
@@ -30,12 +30,17 @@ def subscribe(unique_subscription_name: bool = False):
         message.ack()
 
     # Create the client
-    pubsub_host = settings[VarNames.PUBSUB_HOST]
+    pubsub_host = settings[VarNames.PUBSUB_HOST.value]
     if pubsub_host is None:
         subscriber = pubsub_v1.SubscriberClient()
+        publisher = pubsub_v1.PublisherClient()
     else:
         # Connect to configured (emulator) PubSub
         subscriber = pubsub_v1.SubscriberClient(
+            client_options={"api_endpoint": pubsub_host},
+            credentials=AnonymousCredentials()
+        )
+        publisher = pubsub_v1.PublisherClient(
             client_options={"api_endpoint": pubsub_host},
             credentials=AnonymousCredentials()
         )
@@ -49,7 +54,17 @@ def subscribe(unique_subscription_name: bool = False):
             settings[VarNames.PUBSUB_PROJECT_ID.value],
             settings[VarNames.PUBSUB_TOPIC_ID.value])
 
-        suffix = "-" + str(uuid.uuid4()) if unique_subscription_name else ''
+
+        try:
+            # Check if the topic exists
+            publisher.get_topic(request={"topic": topic_path})
+        except NotFound:
+
+            # If the topic doesn't exist, create it
+            publisher.create_topic(request={"name": topic_path})
+
+        # Suffix needed for unique names
+        suffix = ("-" + str(uuid.uuid4())) if unique_subscription_name else ''
 
         # Get the subscriber path
         subscription_path = subscriber.subscription_path(
@@ -64,22 +79,16 @@ def subscribe(unique_subscription_name: bool = False):
             subscriber.create_subscription(
                 request={"name": subscription_path, "topic": topic_path}
             )
-
         else:
             try:
+                # Check if the subscription exists
+                subscriber.get_subscription(subscription=subscription_path)
+            except NotFound:
 
-                # Try to create a subscription
+                # If it does not exist, create the subscription
                 subscriber.create_subscription(
                     request={"name": subscription_path, "topic": topic_path}
                 )
-
-            except AlreadyExists:
-
-                # If the subscription already exists, retrieve it
-                subscriber.get_subscription(
-                    subscription=f'projects/{settings[VarNames.PUBSUB_PROJECT_ID.value]}\
-                    /subscriptions/{settings[VarNames.PUBSUB_SUBSCRIPTION_ID.value]}')
-
         # Subscribe to the topic
         subscriber.subscribe(subscription_path, callback=callback)
 
