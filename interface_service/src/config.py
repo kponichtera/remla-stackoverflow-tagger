@@ -29,7 +29,7 @@ settings.validators.register(
     Validator(VarNames.MODEL_OBJECT_KEY.value, must_exist=True),
     Validator(VarNames.MODEL_LOCAL_PATH.value, must_exist=True),
 
-    Validator(VarNames.PUBSUB_HOST.value, default=None),
+    Validator(VarNames.PUBSUB_EMULATOR_HOST.value, default=None),
     Validator(VarNames.PUBSUB_PROJECT_ID.value, must_exist=True),
     Validator(VarNames.PUBSUB_TOPIC_ID.value, must_exist=True),
     Validator(VarNames.PUBSUB_SUBSCRIPTION_ID.value, must_exist=True),

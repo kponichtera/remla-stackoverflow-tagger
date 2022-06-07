@@ -1,10 +1,9 @@
 """Provides a `subscribe` function
    That creats a new subscription to a Pub/Sub topic.
 """
-
+import os
 import uuid
 
-from google.auth.credentials import AnonymousCredentials
 from google.cloud import pubsub_v1
 from google.api_core.exceptions import NotFound
 
@@ -30,20 +29,14 @@ def subscribe(unique_subscription_name: bool = False):
         message.ack()
 
     # Create the client
-    pubsub_host = settings[VarNames.PUBSUB_HOST.value]
-    if pubsub_host is None:
-        subscriber = pubsub_v1.SubscriberClient()
-        publisher = pubsub_v1.PublisherClient()
-    else:
-        # Connect to configured (emulator) PubSub
-        subscriber = pubsub_v1.SubscriberClient(
-            client_options={"api_endpoint": pubsub_host},
-            credentials=AnonymousCredentials()
-        )
-        publisher = pubsub_v1.PublisherClient(
-            client_options={"api_endpoint": pubsub_host},
-            credentials=AnonymousCredentials()
-        )
+    pubsub_host = settings[VarNames.PUBSUB_EMULATOR_HOST.value]
+    if pubsub_host is not None:
+        print('Using PubSub emulator on host:', pubsub_host)
+        os.environ["PUBSUB_EMULATOR_HOST"] = pubsub_host
+
+    print('Connecting to Google Cloud PubSub')
+    subscriber = pubsub_v1.SubscriberClient()
+    publisher = pubsub_v1.PublisherClient()
 
     # Wrap the subscriber in a 'with' block to automatically call close() to
     # close the underlying gRPC channel when done.
@@ -54,13 +47,13 @@ def subscribe(unique_subscription_name: bool = False):
             settings[VarNames.PUBSUB_PROJECT_ID.value],
             settings[VarNames.PUBSUB_TOPIC_ID.value])
 
-
         try:
             # Check if the topic exists
             publisher.get_topic(request={"topic": topic_path})
+            print(f'Topic {topic_path} exists')
         except NotFound:
-
             # If the topic doesn't exist, create it
+            print(f'Creating topic {topic_path}')
             publisher.create_topic(request={"name": topic_path})
 
         # Suffix needed for unique names
@@ -74,8 +67,8 @@ def subscribe(unique_subscription_name: bool = False):
         # If the subscription name is unique, no need
         # To check if the topic already exists.
         if unique_subscription_name:
-
             # Create the subscription
+            print(f'Creating subscription {subscription_path} on topic {topic_path}')
             subscriber.create_subscription(
                 request={"name": subscription_path, "topic": topic_path}
             )
@@ -83,13 +76,15 @@ def subscribe(unique_subscription_name: bool = False):
             try:
                 # Check if the subscription exists
                 subscriber.get_subscription(subscription=subscription_path)
+                print(f'Subscription {subscription_path} exists')
             except NotFound:
-
                 # If it does not exist, create the subscription
+                print(f'Creating subscription {subscription_path} on topic {topic_path}')
                 subscriber.create_subscription(
                     request={"name": subscription_path, "topic": topic_path}
                 )
         # Subscribe to the topic
+        print(f'Subscribing to subscription {subscription_path}')
         subscriber.subscribe(subscription_path, callback=callback)
 
 
