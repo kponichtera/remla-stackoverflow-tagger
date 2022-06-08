@@ -29,6 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GCLOUD_PROJECT_ID: remla2022-test
+      TFVARS_FILE: test.tfvars
     steps:
       - uses: actions/checkout@v3
       - uses: docker/setup-buildx-action@v2
@@ -38,6 +39,7 @@ jobs:
           file: terraform/Dockerfile
           context: terraform
           name: ${{ env.TERRAFORM_BUILDER_NAME }}
+          cache_key: ${{ runner.os }}-deploy-test
       - name: Prepare credentials
         env:
           TERRAFORM_SA_KEY_BASE64: ${{ secrets.terraform_sa_key_base64 }}
@@ -60,13 +62,15 @@ jobs:
           command: >-
             task terraform:gcloud:apply PROJECT_ID=${{ env.GCLOUD_PROJECT_ID }} -- 
             --input=false 
-            --var-file=${{ inputs.terraform_variables_file }}
+            --auto-approve
+            --var-file=${{ env.TFVARS_FILE }}
       - name: Kubernetes Terraform apply
         uses: ./.github/actions/builder_run
         with:
           image: ${{ env.TERRAFORM_BUILDER_NAME }}
           command: >-
             task terraform:kubernetes:apply PROJECT_ID=${{ env.GCLOUD_PROJECT_ID }} -- 
-            --input=false 
-            --var-file=${{ inputs.terraform_variables_file }}
+            --input=false
+            --auto-approve
+            --var-file=${{ env.TFVARS_FILE }}
             --var=chart_version=${{ inputs.chart_version }}
