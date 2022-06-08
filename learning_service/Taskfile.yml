@@ -3,30 +3,29 @@ version: '3'
 vars:
   LEARNING_SERVICE_BUILDER_IMAGE: remla-stackoverflow-tagger/learning-service-builder
   LEARNING_SERVICE_IMAGE: remla-stackoverflow-tagger/learning-service
-  PYTHON_BIN: python3
-  ENV: learning_venv
+  PATH: learning_service
+  VENV: learning_venv
 
 tasks:
   create_venv:
-    status:
-      - "test -f ${{.ENV}}/bin/activate"
-    cmds:
-      - "{{.PYTHON_BIN}} -m venv {{.ENV}}"
+    preconditions:
+      - sh: 'python -c "import sys; assert sys.version_info.major == 3 and 8 <= sys.version_info.minor <= 9"'
+        msg: 'Requires Python version >=3.8 and <=3.9'
+    status: ["test -d {{.VENV}}"]
+    cmds: ["python -m venv {{.VENV}}"]
   prepare:
-    sources:
-      - "{{.ENV}}/bin/activate"
-    deps:
-      - task: create_venv
-        vars:
-          ENV: "{{.ENV}}"
+    deps: [create_venv]
     cmds:
-      - "{{.ENV}}/bin/pip install -r requirements.txt"
-  clean:
-    - rm -rf learning_venv
+      - "{{.VENV}}/bin/pip install --upgrade pip wheel"
+      - "{{.VENV}}/bin/pip install -r requirements.txt"
+  clean: "rm -rf {{.VENV}}"
+  lint: "pylint --rcfile=.pylintrc src/"
+  test: "pytest -n auto"
+  mllint: "mllint --output report.md"
   build_builder:
     cmds: [ "docker build --target builder -t {{.LEARNING_SERVICE_BUILDER_IMAGE}} ." ]
   build_docker:
-    cmds: [ "docker build -t {{.LEARNING_SERVICE_IMAGE}} ." ]
+    cmds: [ "docker build --target final -t {{.LEARNING_SERVICE_IMAGE}} ." ]
   docker_run:
     deps: [ build_builder ]
     interactive: true
@@ -44,15 +43,3 @@ tasks:
         --volume {{.PROJECT_ROOT}}/learning_service:/project
         {{.LEARNING_SERVICE_BUILDER_IMAGE}}
         {{.CLI_ARGS}}
-  lint:
-    deps: [ prepare ]
-    cmds:
-      - "{{.ENV}}/bin/pylint --rcfile=.pylintrc src/"
-  mllint:
-    deps: [ prepare ]
-    cmds:
-      - "{{.ENV}}/bin/mllint --output report.md"
-  test:
-    deps: [ prepare ]
-    cmds:
-      - "{{.ENV}}/bin/pytest"

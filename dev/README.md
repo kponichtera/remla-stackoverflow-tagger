@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-* Python 3.8 or 3.9 (`mllint` not supported by 3.10)
+* Python 3.6-3.9 (`mllint` not supported by 3.10)
 * Docker 20.10 or later
 * [Task](https://taskfile.dev/) build tool
 * (Optional) Node.js and npm
@@ -12,15 +12,16 @@
 
 ### Interface service
 
-```bash
-cd interface_service/
-virtualenv venv
-source venv/bin/activate # or source venv/Scripts/activate
-pip install -r requirements.txt
+In case the compatible version of Python is used locally:
+
+```shell
+cd interface_service
+task prepare
+source interface_venv/bin/activate # on Windows: source venv/Scripts/activate
 uvicorn main:app --reload
 ```
 
-Or, to avoid creating local virtual environments and Python version discrepancies:
+Or, to avoid Python version discrepancies and creating virtual environments:
 
 ```shell
 task interface_service:docker_run
@@ -28,14 +29,16 @@ task interface_service:docker_run
 
 ### Learning service
 
-```bash
-cd learning_service/
-virtualenv venv
-source venv/bin/activate # or source venv/Scripts/activate
-pip install -r requirements.txt
+In case the compatible version of Python is used locally:
+
+```shell
+cd learning_service
+task prepare
+source learning_venv/bin/activate # on Windows: source venv/Scripts/activate
+# TODO: Add command to run the learning service
 ```
 
-Or, to avoid creating local virtual environments and Python version discrepancies:
+Or, to avoid Python version discrepancies and creating virtual environments:
 
 ```shell
 task learning_service:docker_run
@@ -43,7 +46,7 @@ task learning_service:docker_run
 
 ### Frontend
 
-```bash
+```shell
 cd frontend/
 npm ci
 npm start
@@ -63,8 +66,6 @@ In order to locally run the system's dependencies, run the Docker Compose contai
 ```shell
 task dev:compose_up
 ```
-
-**IMPORTANT:** The emulator of Google Cloud BigTable does not persist data between restarts!
 
 In order to remove them and their local data, execute:
 
