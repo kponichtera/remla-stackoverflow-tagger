@@ -3,10 +3,19 @@ Copy data into dataset directory.
 """
 import os
 import shutil
-from config import settings, ROOT_DIR
+from var_names import VarNames
+from dir_util import get_directory_from_settings_or_default
 
-DATASET_DIR = os.path.join(ROOT_DIR, settings.DATASET_FOR_TRAINING_DIR)
-DATA_PATH = os.path.join(ROOT_DIR, settings.DATA_DIR)
+setting_dir = VarNames.DATASET_FOR_TRAINING_DIR
+DATASET_DIR = get_directory_from_settings_or_default(
+    setting_dir,
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataset")
+)
+settings_value = VarNames.DATA_DIR
+DATA_PATH = get_directory_from_settings_or_default(
+    setting_dir,
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+)
 
 def copy_data():
     """

@@ -6,16 +6,21 @@ from ast import literal_eval
 import pandas as pd
 import tensorflow_data_validation as tfdv
 from termgraph import termgraph as tg
-from config import settings, ROOT_DIR
+from var_names import VarNames
+from dir_util import get_directory_from_settings_or_default
 
-DATA_PATH = os.path.join(ROOT_DIR, settings.DATASET_FOR_TRAINING_DIR)
+setting_dir = VarNames.DATASET_FOR_TRAINING_DIR
+DATASET_DIR = get_directory_from_settings_or_default(
+    setting_dir,
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataset")
+)
 
 TRAIN_DATA_FILE = 'train.tsv'
 VALIDATION_DATA_FILE = 'validation.tsv'
 TEST_DATA_FILE = 'test.tsv'
 MAIN_COLOR = 94
 
-def read_unlabeled_data_from_file(filename: str, sep='\t', root_path=DATA_PATH):
+def read_unlabeled_data_from_file(filename: str, sep='\t', root_path=DATASET_DIR):
     """Reads unlabeled data from a file.
 
     Args:
@@ -43,14 +48,14 @@ def read_labeled_data(filename: str, sep='\t') :
     data = read_data_from_file(filename, sep=sep)
     return data
 
-def read_data_from_file(filename: str, sep='\t', root_path=DATA_PATH):
+def read_data_from_file(filename: str, sep='\t', root_path=DATASET_DIR):
     """Loads data from a file.
 
     Args:
         filename (str): name of a file to be loaded.
         sep (str, optional): delimiter for file. Defaults to '\t'.
         root_path (_type_, optional): root path where the file should be found.
-                            Defaults to DATA_PATH.
+                            Defaults to DATASET_DIR.
 
     Returns:
         pd.DataFrame: pandas' DataFrame of StackOverflow's titles and tags
@@ -71,7 +76,7 @@ def display_data_schema(filename: str):
         filename (str): File name of which to display the schema
     """
     print("\n\n")
-    full_file_path = os.path.join(DATA_PATH, filename)
+    full_file_path = os.path.join(DATASET_DIR, filename)
     stats_options = tfdv.StatsOptions(enable_semantic_domain_stats=True)
     stats = tfdv.generate_statistics_from_csv(
         full_file_path,

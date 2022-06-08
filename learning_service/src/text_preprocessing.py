@@ -8,10 +8,10 @@ import nltk
 import json
 import numpy as np
 import pandas as pd
-from config import settings, ROOT_DIR
+from var_names import VarNames
+from dir_util import get_directory_from_settings_or_default
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
-from typing import List
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import MultiLabelBinarizer
 from joblib import dump, load
@@ -26,8 +26,11 @@ STOP_WORDS = set(stopwords.words('english'))
 PREPROCESSOR_DATA_FILE_NAME = "preprocessor_data.joblib"
 PREPROCESSOR_LABELS_FILE_NAME = "preprocessor_labels.joblib"
 
-DATA_PATH = os.path.join(ROOT_DIR, settings.DATASET_FOR_TRAINING_DIR)
-OUTPUT_PATH = os.path.join(ROOT_DIR, settings.OUTPUT_DIR)
+setting_dir = VarNames.OUTPUT_DIR
+OUTPUT_PATH = get_directory_from_settings_or_default(
+    setting_dir,
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
+)
 
 np.random.seed(12321)
 

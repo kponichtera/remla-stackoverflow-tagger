@@ -6,7 +6,9 @@ import uuid
 import json
 import scipy
 import pandas as pd
-from config import settings, ROOT_DIR
+from var_names import VarNames
+from dir_util import get_directory_from_settings_or_default
+from var_names import VarNames
 from typing import List, Any
 from joblib import load, dump
 from read_data import read_data_from_file
@@ -14,9 +16,12 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, f1_score, average_precision_score, roc_auc_score
 
-pd.set_option('display.max_colwidth', None)
+setting_dir = VarNames.OUTPUT_DIR
+OUTPUT_PATH = get_directory_from_settings_or_default(
+    setting_dir,
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
+)
 
-OUTPUT_PATH = os.path.join(ROOT_DIR, settings.OUTPUT_DIR)
 
 TRAIN_DATA_FILE_PATH = os.path.join(OUTPUT_PATH, "train_preprocessed_data.joblib")
 TRAIN_LABELS_FILE_PATH = os.path.join(OUTPUT_PATH, "train_preprocessed_labels.joblib")
