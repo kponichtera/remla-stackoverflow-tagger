@@ -1,13 +1,23 @@
 name: Deploy
 
 on:
+  push: {}
   workflow_call:
     inputs:
       chart_version:
         description: 'Version of Helm Chart to deploy'
         type: string
         required: true
-  push: {}
+  workflow_dispatch:
+    inputs:
+      chart_version:
+        description: 'Version of Helm Chart to deploy'
+        type: string
+        required: true
+      environment:
+        description: 'Environment to deploy'
+        type: environment
+        required: true
 
 env:
   TERRAFORM_BUILDER_NAME: terraform-builder
@@ -37,18 +47,18 @@ jobs:
         uses: ./.github/actions/builder_run
         with:
           image: ${{ env.TERRAFORM_BUILDER_NAME }}
-          command: task terraform:gcloud:init PROJECT_ID=$GCLOUD_PROJECT_ID -- --input=false
+          command: task terraform:gcloud:init PROJECT_ID=${{ env.GCLOUD_PROJECT_ID }} -- --input=false
       - name: Kubernetes Terraform init
         uses: ./.github/actions/builder_run
         with:
           image: ${{ env.TERRAFORM_BUILDER_NAME }}
-          command: task terraform:kubernetes:init PROJECT_ID=$GCLOUD_PROJECT_ID -- --input=false
+          command: task terraform:kubernetes:init PROJECT_ID=${{ env.GCLOUD_PROJECT_ID }} -- --input=false
       - name: Google Cloud Terraform apply
         uses: ./.github/actions/builder_run
         with:
           image: ${{ env.TERRAFORM_BUILDER_NAME }}
           command: >-
-            task terraform:gcloud:apply PROJECT_ID=$GCLOUD_PROJECT_ID -- 
+            task terraform:gcloud:apply PROJECT_ID=${{ env.GCLOUD_PROJECT_ID }} -- 
             --input=false 
             --var-file=${{ inputs.terraform_variables_file }}
       - name: Kubernetes Terraform apply
@@ -56,7 +66,7 @@ jobs:
         with:
           image: ${{ env.TERRAFORM_BUILDER_NAME }}
           command: >-
-            task terraform:kubernetes:apply PROJECT_ID=$GCLOUD_PROJECT_ID -- 
+            task terraform:kubernetes:apply PROJECT_ID=${{ env.GCLOUD_PROJECT_ID }} -- 
             --input=false 
             --var-file=${{ inputs.terraform_variables_file }}
             --var=chart_version=${{ inputs.chart_version }}
