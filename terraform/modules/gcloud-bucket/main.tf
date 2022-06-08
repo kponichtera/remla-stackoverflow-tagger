@@ -15,7 +15,7 @@ resource "google_storage_bucket" "bucket" {
 
 # Service account with read/write permissions to the bucket
 resource "google_service_account" "service_account" {
-  account_id   = "${var.name}-sa"
+  account_id   = var.name
   display_name = "${var.name} bucket service account"
 }
 
