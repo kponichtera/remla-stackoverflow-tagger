@@ -1,0 +1,49 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      chart_version:
+        description: 'Version of Helm Chart to deploy'
+        type: string
+        required: true
+  workflow_call:
+    inputs:
+      chart_version:
+        description: 'Version of Helm Chart to deploy'
+        type: string
+        required: true
+  push: {}
+
+env:
+  TERRAFORM_BUILDER_NAME: terraform-builder
+
+jobs:
+  gcloud_plan:
+    name: 'Terraform plan - Google Cloud'
+    environment: staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - name: Prepare builder
+        uses: ./.github/actions/builder
+        with:
+          file: terraform/Dockerfile
+          context: terraform
+          name: ${{ env.TERRAFORM_BUILDER_NAME }}
+      - name: Prepare credentials
+        env:
+          TERRAFORM_SA_KEY_BASE64: ${{ secrets.TERRAFORM_SA_KEY }}
+        run: |
+          echo $TERRAFORM_SA_KEY_BASE64 | base64 --decode > terraform/terraform-credentials.json
+      - name: Terraform init
+        uses: ./.github/actions/builder_run
+        with:
+          image: ${{ env.TERRAFORM_BUILDER_NAME }}
+          command: task terraform:gcloud:init PROJECT_ID=remla2022-staging
+      - name: Terraform plan
+        uses: ./.github/actions/builder_run
+        with:
+          image: ${{ env.TERRAFORM_BUILDER_NAME }}
+          command: task terraform:gcloud:plan PROJECT_ID=remla2022-staging
