@@ -20,7 +20,7 @@ env:
 
 jobs:
   gcloud_plan:
-    name: 'Terraform plan - Google Cloud'
+    name: 'Google Cloud - plan'
     environment: test
     runs-on: ubuntu-latest
     steps:
@@ -41,9 +41,106 @@ jobs:
         uses: ./.github/actions/builder_run
         with:
           image: ${{ env.TERRAFORM_BUILDER_NAME }}
-          command: task terraform:gcloud:init PROJECT_ID=remla2022-test
+          command: task terraform:gcloud:init PROJECT_ID=remla2022-test -- --input=false
       - name: Terraform plan
         uses: ./.github/actions/builder_run
         with:
           image: ${{ env.TERRAFORM_BUILDER_NAME }}
-          command: task terraform:gcloud:plan PROJECT_ID=remla2022-test
+          command: task terraform:gcloud:plan PROJECT_ID=remla2022-test -- --input=false --var-file=test.tfvars
+  gcloud_apply:
+    name: 'Google Cloud - apply'
+    environment: test
+    runs-on: ubuntu-latest
+    needs: [gcloud_plan]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - name: Prepare builder
+        uses: ./.github/actions/builder
+        with:
+          file: terraform/Dockerfile
+          context: terraform
+          name: ${{ env.TERRAFORM_BUILDER_NAME }}
+      - name: Prepare credentials
+        env:
+          TERRAFORM_SA_KEY_BASE64: ${{ secrets.TERRAFORM_SA_KEY_BASE64 }}
+        run: |
+          echo $TERRAFORM_SA_KEY_BASE64 | base64 --decode > terraform/terraform-credentials.json
+      - name: Terraform init
+        uses: ./.github/actions/builder_run
+        with:
+          image: ${{ env.TERRAFORM_BUILDER_NAME }}
+          command: task terraform:gcloud:init PROJECT_ID=remla2022-test-- --input=false
+      - name: Terraform apply
+        uses: ./.github/actions/builder_run
+        with:
+          image: ${{ env.TERRAFORM_BUILDER_NAME }}
+          command: task terraform:gcloud:apply PROJECT_ID=remla2022-test -- --input=false --var-file=test.tfvars
+  kubernetes_plan:
+    name: 'Kubernetes - plan'
+    environment: test
+    runs-on: ubuntu-latest
+    needs: [gcloud_apply]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - name: Prepare builder
+        uses: ./.github/actions/builder
+        with:
+          file: terraform/Dockerfile
+          context: terraform
+          name: ${{ env.TERRAFORM_BUILDER_NAME }}
+      - name: Prepare credentials
+        env:
+          TERRAFORM_SA_KEY_BASE64: ${{ secrets.TERRAFORM_SA_KEY_BASE64 }}
+        run: |
+          echo $TERRAFORM_SA_KEY_BASE64 | base64 --decode > terraform/terraform-credentials.json
+      - name: Terraform init - Google Cloud
+        uses: ./.github/actions/builder_run
+        with:
+          image: ${{ env.TERRAFORM_BUILDER_NAME }}
+          command: task terraform:gcloud:init PROJECT_ID=remla2022-test -- --input=false
+      - name: Terraform init - Kubernetes
+        uses: ./.github/actions/builder_run
+        with:
+          image: ${{ env.TERRAFORM_BUILDER_NAME }}
+          command: task terraform:kubernetes:init PROJECT_ID=remla2022-test -- --input=false
+      - name: Terraform plan
+        uses: ./.github/actions/builder_run
+        with:
+          image: ${{ env.TERRAFORM_BUILDER_NAME }}
+          command: task terraform:kubernetes:plan PROJECT_ID=remla2022-test -- --input=false --var-file=test.tfvars
+  kubernetes_apply:
+    name: 'Kubernetes - apply'
+    environment: test
+    runs-on: ubuntu-latest
+    needs: [kubernetes_plan]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - name: Prepare builder
+        uses: ./.github/actions/builder
+        with:
+          file: terraform/Dockerfile
+          context: terraform
+          name: ${{ env.TERRAFORM_BUILDER_NAME }}
+      - name: Prepare credentials
+        env:
+          TERRAFORM_SA_KEY_BASE64: ${{ secrets.TERRAFORM_SA_KEY_BASE64 }}
+        run: |
+          echo $TERRAFORM_SA_KEY_BASE64 | base64 --decode > terraform/terraform-credentials.json
+      - name: Terraform init - Google Cloud
+        uses: ./.github/actions/builder_run
+        with:
+          image: ${{ env.TERRAFORM_BUILDER_NAME }}
+          command: task terraform:gcloud:init PROJECT_ID=remla2022-test -- --input=false
+      - name: Terraform init - Kubernetes
+        uses: ./.github/actions/builder_run
+        with:
+          image: ${{ env.TERRAFORM_BUILDER_NAME }}
+          command: task terraform:kubernetes:init PROJECT_ID=remla2022-test -- --input=false --var-file=test.tfvars
+      - name: Terraform apply
+        uses: ./.github/actions/builder_run
+        with:
+          image: ${{ env.TERRAFORM_BUILDER_NAME }}
+          command: task terraform:kubernetes:apply PROJECT_ID=remla2022-test -- --input=false --var-file=test.tfvars
