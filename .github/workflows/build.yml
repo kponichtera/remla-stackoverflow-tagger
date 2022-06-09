@@ -13,7 +13,6 @@ env:
 jobs:
   learning-service:
     name: Build learning service
-    if: 'false'
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
@@ -34,7 +33,6 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
   interface-service:
     name: Build interface service
-    if: 'false'
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
@@ -55,7 +53,6 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
   frontend:
     name: Build frontend
-    if: 'false'
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
@@ -122,8 +119,8 @@ jobs:
     outputs:
       chart_version: ${{ steps.version.outputs.tag }}
   deploy:
+    if: github.event_name != 'pull_request'
     needs: [helm]
-    if: always()
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
     with:
