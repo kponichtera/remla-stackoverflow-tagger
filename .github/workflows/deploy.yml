@@ -1,0 +1,49 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      chart_version:
+        description: 'Version of Helm Chart to deploy'
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      chart_version:
+        description: 'Version of Helm Chart to deploy'
+        type: string
+        required: true
+      environment:
+        description: 'Environment to deploy'
+        type: environment
+        required: true
+
+jobs:
+  deploy_test:
+    name: 'Deploy test'
+    environment: test
+    concurrency: deploy-test
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - name: Deploy Terraform
+        uses: ./.github/actions/deploy
+        with:
+          project_id: remla2022-test
+          tfvars_file: test.tfvars
+          terraform_sa_key_base64: ${{ secrets.TERRAFORM_SA_KEY_BASE64 }}
+  deploy_production:
+    name: 'Deploy production'
+    environment: production
+    concurrency: deploy-production
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - name: Deploy Terraform
+        uses: ./.github/actions/deploy
+        with:
+          project_id: remla2022-prod
+          tfvars_file: production.tfvars
+          terraform_sa_key_base64: ${{ secrets.TERRAFORM_SA_KEY_BASE64 }}

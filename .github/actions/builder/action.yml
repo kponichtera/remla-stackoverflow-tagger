@@ -32,6 +32,7 @@ runs:
         restore-keys: |
           ${{ inputs.cache_key }}
           ${{ runner.os }}-${{ github.workflow }}-${{ github.job }}-
+          ${{ runner.os }}-${{ github.workflow }}-
     - name: Build builder
       uses: docker/build-push-action@v3
       with:

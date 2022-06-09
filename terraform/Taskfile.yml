@@ -11,26 +11,32 @@ vars:
     roles/iam.roleAdmin
     roles/resourcemanager.projectIamAdmin
   TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE: terraform-credentials.json
-  TERRAFORM_STATE_BUCKET: 'terraform-{{.PROJECT_ID}}'
-  TERRAFORM_STATE_BUCKET_URL: 'gs://{{.TERRAFORM_STATE_BUCKET}}/'
+  TERRAFORM_STATE_BUCKET: '{{.PROJECT_ID}}-terraform'
+  TERRAFORM_STATE_BUCKET_URL: 'gs://{{.TERRAFORM_STATE_BUCKET}}'
   TERRAFORM_BUILDER_IMAGE: remla-stackoverflow-tagger/terraform-builder
   TERRAFORM_GCLOUD_AUTH_CONTAINER: remla-stackoverflow-tagger-gcloud-config
-  TERRAFORM_CMD: terraform -chdir=project
   GCLOUD_REGION: '{{.GCLOUD_REGION | default "europe-west4"}}'
   GCLOUD_ZONE: '{{.GCLOUD_ZONE | default "europe-west4-a"}}'
+  GOOGLE_CREDENTIALS: '{{.GOOGLE_CREDENTIALS | default (printf "../%s" .TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE)}}'
 
 env:
   CLOUDSDK_CORE_PROJECT: '{{.PROJECT_ID}}'
   CLOUDSDK_COMPUTE_REGION: '{{.GCLOUD_REGION}}'
   CLOUDSDK_COMPUTE_ZONE: '{{.GCLOUD_ZONE}}'
-  GOOGLE_CREDENTIALS: '../{{.TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE}}'
+  GOOGLE_CREDENTIALS: '{{.GOOGLE_CREDENTIALS}}'
   TF_VAR_project_id: '{{.PROJECT_ID}}'
   TF_VAR_region: '{{.GCLOUD_REGION}}'
   TF_VAR_zone: '{{.GCLOUD_ZONE}}'
 
-tasks:
-  run: [ '{{.TERRAFORM_CMD}} {{.CLI_ARGS}}' ]
+includes:
+  gcloud:
+    taskfile: ./project-gcloud
+    dir: ./project-gcloud
+  kubernetes:
+    taskfile: ./project-kubernetes
+    dir: ./project-kubernetes
 
+tasks:
   project:
     - task: project:create
     - task: project:link-billing-account
@@ -107,25 +113,17 @@ tasks:
     - task: service-account
     - task: state-bucket
 
-  init:
-    cmds: [ '{{.TERRAFORM_CMD}} init --backend-config="bucket={{.TERRAFORM_STATE_BUCKET}}" {{.CLI_ARGS}}' ]
-  plan:
-    cmds: [ '{{.TERRAFORM_CMD}} plan {{.CLI_ARGS}}' ]
-  apply:
-    cmds: [ '{{.TERRAFORM_CMD}} apply {{.CLI_ARGS}}' ]
-  destroy:
-    cmds: [ '{{.TERRAFORM_CMD}} destroy {{.CLI_ARGS}}' ]
-
   fmt:
-    cmds: [ '{{.TERRAFORM_CMD}} fmt {{.CLI_ARGS}}' ]
+    cmds: [ 'terraform fmt --recursive {{.CLI_ARGS}}' ]
   validate:
-    cmds: [ '{{.TERRAFORM_CMD}} validate {{.CLI_ARGS}}' ]
+    cmds: [ 'terraform validate {{.CLI_ARGS}}' ]
 
   cleanup:
-    - task: state-bucket:remove
     - task: service-account:remove
-    - rm -rf {{.TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE}}
-    - rm -rf project/.terraform
+    - rm -f {{.TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE}}
+    - task: gcloud:cleanup
+    - task: kubernetes:cleanup
+    - task: state-bucket:remove
 
   build-builder:
     cmds: [ "docker build --target builder -t {{.TERRAFORM_BUILDER_IMAGE}} ." ]
