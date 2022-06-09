@@ -9,11 +9,12 @@ locals {
 }
 
 resource "helm_release" "release" {
-  name       = var.name
-  chart      = "stackoverflow-tagger"
-  version    = var.chart_version
-  repository = "https://remla2022.github.io/stackoverflow-tagger"
-  namespace  = var.namespace
+  name         = var.name
+  chart        = "stackoverflow-tagger"
+  version      = var.chart_version
+  repository   = "https://remla2022.github.io/stackoverflow-tagger"
+  namespace    = var.namespace
+  force_update = true
 
   values = [local.chart_values]
 

@@ -16,8 +16,8 @@ module "stackoverflow_tagger_helm_chart" {
 }
 
 module "managed_certificate" {
-  source    = "../modules/gcloud-gke-managed-certificate"
-  name      = "stackoverflow-tagger-cert"
-  domain    = var.ingress_host
+  source = "../modules/gcloud-gke-managed-certificate"
+  name   = "stackoverflow-tagger-cert"
+  domain = var.ingress_host
 }
 
