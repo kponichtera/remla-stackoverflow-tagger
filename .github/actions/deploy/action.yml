@@ -1,0 +1,63 @@
+name: Deploy
+description: Deploy Terraform infrastructure
+
+inputs:
+  project_id:
+    description: 'Google Cloud project ID'
+    required: true
+  tfvars_file:
+    description: 'File with Terraform variables for the specific environment'
+    required: true
+  terraform_sa_key_base64:
+    description: 'Base64-encoded JSON Google Cloud service account key for Terraform'
+    required: true
+  terraform_builder_name:
+    description: 'Name of the Docker image with Terraform builder'
+    required: false
+    default: terraform-builder
+
+runs:
+  using: composite
+  steps:
+    - name: Prepare builder
+      uses: ./.github/actions/builder
+      with:
+        file: terraform/Dockerfile
+        context: terraform
+        name: ${{ inputs.terraform_builder_name }}
+        cache_key: ${{ runner.os }}-deploy
+    - name: Prepare credentials
+      env:
+        TERRAFORM_SA_KEY_BASE64: ${{ inputs.terraform_sa_key_base64 }}
+      shell: sh
+      run: |
+        echo $TERRAFORM_SA_KEY_BASE64 | base64 --decode > terraform/terraform-credentials.json
+    - name: Google Cloud Terraform init
+      uses: ./.github/actions/builder_run
+      with:
+        image: ${{ inputs.terraform_builder_name }}
+        command: task terraform:gcloud:init PROJECT_ID=${{ inputs.project_id }} -- --input=false
+    - name: Kubernetes Terraform init
+      uses: ./.github/actions/builder_run
+      with:
+        image: ${{ inputs.terraform_builder_name }}
+        command: task terraform:kubernetes:init PROJECT_ID=${{ inputs.project_id }} -- --input=false
+    - name: Google Cloud Terraform apply
+      uses: ./.github/actions/builder_run
+      with:
+        image: ${{ inputs.terraform_builder_name }}
+        command: >-
+          task terraform:gcloud:apply PROJECT_ID=${{ inputs.project_id }} -- 
+          --input=false 
+          --auto-approve
+          --var-file=${{ inputs.tfvars_file }}
+    - name: Kubernetes Terraform apply
+      uses: ./.github/actions/builder_run
+      with:
+        image: ${{ inputs.terraform_builder_name }}
+        command: >-
+          task terraform:kubernetes:apply PROJECT_ID=${{ inputs.project_id }} -- 
+          --input=false
+          --auto-approve
+          --var-file=${{ inputs.tfvars_file }}
+          --var=chart_version=${{ inputs.chart_version }}
