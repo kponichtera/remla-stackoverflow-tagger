@@ -71,10 +71,17 @@ task terraform:docker-run -- task service-account:create-key PROJECT_ID=<project
 
 ### Initializing Terraform project
 
-In order to initialize the local Terraform directory and the remote state bucket, execute:
+In order to initialize the local Terraform directory and the remote state bucket
+for the Google Cloud Terraform project, execute:
 
 ```shell
-task terraform:docker-run -- task init PROJECT_ID=<project_id>
+task terraform:docker-run -- task gcloud:init PROJECT_ID=<project_id>
+```
+
+To do the same with Kubernetes Terraform project:
+
+```shell
+task terraform:docker-run -- task kubernetes:init PROJECT_ID=<project_id>
 ```
 
 ### Applying infrastructure changes
@@ -82,21 +89,32 @@ task terraform:docker-run -- task init PROJECT_ID=<project_id>
 To see what changes are waiting to be applied in the infrastructure, execute:
 
 ```shell
-task terraform:docker-run -- task plan
+task terraform:docker-run -- task gcloud:plan
 ```
 
 To review them again and apply, execute:
 
 ```shell
-task terraform:docker-run -- task apply
+task terraform:docker-run -- task gcloud:apply
+```
+
+Once the Google Cloud infrastructure and the Kubernetes cluster are up, 
+it is possible to plan and deploy the cluster components with:
+
+```shell
+task terraform:docker-run -- task kubernetes:plan
+task terraform:docker-run -- task kubernetes:apply
 ```
 
 ### Taking down the infrastructure
 
+> **IMPORTANT:** Kubernetes project should be taken down BEFORE the Google Cloud infrastructure one!
+
 To remove all the Terraform resources, execute:
 
 ```shell
-task terraform:docker-run -- task destroy
+task terraform:docker-run -- task kubernetes:destroy
+task terraform:docker-run -- task gcloud:destroy
 ```
 
 In order to perform final cleanup (eg. remove the state bucket and Terraform's service account), execute:
@@ -107,6 +125,14 @@ task terraform:docker-run -- task cleanup PROJECT_ID=<project_id>
 
 ### Executing arbitrary Terraform command
 
+#### For Google Cloud project
+
 ```shell
-task terraform:docker-run -- task run -- <command_and_args>
+task terraform:docker-run -- task gcloud:run -- <command_and_args>
+```
+
+#### For Kubernetes project
+
+```shell
+task terraform:docker-run -- task kubernetes:run -- <command_and_args>
 ```

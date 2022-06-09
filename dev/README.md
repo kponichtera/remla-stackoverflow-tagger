@@ -10,6 +10,20 @@
 
 ## Running locally
 
+### Launching development containers
+
+In order to locally run the system's dependencies, run the Docker Compose containers with:
+
+```shell
+task dev:compose:up
+```
+
+In order to remove them and their local data, execute:
+
+```shell
+task dev:compose:down
+```
+
 ### Interface service
 
 In case the compatible version of Python is used locally:
@@ -57,18 +71,4 @@ Or, to avoid Node and NPM version discrepancies:
 ```shell
 task frontend:docker_run -- npm ci
 task frontend:docker_run
-```
-
-## Launching development containers
-
-In order to locally run the system's dependencies, run the Docker Compose containers with:
-
-```shell
-task dev:compose_up
-```
-
-In order to remove them and their local data, execute:
-
-```shell
-task dev:compose_down
 ```

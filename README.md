@@ -4,4 +4,5 @@ Project for [Release Engineering for Machine Learning Applications](https://se.e
 (REMLA) course at TU Delft.
 
 * [Development](dev/README.md)
+* [Local deployment](dist/README.md)
 * [Infrastructure provisioning](terraform/README.md)
