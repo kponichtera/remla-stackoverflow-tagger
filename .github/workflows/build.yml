@@ -125,6 +125,7 @@ jobs:
     needs: [helm]
     if: always()
     uses: ./.github/workflows/deploy.yml
+    secrets: inherit
     with:
       chart_version: ${{ needs.helm.outputs.chart_version }}
 
