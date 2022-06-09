@@ -1,7 +1,6 @@
 name: Deploy
 
 on:
-  push: {}
   workflow_call:
     inputs:
       chart_version:
@@ -26,7 +25,7 @@ jobs:
   deploy_test:
     name: 'Deploy test'
     environment: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
       - uses: docker/setup-buildx-action@v2
@@ -39,7 +38,7 @@ jobs:
   deploy_production:
     name: 'Deploy production'
     environment: production
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
       - uses: docker/setup-buildx-action@v2
