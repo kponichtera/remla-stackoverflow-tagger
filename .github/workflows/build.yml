@@ -27,8 +27,8 @@ jobs:
       - name: Build Docker image
         uses: ./.github/actions/build_and_push
         with:
-          context: ./learning_service
-          file: ./learning_service/Dockerfile
+          context: ./src
+          file: ./src/learning_service/Dockerfile
           image: ${{ env.IMAGE_NAME_BASE }}/learning-service
           push: ${{ github.event_name != 'pull_request' }}
   interface-service:
@@ -47,8 +47,8 @@ jobs:
       - name: Build Docker image
         uses: ./.github/actions/build_and_push
         with:
-          context: ./interface_service
-          file: ./interface_service/Dockerfile
+          context: ./src/
+          file: ./src/interface_service/Dockerfile
           image: ${{ env.IMAGE_NAME_BASE }}/interface-service
           push: ${{ github.event_name != 'pull_request' }}
   frontend:

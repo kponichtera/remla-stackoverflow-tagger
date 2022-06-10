@@ -19,18 +19,18 @@ RUN curl -o task.deb -L ${TASK_URL} \
 ENV XDG_CACHE_HOME /cache
 RUN mkdir $XDG_CACHE_HOME
 
-COPY requirements.txt .
+COPY interface_service/requirements.txt .
 
 RUN pip install --upgrade pip wheel \
     && pip install -r requirements.txt \
     && chmod -R 777 $XDG_CACHE_HOME
 
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "interface_service.src.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 FROM common AS final
 EXPOSE 8000
 
-COPY requirements.txt .
+COPY interface_service/requirements.txt .
 
 RUN pip install --upgrade pip wheel --no-cache-dir \
     && pip install -r requirements.txt --no-cache-dir
@@ -39,6 +39,7 @@ WORKDIR /app
 USER appuser
 RUN mkdir models
 
-COPY . .
+COPY common .
+COPY interface_service .
 
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "interface_service.src.main:app", "--host", "0.0.0.0", "--port", "8000"]

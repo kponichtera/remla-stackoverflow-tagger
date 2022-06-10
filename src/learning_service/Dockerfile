@@ -19,7 +19,7 @@ RUN curl -o task.deb -L ${TASK_URL} \
 ENV XDG_CACHE_HOME /cache
 RUN mkdir $XDG_CACHE_HOME
 
-COPY requirements.txt .
+COPY learning_service/requirements.txt .
 
 RUN pip install --upgrade pip wheel \
     && pip install -r requirements.txt \
@@ -33,7 +33,7 @@ CMD ["bash"]
 
 FROM common AS final
 
-COPY requirements.txt .
+COPY learning_service/requirements.txt .
 
 RUN pip install --upgrade pip wheel --no-cache-dir \
     && pip install -r requirements.txt --no-cache-dir
@@ -41,7 +41,8 @@ RUN pip install --upgrade pip wheel --no-cache-dir \
 WORKDIR /app
 USER appuser
 
-COPY . .
+COPY common .
+COPY learning_service .
 
 # TODO: Replace with actual application startup
 CMD ["bash"]
