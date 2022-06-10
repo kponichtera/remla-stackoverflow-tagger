@@ -8,11 +8,11 @@ vars:
 
 includes:
   interface_service:
-    dir: ./interface_service
-    taskfile: ./interface_service
+    dir: ./src
+    taskfile: ./src/interface_service
   learning_service:
-    dir: ./learning_service
-    taskfile: ./learning_service
+    dir: ./src
+    taskfile: ./src/learning_service
   frontend:
     dir: ./frontend
     taskfile: ./frontend
