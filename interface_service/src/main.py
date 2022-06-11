@@ -3,13 +3,32 @@ from typing import Set
 
 from fastapi import FastAPI
 from pydantic import BaseModel
+from src.pubsub import subscribe_to_topic, publish_to_topic
+from src.var_names import VarNames
+from src.config import settings
 
-app = FastAPI(
-    title="Interface Service API",
-    description="Interface Service API for accessing models 🚀",
-    version="0.0.1",
-)
+class InferenceApp(FastAPI):
+    """Inference FastAPI application
 
+    Args:
+        FastAPI (fastapi.FastAPI): FastAPI object
+    """
+    def __init__(self, *args, **kwargs):
+        """Constructor for the Inference FastAPI application.
+        """
+        super().__init__(*args, **kwargs)
+        subscriber, streaming_pull_future = subscribe_to_topic(unique_subscription_name=True)
+        self.publish_topic = subscriber.topic_path(
+            settings[VarNames.PUBSUB_PROJECT_ID.value],
+            settings[VarNames.PUBSUB_DATA_TOPIC_ID.value])
+        self.publish_client = publish_to_topic(self.publish_topic)
+        self.subscribe_client = subscriber
+        self.streaming_pull_future = streaming_pull_future
+        self.title = "Inference Service API"
+        self.description = "Inference Service API for accessing models 🚀"
+        self.version="0.0.1"
+
+app = InferenceApp()
 
 @app.get('/api/ping')
 async def ping():
@@ -69,4 +88,9 @@ def correct_prediction(request: CorrectionRequest):
     - **predicted**: prediction of tags for the title
     - **actual**: actual tags for the title
     """
+    app.publish_client.publish(
+        app.publish_topic,
+        b'New correction data',
+        foo='bar'
+    )
     return request

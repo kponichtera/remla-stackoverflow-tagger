@@ -31,7 +31,8 @@ settings.validators.register(
 
     Validator(VarNames.PUBSUB_EMULATOR_HOST.value, default=None),
     Validator(VarNames.PUBSUB_PROJECT_ID.value, must_exist=True),
-    Validator(VarNames.PUBSUB_TOPIC_ID.value, must_exist=True),
+    Validator(VarNames.PUBSUB_DATA_TOPIC_ID.value, must_exist=True),
+    Validator(VarNames.PUBSUB_MODEL_TOPIC_ID.value, must_exist=True),
     Validator(VarNames.PUBSUB_SUBSCRIPTION_ID.value, must_exist=True),
 )
 

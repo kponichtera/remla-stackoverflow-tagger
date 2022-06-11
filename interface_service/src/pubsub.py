@@ -11,7 +11,25 @@ from src.config import settings
 from src.var_names import VarNames
 
 
-def subscribe(unique_subscription_name: bool = False):
+def publish_to_topic(topic_path: str):
+    """Creates a publisher to a given topic and creates that topic.
+
+    Args:
+        topic_path (str): topic we want to publish to or just create a topic
+    """
+    publisher = pubsub_v1.PublisherClient()
+    with publisher:
+        try:
+            # Check if the topic exists
+            publisher.get_topic(request={"topic": topic_path})
+            print(f'Topic {topic_path} exists')
+        except NotFound:
+            # If the topic doesn't exist, create it
+            print(f'Creating topic {topic_path}')
+            publisher.create_topic(request={"name": topic_path})
+    return publisher
+
+def subscribe_to_topic(unique_subscription_name: bool = False):
     """Subscribes to a Pub/Sub topic.
 
     Args:
@@ -19,7 +37,7 @@ def subscribe(unique_subscription_name: bool = False):
         This should be enabled for the interface services. Defaults to False.
     """
 
-    def callback(message: pubsub_v1.subscriber.message.Message) -> None:
+    def callback(message: pubsub_v1.subscriber.message.Message):
         """Acknowledges a Pub/Sub message. Used in the `subscribe()` function.
 
         Args:
@@ -36,7 +54,6 @@ def subscribe(unique_subscription_name: bool = False):
 
     print('Connecting to Google Cloud PubSub')
     subscriber = pubsub_v1.SubscriberClient()
-    publisher = pubsub_v1.PublisherClient()
 
     # Wrap the subscriber in a 'with' block to automatically call close() to
     # close the underlying gRPC channel when done.
@@ -45,16 +62,9 @@ def subscribe(unique_subscription_name: bool = False):
         # Get the topic path
         topic_path = subscriber.topic_path(
             settings[VarNames.PUBSUB_PROJECT_ID.value],
-            settings[VarNames.PUBSUB_TOPIC_ID.value])
+            settings[VarNames.PUBSUB_MODEL_TOPIC_ID.value])
 
-        try:
-            # Check if the topic exists
-            publisher.get_topic(request={"topic": topic_path})
-            print(f'Topic {topic_path} exists')
-        except NotFound:
-            # If the topic doesn't exist, create it
-            print(f'Creating topic {topic_path}')
-            publisher.create_topic(request={"name": topic_path})
+        publish_to_topic(topic_path)
 
         # Suffix needed for unique names
         suffix = ("-" + str(uuid.uuid4())) if unique_subscription_name else ''
@@ -85,8 +95,9 @@ def subscribe(unique_subscription_name: bool = False):
                 )
         # Subscribe to the topic
         print(f'Subscribing to subscription {subscription_path}')
-        subscriber.subscribe(subscription_path, callback=callback)
+        streaming_pull_future = subscriber.subscribe(subscription_path, callback=callback)
+    return subscriber, streaming_pull_future
 
 
 if __name__ == '__main__':
-    subscribe()
+    subscribe_to_topic()
