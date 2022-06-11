@@ -17,3 +17,7 @@ frontend:
   service:
     # Required for GKE Ingress
     type: NodePort
+
+gcloud:
+  podMonitoring:
+    enabled: true

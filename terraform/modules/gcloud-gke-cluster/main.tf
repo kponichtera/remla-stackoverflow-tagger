@@ -39,6 +39,13 @@ resource "google_container_cluster" "cluster" {
   }
 }
 
+# TODO: Remove after managed Prometheus toggle is implemented in google_container_cluster
+resource "null_resource" "cluster_enable_prometheus" {
+  provisioner "local-exec" {
+    command = "gcloud beta container clusters update ${google_container_cluster.cluster.name} --enable-managed-prometheus"
+  }
+}
+
 resource "google_container_node_pool" "primary" {
   count   = var.primary_node_pool_enabled ? 1 : 0
   version = data.google_container_engine_versions.gke_versions.release_channel_default_version["STABLE"]
