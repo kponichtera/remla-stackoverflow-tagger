@@ -21,7 +21,7 @@ jobs:
           file: ./src/interface_service/Dockerfile
           context: ./src/
           name: ${{ env.INTERFACE_SERVICE_BUILDER_NAME }}
-      - name: Lint interface service
+      - name: Test interface service
         uses: ./.github/actions/builder_run
         with:
           image: ${{ env.INTERFACE_SERVICE_BUILDER_NAME }}
@@ -38,7 +38,7 @@ jobs:
           file: ./src/learning_service/Dockerfile
           context: ./src/
           name: ${{ env.LEARNING_SERVICE_BUILDER_NAME }}
-      - name: Lint learning service
+      - name: Test learning service
         uses: ./.github/actions/builder_run
         with:
           image: ${{ env.LEARNING_SERVICE_BUILDER_NAME }}
