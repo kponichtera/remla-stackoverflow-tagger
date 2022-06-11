@@ -3,7 +3,7 @@ Provides a configuration management object.
 """
 
 from dynaconf import Dynaconf, Validator
-from var_names import VarNames
+from interface_service.var_names import VarNames
 
 settings = Dynaconf(
     # variables exported in .env as `REMLA_FOO=bar` becomes `settings.FOO == "bar"`
