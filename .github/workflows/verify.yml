@@ -21,8 +21,8 @@ jobs:
       - name: Prepare builder
         uses: ./.github/actions/builder
         with:
-          file: interface_service/Dockerfile
-          context: interface_service
+          file: ./src/interface_service/Dockerfile
+          context: ./src/
           name: ${{ env.INTERFACE_SERVICE_BUILDER_NAME }}
       - name: Lint interface service
         uses: ./.github/actions/builder_run
@@ -38,8 +38,8 @@ jobs:
       - name: Prepare builder
         uses: ./.github/actions/builder
         with:
-          file: learning_service/Dockerfile
-          context: learning_service
+          file: ./src/learning_service/Dockerfile
+          context: ./src/
           name: ${{ env.LEARNING_SERVICE_BUILDER_NAME }}
       - name: Lint learning service
         uses: ./.github/actions/builder_run
