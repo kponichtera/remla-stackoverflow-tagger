@@ -1,6 +1,8 @@
 # Learning Service
 
 Predict tags for posts from StackOverflow with multi-label classification approach.
+Responsible for collecting the new feedback data from the Pub/Sub queue,
+performing continuous learning of the model and storing the new model in the S3-compatible storage. 
 
 ## Dataset
 
