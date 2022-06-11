@@ -18,15 +18,15 @@ def publish_to_topic(topic_path: str):
         topic_path (str): topic we want to publish to or just create a topic
     """
     publisher = pubsub_v1.PublisherClient()
-    with publisher:
-        try:
-            # Check if the topic exists
-            publisher.get_topic(request={"topic": topic_path})
-            print(f'Topic {topic_path} exists')
-        except NotFound:
-            # If the topic doesn't exist, create it
-            print(f'Creating topic {topic_path}')
-            publisher.create_topic(request={"name": topic_path})
+    #with publisher:
+    try:
+        # Check if the topic exists
+        publisher.get_topic(request={"topic": topic_path})
+        print(f'Topic {topic_path} exists')
+    except NotFound:
+        # If the topic doesn't exist, create it
+        print(f'Creating topic {topic_path}')
+        publisher.create_topic(request={"name": topic_path})
     return publisher
 
 def subscribe_to_topic(unique_subscription_name: bool = False):
@@ -57,45 +57,39 @@ def subscribe_to_topic(unique_subscription_name: bool = False):
 
     # Wrap the subscriber in a 'with' block to automatically call close() to
     # close the underlying gRPC channel when done.
-    with subscriber:
-
-        # Get the topic path
-        topic_path = subscriber.topic_path(
-            settings[VarNames.PUBSUB_PROJECT_ID.value],
-            settings[VarNames.PUBSUB_MODEL_TOPIC_ID.value])
-
-        publish_to_topic(topic_path)
-
-        # Suffix needed for unique names
-        suffix = ("-" + str(uuid.uuid4())) if unique_subscription_name else ''
-
-        # Get the subscriber path
-        subscription_path = subscriber.subscription_path(
-            settings[VarNames.PUBSUB_PROJECT_ID.value],
-            settings[VarNames.PUBSUB_SUBSCRIPTION_ID.value] + suffix)
-
-        # If the subscription name is unique, no need
-        # To check if the topic already exists.
-        if unique_subscription_name:
-            # Create the subscription
+    # Get the topic path
+    topic_path = subscriber.topic_path(
+        settings[VarNames.PUBSUB_PROJECT_ID.value],
+        settings[VarNames.PUBSUB_MODEL_TOPIC_ID.value])
+    publish_to_topic(topic_path)
+    # Suffix needed for unique names
+    suffix = ("-" + str(uuid.uuid4())) if unique_subscription_name else ''
+    # Get the subscriber path
+    subscription_path = subscriber.subscription_path(
+        settings[VarNames.PUBSUB_PROJECT_ID.value],
+        settings[VarNames.PUBSUB_SUBSCRIPTION_ID.value] + suffix)
+    # If the subscription name is unique, no need
+    # To check if the topic already exists.
+    if unique_subscription_name:
+        # Create the subscription
+        print(f'Creating subscription {subscription_path} on topic {topic_path}')
+        subscriber.create_subscription(
+            request={"name": subscription_path, "topic": topic_path}
+        )
+    else:
+        try:
+            # Check if the subscription exists
+            subscriber.get_subscription(subscription=subscription_path)
+            print(f'Subscription {subscription_path} exists')
+        except NotFound:
+            # If it does not exist, create the subscription
             print(f'Creating subscription {subscription_path} on topic {topic_path}')
             subscriber.create_subscription(
                 request={"name": subscription_path, "topic": topic_path}
             )
-        else:
-            try:
-                # Check if the subscription exists
-                subscriber.get_subscription(subscription=subscription_path)
-                print(f'Subscription {subscription_path} exists')
-            except NotFound:
-                # If it does not exist, create the subscription
-                print(f'Creating subscription {subscription_path} on topic {topic_path}')
-                subscriber.create_subscription(
-                    request={"name": subscription_path, "topic": topic_path}
-                )
-        # Subscribe to the topic
-        print(f'Subscribing to subscription {subscription_path}')
-        streaming_pull_future = subscriber.subscribe(subscription_path, callback=callback)
+    # Subscribe to the topic
+    print(f'Subscribing to subscription {subscription_path}')
+    streaming_pull_future = subscriber.subscribe(subscription_path, callback=callback)
     return subscriber, streaming_pull_future
 
 
