@@ -42,6 +42,7 @@ tasks:
         --network host
         --user {{.UID}}:{{.GID}}
         --workdir /project
-        --volume {{.PROJECT_ROOT}}/src:/project
+        --volume {{.PROJECT_ROOT}}/src/common:/project/common
+        --volume {{.PROJECT_ROOT}}/src/learning_service:/project/learning_service
         {{.LEARNING_SERVICE_BUILDER_IMAGE}}
         {{.CLI_ARGS}}

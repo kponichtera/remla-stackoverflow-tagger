@@ -7,8 +7,8 @@ import uuid
 from google.cloud import pubsub_v1
 from google.api_core.exceptions import NotFound
 
-from src.config import settings
-from src.var_names import VarNames
+from config import settings
+from var_names import VarNames
 
 
 def subscribe(unique_subscription_name: bool = False):

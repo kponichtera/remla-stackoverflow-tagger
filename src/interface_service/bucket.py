@@ -3,8 +3,8 @@ Provides download and upload functionality
 For interfacing with MinIO buckets
 """
 from minio import Minio
-from src.config import settings
-from src.var_names import VarNames
+from config import settings
+from var_names import VarNames
 
 
 def authenticate():

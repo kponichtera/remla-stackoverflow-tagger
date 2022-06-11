@@ -25,7 +25,7 @@ RUN pip install --upgrade pip wheel \
     && pip install -r requirements.txt \
     && chmod -R 777 $XDG_CACHE_HOME
 
-CMD ["uvicorn", "interface_service.src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "interface_service.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 FROM common AS final
 EXPOSE 8000
@@ -42,4 +42,4 @@ RUN mkdir models
 COPY common .
 COPY interface_service .
 
-CMD ["uvicorn", "interface_service.src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "interface_service.main:app", "--host", "0.0.0.0", "--port", "8000"]

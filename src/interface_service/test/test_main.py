@@ -2,7 +2,7 @@
 import unittest
 import pytest
 from fastapi.testclient import TestClient
-from src.main import app
+from interface_service.main import app
 
 class MainTest(unittest.TestCase):
     """Testing basic main file"""
@@ -19,7 +19,7 @@ class MainTest(unittest.TestCase):
     def test_predict_main(self):
         """Predict test."""
         title = 'lol'
-        response = self.test_app.post("/predict", params={"title": title})
+        response = self.test_app.post("/api/predict", params={"title": title})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {
             "result": ["java", "OOP"],

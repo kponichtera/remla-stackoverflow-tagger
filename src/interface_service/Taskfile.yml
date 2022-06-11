@@ -41,6 +41,7 @@ tasks:
         --network host
         --user {{.UID}}:{{.GID}}
         --workdir /project
-        --volume {{.PROJECT_ROOT}}/src:/project
+        --volume {{.PROJECT_ROOT}}/src/common:/project/common
+        --volume {{.PROJECT_ROOT}}/src/interface_service:/project/interface_service
         {{.INTERFACE_SERVICE_BUILDER_IMAGE}}
         {{.CLI_ARGS}}
