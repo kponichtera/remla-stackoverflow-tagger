@@ -10,6 +10,7 @@ from google.api_core.exceptions import NotFound
 from src.config import settings
 from src.var_names import VarNames
 
+from src.color_module import ColorsPrinter
 
 def publish_to_topic(topic_path: str):
     """Creates a publisher to a given topic and creates that topic.
@@ -18,15 +19,22 @@ def publish_to_topic(topic_path: str):
         topic_path (str): topic we want to publish to or just create a topic
     """
     publisher = pubsub_v1.PublisherClient()
+
+    colored_topic_path = ColorsPrinter.get_color_string(
+        topic_path,
+        ColorsPrinter.OK_BLUE
+    )
+
     #with publisher:
     try:
         # Check if the topic exists
         publisher.get_topic(request={"topic": topic_path})
-        print(f'Topic {topic_path} exists')
+        ColorsPrinter.log_print_warning(f'Topic {colored_topic_path} exists ⚠️')
     except NotFound:
         # If the topic doesn't exist, create it
-        print(f'Creating topic {topic_path}')
+        ColorsPrinter.log_print_info(f'Creating topic {colored_topic_path}')
         publisher.create_topic(request={"name": topic_path})
+        ColorsPrinter.log_print_info(f'Topic created {colored_topic_path} ✔️')
     return publisher
 
 def subscribe_to_topic(unique_subscription_name: bool = False):
@@ -49,10 +57,13 @@ def subscribe_to_topic(unique_subscription_name: bool = False):
     # Create the client
     pubsub_host = settings[VarNames.PUBSUB_EMULATOR_HOST.value]
     if pubsub_host is not None:
-        print('Using PubSub emulator on host:', pubsub_host)
+        colored_host = ColorsPrinter.get_color_string(pubsub_host, ColorsPrinter.OK_BLUE)
+        ColorsPrinter.log_print_info(
+            f'Using PubSub emulator on host: {colored_host}'
+        )
         os.environ["PUBSUB_EMULATOR_HOST"] = pubsub_host
 
-    print('Connecting to Google Cloud PubSub')
+    ColorsPrinter.log_print_info('Connecting to Google Cloud PubSub')
     subscriber = pubsub_v1.SubscriberClient()
 
     # Wrap the subscriber in a 'with' block to automatically call close() to
@@ -70,9 +81,19 @@ def subscribe_to_topic(unique_subscription_name: bool = False):
         settings[VarNames.PUBSUB_SUBSCRIPTION_ID.value] + suffix)
     # If the subscription name is unique, no need
     # To check if the topic already exists.
+    colored_subscription_path = ColorsPrinter.get_color_string(
+        subscription_path,
+        ColorsPrinter.OK_BLUE
+    )
+    colored_topic_path = ColorsPrinter.get_color_string(
+        topic_path,
+        ColorsPrinter.OK_BLUE
+    )
     if unique_subscription_name:
         # Create the subscription
-        print(f'Creating subscription {subscription_path} on topic {topic_path}')
+        ColorsPrinter.log_print_info(
+            f'Creating subscription {colored_subscription_path} on topic {colored_topic_path}'
+        )
         subscriber.create_subscription(
             request={"name": subscription_path, "topic": topic_path}
         )
@@ -80,16 +101,22 @@ def subscribe_to_topic(unique_subscription_name: bool = False):
         try:
             # Check if the subscription exists
             subscriber.get_subscription(subscription=subscription_path)
-            print(f'Subscription {subscription_path} exists')
+            print(f'Subscription {colored_subscription_path} exists ⚠️')
         except NotFound:
             # If it does not exist, create the subscription
-            print(f'Creating subscription {subscription_path} on topic {topic_path}')
+            ColorsPrinter.log_print_info(
+                f'Creating subscription {colored_subscription_path} on topic {colored_topic_path}'
+            )
             subscriber.create_subscription(
                 request={"name": subscription_path, "topic": topic_path}
             )
     # Subscribe to the topic
-    print(f'Subscribing to subscription {subscription_path}')
-    streaming_pull_future = subscriber.subscribe(subscription_path, callback=callback)
+    ColorsPrinter.log_print_info(f'Subscribing to subscription {colored_subscription_path}')
+    try:
+        streaming_pull_future = subscriber.subscribe(subscription_path, callback=callback)
+        ColorsPrinter.log_print_info(f'Subscribed to {colored_subscription_path} ✔️')
+    except NotFound:
+        ColorsPrinter.log_print_fail(f'Failed to subscribe to {colored_subscription_path} ❌')
     return subscriber, streaming_pull_future
 
 
