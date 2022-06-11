@@ -4,8 +4,8 @@ import collections
 import numpy as np
 import pandas as pd
 import unittest
-from learning_service.src.read_data import read_data_from_file
-from learning_service.src.text_preprocessing import text_process, preprocess_bag_of_words, \
+from learning_service.read_data import read_data_from_file
+from learning_service.text_preprocessing import text_process, preprocess_bag_of_words, \
     prepare_data_from_processor, prepare_labels, create_multi_label_binarizer
 from typing import Dict, List, Union, Tuple
 from parameterized import parameterized

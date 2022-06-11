@@ -1,10 +1,8 @@
 """
 Provides a configuration management object.
 """
-import os
-from dynaconf import Dynaconf
 from dynaconf import Dynaconf, Validator
-from src.var_names import VarNames
+from var_names import VarNames
 
 settings = Dynaconf(
     # variables exported in .env as `REMLA_FOO=bar` becomes `settings.FOO == "bar"`
