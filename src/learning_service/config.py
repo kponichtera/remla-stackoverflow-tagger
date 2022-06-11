@@ -2,13 +2,13 @@
 Provides a configuration management object.
 """
 from dynaconf import Dynaconf, Validator
-from var_names import VarNames
+from learning_service.var_names import VarNames
 
 settings = Dynaconf(
     # variables exported in .env as `REMLA_FOO=bar` becomes `settings.FOO == "bar"`
     envvar_prefix="REMLA",
     load_dotenv=False,
-    settings_files=['src/configs/settings.yaml'],
+    settings_files=['learning_service/configs/settings.yaml'],
     environments=True,
     env_switcher="DYNACONF_ENV",
 )

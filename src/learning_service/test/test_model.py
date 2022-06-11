@@ -24,6 +24,7 @@ class ModelTest(unittest.TestCase):
                     )
                 )
             ),
+            "learning_service",
             "notebooks"
         )
         # TODO: these paths have to be changed later on when a proper workflow is set

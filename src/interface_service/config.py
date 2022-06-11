@@ -9,7 +9,7 @@ settings = Dynaconf(
     # variables exported in .env as `REMLA_FOO=bar` becomes `settings.FOO == "bar"`
     envvar_prefix="REMLA",
     load_dotenv=False,
-    settings_files=['src/configs/settings.yaml'],
+    settings_files=['interface_service/configs/settings.yaml'],
 
     # Enable layered environments
     environments=True,

@@ -21,7 +21,7 @@ tasks:
       - "{{.INTERFACE_SERVICE_VENV}}/bin/pip install --upgrade pip wheel"
       - "{{.INTERFACE_SERVICE_VENV}}/bin/pip install -r interface_service/requirements.txt"
   clean: "rm -rf {{.INTERFACE_SERVICE_VENV}}"
-  lint: "pylint --rcfile=.pylintrc interface_service/src/"
+  lint: "pylint --rcfile=interface_service/.pylintrc interface_service/src/"
   test: "pytest -n auto interface_service"
   build_builder:
     cmds: [ "docker build --target builder -f interface_service/Dockerfile -t {{.INTERFACE_SERVICE_BUILDER_IMAGE}} ." ]
@@ -43,5 +43,6 @@ tasks:
         --workdir /project
         --volume {{.PROJECT_ROOT}}/src/common:/project/common
         --volume {{.PROJECT_ROOT}}/src/interface_service:/project/interface_service
+        --volume {{.PROJECT_ROOT}}/src/interface_service/Taskfile.yml:/project/Taskfile.yml
         {{.INTERFACE_SERVICE_BUILDER_IMAGE}}
         {{.CLI_ARGS}}

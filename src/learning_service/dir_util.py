@@ -1,7 +1,7 @@
 """Directory utility file for getting the right directories.
 """
 import os
-from config import settings
+from learning_service.config import settings
 
 
 def get_directory_from_settings_or_default(setting : str, default: str):

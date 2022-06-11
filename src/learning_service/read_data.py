@@ -6,8 +6,9 @@ from ast import literal_eval
 import pandas as pd
 import tensorflow_data_validation as tfdv
 from termgraph import termgraph as tg
-from var_names import VarNames
-from dir_util import get_directory_from_settings_or_default
+
+from learning_service.var_names import VarNames
+from learning_service.dir_util import get_directory_from_settings_or_default
 
 setting_dir = VarNames.DATASET_FOR_TRAINING_DIR
 DATASET_DIR = get_directory_from_settings_or_default(

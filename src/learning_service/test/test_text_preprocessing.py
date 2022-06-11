@@ -40,6 +40,7 @@ class PreprocessingTest(unittest.TestCase):
                     )
                 )
             ),
+            "learning_service",
             "data"
         )
         self.train_data = read_data_from_file("train.tsv", root_path=base_dir)

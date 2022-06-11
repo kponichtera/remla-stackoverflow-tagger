@@ -21,7 +21,7 @@ tasks:
       - "{{.LEARNING_SERVICE_VENV}}/bin/pip install --upgrade pip wheel"
       - "{{.LEARNING_SERVICE_VENV}}/bin/pip install -r requirements.txt"
   clean: "rm -rf {{.LEARNING_SERVICE_VENV}}"
-  lint: "pylint --rcfile=.pylintrc learning_service/src/"
+  lint: "pylint --rcfile=learning_service/.pylintrc learning_service/src/"
   test: "pytest -n auto learning_service"
   mllint: "mllint learning_service"
   build_builder:
@@ -44,5 +44,6 @@ tasks:
         --workdir /project
         --volume {{.PROJECT_ROOT}}/src/common:/project/common
         --volume {{.PROJECT_ROOT}}/src/learning_service:/project/learning_service
+        --volume {{.PROJECT_ROOT}}/src/learning_service/Taskfile.yml:/project/Taskfile.yml
         {{.LEARNING_SERVICE_BUILDER_IMAGE}}
         {{.CLI_ARGS}}

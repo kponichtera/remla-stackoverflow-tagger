@@ -8,16 +8,18 @@ import nltk
 import json
 import numpy as np
 import pandas as pd
-from var_names import VarNames
-from dir_util import get_directory_from_settings_or_default
+
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import MultiLabelBinarizer
 from joblib import dump, load
-from learning_service.src.read_data import read_data_from_file, read_unlabeled_data_from_file
-nltk.download('stopwords')
 
+from learning_service.read_data import read_data_from_file, read_unlabeled_data_from_file
+from learning_service.var_names import VarNames
+from learning_service.dir_util import get_directory_from_settings_or_default
+
+nltk.download('stopwords')
 
 REPLACE_BY_SPACE_RE = re.compile('[/(){}\[\]\|@,;]')
 BAD_SYMBOLS_RE = re.compile('[^0-9a-z #+_]')
