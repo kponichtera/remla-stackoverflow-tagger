@@ -3,6 +3,11 @@
 Project for [Release Engineering for Machine Learning Applications](https://se.ewi.tudelft.nl/remla/2022/)
 (REMLA) course at TU Delft.
 
+[![Build](https://github.com/remla2022/stackoverflow-tagger/actions/workflows/build.yml/badge.svg)](https://github.com/remla2022/stackoverflow-tagger/actions/workflows/build.yml)
+[![Test](https://github.com/remla2022/stackoverflow-tagger/actions/workflows/test.yml/badge.svg)](https://github.com/remla2022/stackoverflow-tagger/actions/workflows/test.yml)
+[![Verify](https://github.com/remla2022/stackoverflow-tagger/actions/workflows/verify.yml/badge.svg)](https://github.com/remla2022/stackoverflow-tagger/actions/workflows/verify.yml)
+[![Verify Terraform](https://github.com/remla2022/stackoverflow-tagger/actions/workflows/verify-terraform.yml/badge.svg)](https://github.com/remla2022/stackoverflow-tagger/actions/workflows/verify-terraform.yml)
+
 ## System components
 
 * [Frontend](frontend/README.md)
