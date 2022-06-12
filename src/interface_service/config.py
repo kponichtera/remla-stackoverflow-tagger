@@ -10,12 +10,10 @@ settings = Dynaconf(
     envvar_prefix="REMLA",
     load_dotenv=False,
     settings_files=['interface_service/configs/settings.yaml'],
-
     # Enable layered environments
     environments=True,
-
-    # To switch environments `export ENV_FOR_DYNACONF=production`
-    env_switcher="DYNACONF_ENV",
+    # To switch environments `export REMLA_ENV=deployment`
+    env_switcher="REMLA_ENV",
 )
 
 settings.validators.register(

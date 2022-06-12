@@ -35,6 +35,8 @@ COPY interface_service/requirements.txt .
 RUN pip install --upgrade pip wheel --no-cache-dir \
     && pip install -r requirements.txt --no-cache-dir
 
+ENV REMLA_ENV deployment
+
 WORKDIR /app
 USER appuser
 RUN mkdir models

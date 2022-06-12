@@ -6,6 +6,23 @@ services:
     ports:
       - 8010:8010
       - 9010:9010
+    volumes:
+      - learning-service-data:/app/data
+    environment:
+      REMLA_DATA_DIR: "/app/data"
+      REMLA_DATASET_FOR_TRAINING_DIR: "/app/training"
+      REMLA_OUTPUT_DIR: "/app/output"
+      REMLA_OBJECT_STORAGE_ENDPOINT: "minio:10000"
+      REMLA_OBJECT_STORAGE_ACCESS_KEY: "root"
+      REMLA_OBJECT_STORAGE_TLS: "remla2022"
+      REMLA_BUCKET_NAME: "stackoverflow-tagger"
+      REMLA_MODEL_OBJECT_KEY: "model.joblib"
+      REMLA_MODEL_LOCAL_PATH: "/app/output/model.joblib"
+      REMLA_PUBSUB_EMULATOR_HOST: "pubsub:8085"
+      REMLA_PUBSUB_PROJECT_ID: "testlocal-123"
+      REMLA_PUBSUB_DATA_TOPIC_ID: "new-data"
+      REMLA_PUBSUB_MODEL_TOPIC_ID: "new-model"
+      REMLA_PUBSUB_SUBSCRIPTION_ID: "learning-service-new-model"
   interface_service:
     build:
       context: src
@@ -13,6 +30,18 @@ services:
     ports:
       - 8000:8000
       - 9000:9000
+    environment:
+      REMLA_OBJECT_STORAGE_ENDPOINT: "minio:10000"
+      REMLA_OBJECT_STORAGE_ACCESS_KEY: "root"
+      REMLA_OBJECT_STORAGE_TLS: "remla2022"
+      REMLA_BUCKET_NAME: "stackoverflow-tagger"
+      REMLA_MODEL_OBJECT_KEY: "model.joblib"
+      REMLA_MODEL_LOCAL_PATH: "/app/models/model.joblib"
+      REMLA_PUBSUB_EMULATOR_HOST: "pubsub:8085"
+      REMLA_PUBSUB_PROJECT_ID: "testlocal-123"
+      REMLA_PUBSUB_DATA_TOPIC_ID: "new-data"
+      REMLA_PUBSUB_MODEL_TOPIC_ID: "new-model"
+      REMLA_PUBSUB_SUBSCRIPTION_ID: "interface-service-new-model"
   frontend:
     build:
       context: frontend
@@ -21,3 +50,6 @@ services:
     environment:
       NGINX_ENVSUBST_TEMPLATE_DIR: /etc/nginx/templates/dev
       INTERFACE_SERVICE_PROXY_PASS_URL: http://interface_service:8000
+
+volumes:
+  learning-service-data: {}
