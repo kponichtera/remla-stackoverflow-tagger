@@ -42,6 +42,6 @@ WORKDIR /app
 USER appuser
 
 COPY common common
-COPY interface_service interface_service
+COPY learning_service learning_service
 
 CMD ["uvicorn", "learning_service.main:app", "--host", "0.0.0.0", "--port", "8010"]
