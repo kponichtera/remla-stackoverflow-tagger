@@ -39,7 +39,7 @@ WORKDIR /app
 USER appuser
 RUN mkdir models
 
-COPY common .
-COPY interface_service .
+COPY common common
+COPY interface_service interface_service
 
 CMD ["uvicorn", "interface_service.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -41,7 +41,7 @@ RUN pip install --upgrade pip wheel --no-cache-dir \
 WORKDIR /app
 USER appuser
 
-COPY common .
-COPY learning_service .
+COPY common common
+COPY interface_service interface_service
 
 CMD ["python", "-m", "learning_service.main"]
