@@ -44,8 +44,9 @@ module "cluster_enable_managed_prometheus" {
   source  = "terraform-google-modules/gcloud/google"
   version = "3.1.1"
 
-  additional_components             = ["beta"]
-  use_tf_google_credentials_env_var = true
+  skip_download = true
+  additional_components    = ["beta"]
+  service_account_key_file = "${path.root}/../terraform-credentials.json"
 
   create_cmd_entrypoint = "gcloud"
   create_cmd_body       = "beta container clusters update ${google_container_cluster.cluster.name} --enable-managed-prometheus"
