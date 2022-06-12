@@ -2,6 +2,10 @@ output "ingress_external_ip" {
   value = module.ingress_address.address
 }
 
+output "gke_cluster_name" {
+  value = module.gke_cluster.name
+}
+
 output "gke_cluster_endpoint" {
   value     = "https://${module.gke_cluster.cluster_endpoint}"
   sensitive = true

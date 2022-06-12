@@ -4,7 +4,9 @@ from fastapi import FastAPI
 from google.cloud import pubsub_v1
 from learning_service.config import settings
 from common.color_module import ColorsPrinter
+from prometheus_client import start_http_server
 from learning_service.var_names import VarNames
+from learning_service.text_classification import main
 from google.cloud.pubsub_v1.subscriber.message import Message
 from common.pubsub import subscribe_to_topic, publish_to_topic
 
@@ -75,6 +77,7 @@ class LearningApp(FastAPI):
         self.title = "Learning Service API"
         self.description = "Learning Service API for learning models 📙🤖"
         self.version="0.0.1"
+        start_http_server(9010)
 
 app = LearningApp()
 

@@ -31,6 +31,7 @@ RUN chown -R appuser: /usr/local/lib/python3.8/site-packages/mllint
 CMD ["uvicorn", "learning_service.main:app", "--host", "0.0.0.0", "--port", "8010"]
 
 FROM common AS final
+EXPOSE 9010
 
 COPY learning_service/requirements.txt .
 
@@ -40,7 +41,7 @@ RUN pip install --upgrade pip wheel --no-cache-dir \
 WORKDIR /app
 USER appuser
 
-COPY common .
-COPY learning_service .
+COPY common common
+COPY interface_service interface_service
 
 CMD ["uvicorn", "learning_service.main:app", "--host", "0.0.0.0", "--port", "8010"]
