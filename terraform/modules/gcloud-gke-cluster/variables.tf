@@ -2,6 +2,10 @@ variable "name" {
   description = "Name of the cluster"
 }
 
+variable "project_id" {
+  description = "Workaround to the bug with data.google_project.project_id not returning anything."
+}
+
 variable "primary_node_pool_enabled" {
   default     = true
   description = "If true then a default (non-preemptible) node pool will be created."

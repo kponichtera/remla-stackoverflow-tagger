@@ -1,4 +1,3 @@
-data "google_project" "project" {}
 data "google_client_config" "config" {}
 data "google_container_engine_versions" "gke_versions" {
   location = local.zone
@@ -8,6 +7,7 @@ locals {
   zone         = data.google_client_config.config.zone
   cluster_name = "${var.name}-cluster"
 
+  # Includes roles, required by Prometheus
   service_account_roles = [
     "roles/logging.logWriter",
     "roles/monitoring.metricWriter",
@@ -24,7 +24,7 @@ resource "google_service_account" "cluster_account" {
 resource "google_project_iam_member" "service_account_roles" {
   for_each = toset(local.service_account_roles)
 
-  project = data.google_project.project.project_id
+  project = var.project_id
   role    = each.value
   member  = "serviceAccount:${google_service_account.cluster_account.email}"
 }
