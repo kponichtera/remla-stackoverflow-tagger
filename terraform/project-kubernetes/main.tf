@@ -7,6 +7,11 @@ data "terraform_remote_state" "gcloud" {
   }
 }
 
+module "prometheus" {
+  source       = "../modules/helm-prometheus"
+  cluster_name = data.terraform_remote_state.gcloud.outputs.gke_cluster_name
+}
+
 module "stackoverflow_tagger_helm_chart" {
   source                           = "../modules/helm-stackoverflow-tagger"
   ingress_static_ip_name           = data.terraform_remote_state.gcloud.outputs.ingress_static_ip_name

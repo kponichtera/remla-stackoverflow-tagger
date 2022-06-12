@@ -8,7 +8,7 @@ variable "primary_node_pool_enabled" {
 }
 
 variable "primary_node_pool_size" {
-  default     = 2
+  default     = 3
   description = "The minimum number of nodes in the primary node pool."
 }
 
@@ -28,7 +28,7 @@ variable "preemptible_node_pool_enabled" {
 }
 
 variable "preemptible_node_pool_size" {
-  default     = 2
+  default     = 3
   description = "The minimum number of nodes in the preemptible node pool."
 }
 
