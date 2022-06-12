@@ -43,7 +43,12 @@ jobs:
           file: terraform/Dockerfile
           context: terraform
           name: ${{ env.TERRAFORM_BUILDER_NAME }}
-      - name: Initialize Terraform
+      - name: Google Cloud Terraform init
+        uses: ./.github/actions/builder_run
+        with:
+          image: ${{ env.TERRAFORM_BUILDER_NAME }}
+          command: task gcloud:run -- init --backend=false
+      - name: Kubernetes Terraform init
         uses: ./.github/actions/builder_run
         with:
           image: ${{ env.TERRAFORM_BUILDER_NAME }}
