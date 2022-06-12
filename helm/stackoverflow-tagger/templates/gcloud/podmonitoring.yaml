@@ -1,0 +1,13 @@
+{{- if .Values.gcloud.podMonitoring.enabled }}
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+  name: {{ include "stackoverflow-tagger.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      {{ include "stackoverflow-tagger.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: metrics
+      interval: {{ .Values.gcloud.podMonitoring.interval | quote }}
+{{- end }}

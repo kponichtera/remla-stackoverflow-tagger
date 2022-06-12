@@ -1,0 +1,48 @@
+version: '3'
+
+vars:
+  INTERFACE_SERVICE_BUILDER_IMAGE: remla-stackoverflow-tagger/interface-service-builder
+  INTERFACE_SERVICE_IMAGE: remla-stackoverflow-tagger/interface-service
+  INTERFACE_SERVICE_VENV: interface_service/interface_venv
+
+env:
+  DOCKER_BUILDKIT: 1
+
+tasks:
+  create_venv:
+    preconditions:
+      - sh: 'python -c "import sys; assert sys.version_info.major == 3 and 6 <= sys.version_info.minor <= 9"'
+        msg: 'Requires Python version >=3.6 and <=3.9'
+    status: ["test -d {{.INTERFACE_SERVICE_VENV}}"]
+    cmds: ["python -m venv {{.INTERFACE_SERVICE_VENV}}"]
+  prepare:
+    deps: [create_venv]
+    cmds:
+      - "{{.INTERFACE_SERVICE_VENV}}/bin/pip install --upgrade pip wheel"
+      - "{{.INTERFACE_SERVICE_VENV}}/bin/pip install -r interface_service/requirements.txt"
+  clean: "rm -rf {{.INTERFACE_SERVICE_VENV}}"
+  lint: "pylint --rcfile=interface_service/.pylintrc interface_service"
+  test: "pytest -n auto interface_service"
+  build_builder:
+    cmds: [ "docker build --target builder -f interface_service/Dockerfile -t {{.INTERFACE_SERVICE_BUILDER_IMAGE}} ." ]
+  build_docker:
+    cmds: [ "docker build --target final -f interface_service/Dockerfile -t {{.INTERFACE_SERVICE_IMAGE}} ." ]
+  docker_run:
+    deps: [ build_builder ]
+    interactive: true
+    vars:
+      UID:
+        sh: id -u
+      GID:
+        sh: id -g
+    cmds:
+      - >
+        docker run -it --rm
+        --network host
+        --user {{.UID}}:{{.GID}}
+        --workdir /project
+        --volume {{.PROJECT_ROOT}}/src/common:/project/common
+        --volume {{.PROJECT_ROOT}}/src/interface_service:/project/interface_service
+        --volume {{.PROJECT_ROOT}}/src/interface_service/Taskfile.yml:/project/Taskfile.yml
+        {{.INTERFACE_SERVICE_BUILDER_IMAGE}}
+        {{.CLI_ARGS}}
