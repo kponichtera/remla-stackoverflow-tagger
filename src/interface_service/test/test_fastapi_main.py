@@ -11,10 +11,10 @@ class MainTest(unittest.TestCase):
         super().__init__(*args, **kwargs)
         self.test_app = None
 
-    """@pytest.fixture(autouse=True, scope="module")
-    def prepare_fixture(self):
-        self.test_app = TestClient(app)
-    """
+    #@pytest.fixture(autouse=True, scope="module")
+    #def prepare_fixture(self):
+    #    self.test_app = TestClient(app)
+    #
 
     @pytest.mark.skip(reason="The code is currently not mocking the logic behind the web server's callback")
     def test_predict_main(self):
