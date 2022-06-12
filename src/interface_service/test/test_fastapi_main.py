@@ -28,6 +28,7 @@ class MainTest(unittest.TestCase):
             "title": title,
         })
 
+    @pytest.mark.skip(reason="Requires Google pubsub to be active.")
     def test_ping_main(self):
         """Ping test."""
         response = self.test_app.get("/api/ping")

@@ -16,6 +16,7 @@ class MainTest(unittest.TestCase):
         """Fixture to generate test app."""
         self.test_app = TestClient(app)
 
+    @pytest.mark.skip(reason="Requires Google pub sub to be active.")
     def test_ping_main(self):
         """Ping test."""
         response = self.test_app.get("/api/ping")
