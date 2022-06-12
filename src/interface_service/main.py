@@ -2,10 +2,12 @@
 from typing import Set
 from fastapi import FastAPI
 from pydantic import BaseModel
-from interface_service.config import settings
-from common.color_module import ColorsPrinter
-from interface_service.var_names import VarNames
 from google.cloud.pubsub_v1.subscriber.message import Message
+
+from interface_service.config import settings
+from interface_service.var_names import VarNames
+
+from common.color_module import ColorsPrinter
 from common.pubsub import subscribe_to_topic, publish_to_topic
 
 def receive_msg_callback(message : Message):
