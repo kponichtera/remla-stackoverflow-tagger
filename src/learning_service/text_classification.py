@@ -15,13 +15,13 @@ from read_data import read_data_from_file
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, f1_score, average_precision_score, roc_auc_score
+from prometheus_client import Gauge
 
 setting_dir = VarNames.OUTPUT_DIR
 OUTPUT_PATH = get_directory_from_settings_or_default(
     setting_dir,
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
 )
-
 
 TRAIN_DATA_FILE_PATH = os.path.join(OUTPUT_PATH, "train_preprocessed_data.joblib")
 TRAIN_LABELS_FILE_PATH = os.path.join(OUTPUT_PATH, "train_preprocessed_labels.joblib")
@@ -31,6 +31,12 @@ VALIDATION_LABELS_FILE_PATH = os.path.join(OUTPUT_PATH, "val_preprocessed_labels
 
 LABEL_PREPROCESSOR = os.path.join(OUTPUT_PATH, "preprocessor_labels.joblib")
 DATA_PREPROCESSOR = os.path.join(OUTPUT_PATH, "preprocessor_data.joblib")
+
+ACCURACY_SCORE = Gauge('accuracy_score', 'Model accuracy score')
+F1_SCORE = Gauge('f1_score', 'F1-score')
+AVERAGE_PRECISION_SCORE = Gauge('average_precision_score', 'Average precision score')
+ROC_AUC = Gauge('roc_auc', 'Area under the Receiver operating characteristic curve')
+LATEST_MODEL_UPDATE = Gauge('latest_model_update', 'Unix timestamp of the latest model update time')
 
 
 def train_classifier(X_train, y_train, penalty='l1', C=1.0):
@@ -62,6 +68,7 @@ def train_classifier(X_train, y_train, penalty='l1', C=1.0):
     print("####################### DONE #########################")
     return clf
 
+
 def predict_labels(
     classifier: OneVsRestClassifier,
     input_data: scipy.sparse.csr.csr_matrix or List[str],
@@ -82,6 +89,7 @@ def predict_labels(
         return test_predictions
     test_pred_inverse = inverse_transformer.inverse_transform(test_predictions)
     return test_pred_inverse
+
 
 def get_evaluation_scores(
     predicted_labels : scipy.sparse.csr.csr_matrix,
@@ -104,9 +112,15 @@ def get_evaluation_scores(
     """
     accuracy_score_num = accuracy_score(actual_labels, predicted_labels)
     f1_score_num = f1_score(actual_labels, predicted_labels, average='weighted')
-    precision_score  = average_precision_score(actual_labels, predicted_labels, average='macro')
+    precision_score = average_precision_score(actual_labels, predicted_labels, average='macro')
     predicted_scores = classifier.decision_function(actual_data)
     roc_auc_score_num = roc_auc_score(actual_labels, predicted_scores, multi_class='ovo')
+
+    ACCURACY_SCORE.set(accuracy_score_num)
+    F1_SCORE.set(f1_score_num)
+    AVERAGE_PRECISION_SCORE.set(precision_score)
+    ROC_AUC.set(roc_auc_score_num)
+    LATEST_MODEL_UPDATE.set_to_current_time()
 
     if print_stats:
         print('\n############### Evaluation Scores ###############\n')
@@ -179,6 +193,7 @@ def main():
     )
     # Store "best" classifier
     dump(classifier, os.path.join(OUTPUT_PATH, f'{classifier_name}.joblib'))
+
 
 if __name__ == "__main__":
     main()

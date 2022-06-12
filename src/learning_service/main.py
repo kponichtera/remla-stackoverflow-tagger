@@ -1,6 +1,7 @@
-import time
+from prometheus_client import start_http_server
+from text_classification import main
 
 if __name__ == '__main__':
-    print('TODO: Replace me with some program logic')
+    start_http_server(9010)
     while True:
-        time.sleep(1000)
+        main()
