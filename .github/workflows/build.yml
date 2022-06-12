@@ -119,7 +119,7 @@ jobs:
     outputs:
       chart_version: ${{ steps.version.outputs.tag }}
   deploy:
-#    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request'
     needs: [helm]
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
