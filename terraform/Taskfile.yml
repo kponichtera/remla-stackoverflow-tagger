@@ -147,7 +147,7 @@ tasks:
     status: ['docker inspect {{.TERRAFORM_GCLOUD_AUTH_CONTAINER}}']
   docker-gcloud-logout:
     cmds: [ "docker rm --volumes {{.TERRAFORM_GCLOUD_AUTH_CONTAINER}}" ]
-    status: [ '[ ! $(docker container ls -aq --filter={{.TERRAFORM_GCLOUD_AUTH_CONTAINER}}) ]' ]
+    status: [ '[ ! "$(docker container ls -aq --filter=name={{.TERRAFORM_GCLOUD_AUTH_CONTAINER}})" ]' ]
   docker-run:
     deps: [ build-builder ]
     interactive: true
