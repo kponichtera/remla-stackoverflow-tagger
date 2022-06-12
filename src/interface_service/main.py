@@ -3,6 +3,7 @@ from typing import Set
 from fastapi import FastAPI
 from pydantic import BaseModel
 from google.cloud.pubsub_v1.subscriber.message import Message
+import prometheus_client
 
 from interface_service.config import settings
 from interface_service.var_names import VarNames
@@ -55,6 +56,8 @@ class InferenceApp(FastAPI):
         self.title = "Inference Service API"
         self.description = "Inference Service API for accessing models 🚀"
         self.version="0.0.1"
+
+        prometheus_client.start_http_server(9000)
 
 app = InferenceApp()
 

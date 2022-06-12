@@ -1,14 +1,18 @@
 services:
   learning_service:
     build:
-      context: learning_service
+      context: src
+      dockerfile: learning_service/Dockerfile
     ports:
+      - 8010:8010
       - 9010:9010
   interface_service:
     build:
-      context: interface_service
+      context: src
+      dockerfile: interface_service/Dockerfile
     ports:
       - 8000:8000
+      - 9000:9000
   frontend:
     build:
       context: frontend
