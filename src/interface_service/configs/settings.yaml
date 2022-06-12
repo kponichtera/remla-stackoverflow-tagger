@@ -9,5 +9,6 @@ development:
   MODEL_LOCAL_PATH: filename
   PUBSUB_EMULATOR_HOST: localhost:8085
   PUBSUB_PROJECT_ID: testlocal-123
-  PUBSUB_TOPIC_ID: new-model-data
+  PUBSUB_DATA_TOPIC_ID: new-data
+  PUBSUB_MODEL_TOPIC_ID: new-model
   PUBSUB_SUBSCRIPTION_ID: interface-service-new-model

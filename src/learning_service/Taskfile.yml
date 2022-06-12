@@ -19,7 +19,7 @@ tasks:
     deps: [create_venv]
     cmds:
       - "{{.LEARNING_SERVICE_VENV}}/bin/pip install --upgrade pip wheel"
-      - "{{.LEARNING_SERVICE_VENV}}/bin/pip install -r requirements.txt"
+      - "{{.LEARNING_SERVICE_VENV}}/bin/pip install -r learning_service/requirements.txt"
   clean: "rm -rf {{.LEARNING_SERVICE_VENV}}"
   lint: "pylint --rcfile=learning_service/.pylintrc learning_service"
   test: "pytest -n auto learning_service"

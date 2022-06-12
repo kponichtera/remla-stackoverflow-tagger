@@ -27,3 +27,9 @@ class MainTest(unittest.TestCase):
             "classifier": "decision tree",
             "title": title,
         })
+
+    def test_ping_main(self):
+        """Ping test."""
+        response = self.test_app.get("/api/ping")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {})

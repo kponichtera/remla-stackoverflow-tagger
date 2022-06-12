@@ -1,15 +1,62 @@
 """Main file for the FastAPI application."""
 from typing import Set
-
 from fastapi import FastAPI
 from pydantic import BaseModel
+from google.cloud.pubsub_v1.subscriber.message import Message
 
-app = FastAPI(
-    title="Interface Service API",
-    description="Interface Service API for accessing models 🚀",
-    version="0.0.1",
-)
+from interface_service.config import settings
+from interface_service.var_names import VarNames
 
+from common.color_module import ColorsPrinter
+from common.pubsub import subscribe_to_topic, publish_to_topic
+
+def receive_msg_callback(message : Message):
+    """Acknowledges a Pub/Sub message. Used in the `subscribe()` function.
+
+    Args:
+        message (pubsub_v1.subscriber.message.Message): The message to acknowledge.
+    """
+    message.ack()
+    ColorsPrinter.log_print_info(f'💬✔️ Received message: {message} ')
+
+
+class InferenceApp(FastAPI):
+    """Inference FastAPI application
+
+    Args:
+        FastAPI (fastapi.FastAPI): FastAPI object
+    """
+    def __init__(self, *args, **kwargs):
+        """Constructor for the Inference FastAPI application.
+        """
+        super().__init__(*args, **kwargs)
+        pubsub_host = settings[VarNames.PUBSUB_EMULATOR_HOST.value]
+        pubsub_project_id = settings[VarNames.PUBSUB_PROJECT_ID.value]
+        pubsub_subscription_id = settings[VarNames.PUBSUB_SUBSCRIPTION_ID.value]
+
+        pubsub_publish_topic_id = settings[VarNames.PUBSUB_DATA_TOPIC_ID.value]
+        pubsub_subscription_topic_id = settings[VarNames.PUBSUB_MODEL_TOPIC_ID.value]
+
+        subscriber, streaming_pull_future = subscribe_to_topic(
+            pubsub_host,
+            pubsub_project_id,
+            pubsub_subscription_id,
+            pubsub_subscription_topic_id,
+            receive_msg_callback,
+            unique_subscription_name=True
+        )
+        self.publish_topic = subscriber.topic_path(
+            pubsub_project_id,
+            pubsub_publish_topic_id
+        )
+        self.publish_client = publish_to_topic(self.publish_topic)
+        self.subscribe_client = subscriber
+        self.streaming_pull_future = streaming_pull_future
+        self.title = "Inference Service API"
+        self.description = "Inference Service API for accessing models 🚀"
+        self.version="0.0.1"
+
+app = InferenceApp()
 
 @app.get('/api/ping')
 async def ping():
@@ -61,7 +108,7 @@ class CorrectionRequest(BaseModel):
 
 
 @app.post('/api/correct', summary="Correct the tags to the model", )
-def correct_prediction(request: CorrectionRequest):
+async def correct_prediction(request: CorrectionRequest):
     """
     Correct a prediction of tags for models to learn in the future.
 
@@ -69,4 +116,12 @@ def correct_prediction(request: CorrectionRequest):
     - **predicted**: prediction of tags for the title
     - **actual**: actual tags for the title
     """
+    data_to_publish = request.dict()
+    data_to_publish["predicted"] = str(data_to_publish["predicted"])
+    data_to_publish["actual"] = str(data_to_publish["actual"])
+    app.publish_client.publish(
+        app.publish_topic,
+        b'New correction data',
+        **data_to_publish
+    )
     return request

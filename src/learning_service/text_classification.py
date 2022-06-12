@@ -6,12 +6,11 @@ import uuid
 import json
 import scipy
 import pandas as pd
-from var_names import VarNames
-from dir_util import get_directory_from_settings_or_default
-from var_names import VarNames
+from learning_service.var_names import VarNames
+from learning_service.dir_util import get_directory_from_settings_or_default
 from typing import List, Any
 from joblib import load, dump
-from read_data import read_data_from_file
+from learning_service.read_data import read_data_from_file
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, f1_score, average_precision_score, roc_auc_score

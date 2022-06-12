@@ -28,7 +28,7 @@ RUN pip install --upgrade pip wheel \
 # mllint tries to make its file executable - can't do this unless it's root or owns the file\
 RUN chown -R appuser: /usr/local/lib/python3.8/site-packages/mllint
 
-CMD ["python", "-m", "learning_service.main"]
+CMD ["uvicorn", "learning_service.main:app", "--host", "0.0.0.0", "--port", "8010"]
 
 FROM common AS final
 EXPOSE 9010
@@ -44,4 +44,4 @@ USER appuser
 COPY common common
 COPY interface_service interface_service
 
-CMD ["python", "-m", "learning_service.main"]
+CMD ["uvicorn", "learning_service.main:app", "--host", "0.0.0.0", "--port", "8010"]

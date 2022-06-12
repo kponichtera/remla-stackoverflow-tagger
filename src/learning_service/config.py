@@ -60,6 +60,16 @@ settings.validators.register(
               when=Validator("env", eq="deployment", must_exist=True)),
     Validator(VarNames.MODEL_LOCAL_PATH.value, must_exist=True, env="deployment",
               when=Validator("env", eq="deployment", must_exist=True)),
+    Validator(VarNames.PUBSUB_EMULATOR_HOST.value, must_exist=True, env="deployment",
+              when=Validator("env", eq="deployment", must_exist=True)),
+    Validator(VarNames.PUBSUB_PROJECT_ID.value, must_exist=True, env="deployment",
+              when=Validator("env", eq="deployment", must_exist=True)),
+    Validator(VarNames.PUBSUB_DATA_TOPIC_ID.value, must_exist=True, env="deployment",
+              when=Validator("env", eq="deployment", must_exist=True)),
+    Validator(VarNames.PUBSUB_MODEL_TOPIC_ID.value, must_exist=True, env="deployment",
+              when=Validator("env", eq="deployment", must_exist=True)),
+    Validator(VarNames.PUBSUB_SUBSCRIPTION_ID.value, must_exist=True, env="deployment",
+              when=Validator("env", eq="deployment", must_exist=True)),
 )
 
 settings.validators.validate()
