@@ -47,12 +47,12 @@ jobs:
         uses: ./.github/actions/builder_run
         with:
           image: ${{ env.TERRAFORM_BUILDER_NAME }}
-          command: task gcloud:run -- init --backend=false
+          command: task terraform:gcloud:run -- init --backend=false
       - name: Kubernetes Terraform init
         uses: ./.github/actions/builder_run
         with:
           image: ${{ env.TERRAFORM_BUILDER_NAME }}
-          command: task terraform:run -- init --backend=false
+          command: task terraform:kubernetes:run -- init --backend=false
       - name: Validate Terraform files
         uses: ./.github/actions/builder_run
         with:

@@ -40,10 +40,14 @@ resource "google_container_cluster" "cluster" {
 }
 
 # TODO: Remove after managed Prometheus toggle is implemented in google_container_cluster
-resource "null_resource" "cluster_enable_prometheus" {
-  provisioner "local-exec" {
-    command = "gcloud beta container clusters update ${google_container_cluster.cluster.name} --enable-managed-prometheus"
-  }
+module "gcloud" {
+  source  = "terraform-google-modules/gcloud/google"
+  version = "3.1.1"
+
+  additional_components = ["beta"]
+
+  create_cmd_entrypoint = "gcloud"
+  create_cmd_body       = "beta container clusters update ${google_container_cluster.cluster.name} --enable-managed-prometheus"
 }
 
 resource "google_container_node_pool" "primary" {
