@@ -6,6 +6,8 @@ from pydantic import BaseModel
 from src.pubsub import subscribe_to_topic, publish_to_topic
 from src.var_names import VarNames
 from src.config import settings
+from src.bucket import download_model, load_model
+
 
 class InferenceApp(FastAPI):
     """Inference FastAPI application
@@ -26,7 +28,9 @@ class InferenceApp(FastAPI):
         self.streaming_pull_future = streaming_pull_future
         self.title = "Inference Service API"
         self.description = "Inference Service API for accessing models 🚀"
-        self.version="0.0.1"
+        self.version = "0.0.1"
+        download_model()
+        self.model = load_model()
 
 app = InferenceApp()
 
@@ -97,3 +101,10 @@ async def correct_prediction(request: CorrectionRequest):
         **data_to_publish
     )
     return request
+
+@app.post('/api/update', summary='Pull new model from the bucket')
+async def update_model():
+    """Update the internal model by pulling from object sotrage.
+    """
+    download_model()
+    app.model = load_model()
