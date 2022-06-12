@@ -31,6 +31,7 @@ RUN chown -R appuser: /usr/local/lib/python3.8/site-packages/mllint
 CMD ["python", "-m", "learning_service.main"]
 
 FROM common AS final
+EXPOSE 9010
 
 COPY learning_service/requirements.txt .
 

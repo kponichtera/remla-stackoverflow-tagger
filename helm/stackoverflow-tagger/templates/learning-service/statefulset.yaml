@@ -47,6 +47,10 @@ spec:
           volumeMounts:
             - name: cache
               mountPath: /app/cache
+          ports:
+            - name: metrics
+              containerPort: 9010
+              protocol: TCP
           # TODO: Expose endpoints for liveness and readiness checking (might be done alongside Prometheus metrics)
           #livenessProbe:
           #  httpGet:

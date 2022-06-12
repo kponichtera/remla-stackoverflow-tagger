@@ -2,6 +2,8 @@ services:
   learning_service:
     build:
       context: learning_service
+    ports:
+      - 9010:9010
   interface_service:
     build:
       context: interface_service
