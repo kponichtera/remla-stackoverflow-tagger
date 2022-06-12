@@ -28,8 +28,7 @@ RUN pip install --upgrade pip wheel \
 # mllint tries to make its file executable - can't do this unless it's root or owns the file\
 RUN chown -R appuser: /usr/local/lib/python3.8/site-packages/mllint
 
-# TODO: Replace with actual application startup
-CMD ["bash"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 FROM common AS final
 
@@ -43,5 +42,4 @@ USER appuser
 
 COPY . .
 
-# TODO: Replace with actual application startup
-CMD ["bash"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
