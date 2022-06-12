@@ -80,7 +80,7 @@ class CorrectionRequest(BaseModel):
 
 
 @app.post('/api/correct', summary="Correct the tags to the model", )
-def correct_prediction(request: CorrectionRequest):
+async def correct_prediction(request: CorrectionRequest):
     """
     Correct a prediction of tags for models to learn in the future.
 
@@ -88,9 +88,12 @@ def correct_prediction(request: CorrectionRequest):
     - **predicted**: prediction of tags for the title
     - **actual**: actual tags for the title
     """
+    data_to_publish = request.dict()
+    data_to_publish["predicted"] = str(data_to_publish["predicted"])
+    data_to_publish["actual"] = str(data_to_publish["actual"])
     app.publish_client.publish(
         app.publish_topic,
         b'New correction data',
-        foo='bar'
+        **data_to_publish
     )
     return request

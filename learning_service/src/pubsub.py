@@ -37,7 +37,7 @@ def publish_to_topic(topic_path: str):
         ColorsPrinter.log_print_info(f'Topic created {colored_topic_path} ✔️')
     return publisher
 
-def subscribe_to_topic(unique_subscription_name: bool = False):
+def subscribe_to_topic(unique_subscription_name: bool = False, send_callback=None):
     """Subscribes to a Pub/Sub topic.
 
     Args:
@@ -54,6 +54,9 @@ def subscribe_to_topic(unique_subscription_name: bool = False):
         """
         message.ack()
         ColorsPrinter.log_print_info(f'💬✔️ Received message: {message} ')
+        if send_callback is not None:
+            send_callback()
+            ColorsPrinter.log_print_info(f'Sent model! ✔️')
 
     # Create the client
     pubsub_host = settings[VarNames.PUBSUB_EMULATOR_HOST.value]
@@ -72,7 +75,7 @@ def subscribe_to_topic(unique_subscription_name: bool = False):
     # Get the topic path
     topic_path = subscriber.topic_path(
         settings[VarNames.PUBSUB_PROJECT_ID.value],
-        settings[VarNames.PUBSUB_MODEL_TOPIC_ID.value])
+        settings[VarNames.PUBSUB_DATA_TOPIC_ID.value])
     publish_to_topic(topic_path)
     # Suffix needed for unique names
     suffix = ("-" + str(uuid.uuid4())) if unique_subscription_name else ''
