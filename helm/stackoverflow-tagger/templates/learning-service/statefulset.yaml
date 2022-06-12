@@ -13,8 +13,6 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: cache
-        labels:
-          {{- include "stackoverflow-tagger.labels" . | nindent 10 }}
       spec:
         accessModes:
           - ReadWriteOnce
