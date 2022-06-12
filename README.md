@@ -12,7 +12,7 @@ Project for [Release Engineering for Machine Learning Applications](https://se.e
 
 * [Frontend](frontend/README.md)
 * [Learning service](src/learning_service/README.md)
-* [Interface service](src/interface service/README.md)
+* [Interface service](src/interface_service/README.md)
 
 ## Guides
 
