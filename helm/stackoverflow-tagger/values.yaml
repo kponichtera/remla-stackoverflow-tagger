@@ -146,10 +146,3 @@ frontend:
   nodeSelector: { }
   tolerations: [ ]
   affinity: { }
-
-# Google Kubernetes Engine specific configuration
-# Disabled by default to allow for deploying on arbitrary Kubernetes cluster
-gcloud:
-  podMonitoring:
-    enabled: false
-    interval: "30s"
