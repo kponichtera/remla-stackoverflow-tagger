@@ -19,3 +19,19 @@ output "gke_cluster_ca_certificate" {
 output "ingress_static_ip_name" {
   value = module.ingress_address.name
 }
+
+output "data_model_bucket_access_key" {
+  value = module.data_model_bucket.access_key
+  sensitive = true
+}
+
+output "data_model_bucket_secret_key" {
+  value = module.data_model_bucket.secret_key
+  sensitive = true
+}
+
+output "application_service_account_key" {
+  value = module.application_service_account.private_key
+  sensitive = true
+}
+

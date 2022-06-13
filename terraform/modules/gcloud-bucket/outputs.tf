@@ -13,12 +13,12 @@ output "url" {
   description = "The URL of created bucket"
 }
 
-output "hmac_access_id" {
+output "access_key" {
   value       = google_storage_hmac_key.key.access_id
   description = "HMAC access key of the bucket's service account"
 }
 
-output "hmac_secret" {
+output "secret_key" {
   value       = google_storage_hmac_key.key.secret
   description = "HMAC secret of the bucket's service account"
 }

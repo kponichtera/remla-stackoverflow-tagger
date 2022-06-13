@@ -11,6 +11,7 @@ vars:
     roles/iam.roleAdmin
     roles/resourcemanager.projectIamAdmin
     roles/container.admin
+    roles/pubsub.admin
   TERRAFORM_SERVICE_ACCOUNT_CREDENTIALS_FILE: terraform-credentials.json
   TERRAFORM_STATE_BUCKET: '{{.PROJECT_ID}}-terraform'
   TERRAFORM_STATE_BUCKET_URL: 'gs://{{.TERRAFORM_STATE_BUCKET}}'
