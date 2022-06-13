@@ -1,0 +1,49 @@
+version: '3'
+
+vars:
+  LEARNING_SERVICE_BUILDER_IMAGE: remla-stackoverflow-tagger/learning-service-builder
+  LEARNING_SERVICE_IMAGE: remla-stackoverflow-tagger/learning-service
+  LEARNING_SERVICE_VENV: learning_service/learning_venv
+
+env:
+  DOCKER_BUILDKIT: 1
+
+tasks:
+  create_venv:
+    preconditions:
+      - sh: 'python -c "import sys; assert sys.version_info.major == 3 and 8 <= sys.version_info.minor <= 9"'
+        msg: 'Requires Python version >=3.8 and <=3.9'
+    status: ["test -d {{.LEARNING_SERVICE_VENV}}"]
+    cmds: ["python -m venv {{.LEARNING_SERVICE_VENV}}"]
+  prepare:
+    deps: [create_venv]
+    cmds:
+      - "{{.LEARNING_SERVICE_VENV}}/bin/pip install --upgrade pip wheel"
+      - "{{.LEARNING_SERVICE_VENV}}/bin/pip install -r learning_service/requirements.txt"
+  clean: "rm -rf {{.LEARNING_SERVICE_VENV}}"
+  lint: "pylint --rcfile=learning_service/.pylintrc learning_service"
+  test: "pytest -n auto learning_service"
+  mllint: "mllint learning_service"
+  build_builder:
+    cmds: [ "docker build --target builder -f learning_service/Dockerfile -t {{.LEARNING_SERVICE_BUILDER_IMAGE}} ." ]
+  build_docker:
+    cmds: [ "docker build --target final -f learning_service/Dockerfile -t {{.LEARNING_SERVICE_IMAGE}} ." ]
+  docker_run:
+    deps: [ build_builder ]
+    interactive: true
+    vars:
+      UID:
+        sh: id -u
+      GID:
+        sh: id -g
+    cmds:
+      - >
+        docker run -it --rm
+        --network host
+        --user {{.UID}}:{{.GID}}
+        --workdir /project
+        --volume {{.PROJECT_ROOT}}/src/common:/project/common
+        --volume {{.PROJECT_ROOT}}/src/learning_service:/project/learning_service
+        --volume {{.PROJECT_ROOT}}/src/learning_service/Taskfile.yml:/project/Taskfile.yml
+        {{.LEARNING_SERVICE_BUILDER_IMAGE}}
+        {{.CLI_ARGS}}

@@ -6,14 +6,28 @@ ingress:
   hosts:
     - ${HOSTNAME}
 
+learningService:
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9010"
+    prometheus.io/path: "/metrics"
+
 interfaceService:
   replicaCount: ${INTERFACE_SERVICE_REPLICA_COUNT}
   service:
     # Required for GKE Ingress
     type: NodePort
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9000"
+    prometheus.io/path: "/metrics"
 
 frontend:
   replicaCount: ${FRONTEND_REPLICA_COUNT}
   service:
     # Required for GKE Ingress
     type: NodePort
+
+gcloud:
+  podMonitoring:
+    enabled: true

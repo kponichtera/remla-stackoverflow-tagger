@@ -1,0 +1,45 @@
+name: Test
+
+on:
+  pull_request:
+    branches: [ master ]
+
+env:
+  INTERFACE_SERVICE_BUILDER_NAME: interface-service-builder
+  LEARNING_SERVICE_BUILDER_NAME: learning-service-builder
+
+jobs:
+  test-interface-service:
+    name: Test interface service
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - name: Prepare builder
+        uses: ./.github/actions/builder
+        with:
+          file: ./src/interface_service/Dockerfile
+          context: ./src/
+          name: ${{ env.INTERFACE_SERVICE_BUILDER_NAME }}
+      - name: Test interface service
+        uses: ./.github/actions/builder_run
+        with:
+          image: ${{ env.INTERFACE_SERVICE_BUILDER_NAME }}
+          command: task interface_service:test
+  test-learning-service:
+    name: Test learning service
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - name: Prepare builder
+        uses: ./.github/actions/builder
+        with:
+          file: ./src/learning_service/Dockerfile
+          context: ./src/
+          name: ${{ env.LEARNING_SERVICE_BUILDER_NAME }}
+      - name: Test learning service
+        uses: ./.github/actions/builder_run
+        with:
+          image: ${{ env.LEARNING_SERVICE_BUILDER_NAME }}
+          command: task learning_service:test

@@ -1,0 +1,17 @@
+development:
+  name: development
+  DATA_DIR: ./learning_service/data
+  DATASET_FOR_TRAINING_DIR: ./learning_service/dataset
+  OUTPUT_DIR: ./learning_service/output
+  OBJECT_STORAGE_ENDPOINT: localhost:10000
+  OBJECT_STORAGE_ACCESS_KEY: root
+  OBJECT_STORAGE_SECRET_KEY: remla2022
+  OBJECT_STORAGE_TLS: false
+  BUCKET_NAME: stackoverflow-tagger
+  MODEL_OBJECT_KEY: filename
+  MODEL_LOCAL_PATH: filename
+  PUBSUB_EMULATOR_HOST: localhost:8085
+  PUBSUB_PROJECT_ID: testlocal-123
+  PUBSUB_DATA_TOPIC_ID: new-data
+  PUBSUB_MODEL_TOPIC_ID: new-model
+  PUBSUB_SUBSCRIPTION_ID: learning-service-new-model

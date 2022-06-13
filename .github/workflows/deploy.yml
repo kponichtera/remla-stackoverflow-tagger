@@ -21,7 +21,8 @@ on:
 jobs:
   deploy_test:
     name: 'Deploy test'
-    if: github.event_name == 'workflow_call' || inputs.environment == 'test'
+    # inputs.environment equal to 0 means that the workflow was executed with workflow_call
+    if: inputs.environment == 0 || inputs.environment == 'test'
     environment: test
     concurrency: deploy-test
     runs-on: ubuntu-20.04
@@ -36,7 +37,8 @@ jobs:
           terraform_sa_key_base64: ${{ secrets.TERRAFORM_SA_KEY_BASE64 }}
   deploy_production:
     name: 'Deploy production'
-    if: github.event_name == 'workflow_call' || inputs.environment == 'production'
+    # inputs.environment equal to 0 means that the workflow was executed with workflow_call
+    if: inputs.environment == 0 || inputs.environment == 'production'
     environment: production
     concurrency: deploy-production
     runs-on: ubuntu-20.04

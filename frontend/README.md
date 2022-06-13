@@ -1,4 +1,7 @@
-# RemlaStackoverflowTagger
+# Frontend
+
+Simple frontend from the interface service's API, allowing the users to make predictions 
+about the StackOverflow titles and submit feedback with new, fixed prediction.
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.3.6.
 

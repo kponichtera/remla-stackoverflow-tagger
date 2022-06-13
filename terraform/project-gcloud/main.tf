@@ -6,11 +6,11 @@ module "gcloud_services" {
 module "gke_cluster" {
   source = "../modules/gcloud-gke-cluster"
   name   = "main"
+  # TODO: Workaround to the bug with data.google_project.project_id not returning anything
+  project_id = var.project_id
 
-  primary_node_pool_enabled = false
-
+  primary_node_pool_enabled     = false
   preemptible_node_pool_enabled = true
-  preemptible_node_pool_size    = 2
 
   depends_on = [module.gcloud_services]
 }

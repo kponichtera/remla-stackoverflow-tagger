@@ -1,20 +1,36 @@
-data "google_project" "project" {}
 data "google_client_config" "config" {}
 data "google_container_engine_versions" "gke_versions" {
   location = local.zone
 }
 
 locals {
-  zone = data.google_client_config.config.zone
+  zone         = data.google_client_config.config.zone
+  cluster_name = "${var.name}-cluster"
+
+  # Includes roles, required by Prometheus
+  service_account_roles = [
+    "roles/logging.logWriter",
+    "roles/monitoring.metricWriter",
+    "roles/monitoring.viewer",
+    "roles/stackdriver.resourceMetadata.writer"
+  ]
 }
 
 resource "google_service_account" "cluster_account" {
-  account_id   = "${var.name}-cluster-service-account"
-  display_name = "${var.name} cluster service account"
+  account_id   = "${local.cluster_name}-service-account"
+  display_name = "${local.cluster_name} GKE service account"
+}
+
+resource "google_project_iam_member" "service_account_roles" {
+  for_each = toset(local.service_account_roles)
+
+  project = var.project_id
+  role    = each.value
+  member  = "serviceAccount:${google_service_account.cluster_account.email}"
 }
 
 resource "google_container_cluster" "cluster" {
-  name               = "${var.name}-cluster"
+  name               = local.cluster_name
   min_master_version = data.google_container_engine_versions.gke_versions.release_channel_default_version["STABLE"]
   location           = local.zone
 
