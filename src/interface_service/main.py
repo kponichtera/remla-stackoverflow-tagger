@@ -1,4 +1,5 @@
 """Main file for the FastAPI application."""
+from threading import Thread
 from typing import Set
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -7,9 +8,11 @@ import prometheus_client
 
 from interface_service.config import settings
 from interface_service.var_names import VarNames
+from interface_service.bucket import download_model, load_model
 
 from common.color_module import ColorsPrinter
 from common.pubsub import subscribe_to_topic, publish_to_topic
+
 
 def receive_msg_callback(message : Message):
     """Acknowledges a Pub/Sub message. Used in the `subscribe()` function.
@@ -20,6 +23,35 @@ def receive_msg_callback(message : Message):
     message.ack()
     ColorsPrinter.log_print_info(f'💬✔️ Received message: {message} ')
 
+def get_callback(app_object : FastAPI):
+    """Creates a callback that updates the model from object storage.
+
+    Args:
+        app_object (FastAPI): The app which the model should be part of.
+    """
+    def receive_model_update_callback(message : Message):
+        print('downloading new model')
+        message.ack()
+        download_model(
+            settings[VarNames.MODEL_LOCAL_PATH.value],
+            settings[VarNames.BUCKET_NAME.value],
+            settings[VarNames.MODEL_OBJECT_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
+            settings[VarNames.OBJECT_STORAGE_ACCESS_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_SECRET_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_TLS.value])
+        app_object.model = load_model(settings[VarNames.MODEL_LOCAL_PATH.value])
+
+    return receive_model_update_callback
+
+
+def get_result(streaming_pull_future):
+    """Wrapper function for getting results from Pub/Sub.
+
+    Args:
+        streaming_pull_future: The stream from which to get the results.
+    """
+    streaming_pull_future.result()
 
 class InferenceApp(FastAPI):
     """Inference FastAPI application
@@ -38,12 +70,14 @@ class InferenceApp(FastAPI):
         pubsub_publish_topic_id = settings[VarNames.PUBSUB_DATA_TOPIC_ID.value]
         pubsub_subscription_topic_id = settings[VarNames.PUBSUB_MODEL_TOPIC_ID.value]
 
+        pubsub_handle_model_callback = get_callback(self)
+
         subscriber, streaming_pull_future = subscribe_to_topic(
             pubsub_host,
             pubsub_project_id,
             pubsub_subscription_id,
             pubsub_subscription_topic_id,
-            receive_msg_callback,
+            pubsub_handle_model_callback,
             unique_subscription_name=True
         )
         self.publish_topic = subscriber.topic_path(
@@ -56,8 +90,19 @@ class InferenceApp(FastAPI):
         self.title = "Inference Service API"
         self.description = "Inference Service API for accessing models 🚀"
         self.version="0.0.1"
-
+        download_model(settings[VarNames.MODEL_LOCAL_PATH.value],
+                       settings[VarNames.BUCKET_NAME.value],
+                       settings[VarNames.MODEL_OBJECT_KEY.value],
+                       settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
+                       settings[VarNames.OBJECT_STORAGE_ACCESS_KEY.value],
+                       settings[VarNames.OBJECT_STORAGE_SECRET_KEY.value],
+                       settings[VarNames.OBJECT_STORAGE_TLS.value])
+        self.model = load_model(settings[VarNames.MODEL_LOCAL_PATH.value])
         prometheus_client.start_http_server(9000)
+
+        # Create a new thread for the blockinb Pub/Sub call and start it
+        pubsub_thread = Thread(target=get_result, args=(streaming_pull_future,))
+        pubsub_thread.start()
 
 app = InferenceApp()
 

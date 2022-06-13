@@ -1,14 +1,16 @@
 """Provides a `subscribe` function
-   That creates a new subscription to a Pub/Sub topic.
+   That creats a new subscription to a Pub/Sub topic.
 """
 import os
 import uuid
-from typing import Callable
-from google.api_core.exceptions import NotFound
-from common.color_module import ColorsPrinter
-from google.cloud.pubsub_v1.subscriber.message import Message
-from google.cloud.pubsub_v1 import PublisherClient, SubscriberClient
 
+from google.cloud import pubsub_v1
+from google.api_core.exceptions import NotFound
+
+from src.config import settings
+from src.var_names import VarNames
+
+from src.color_module import ColorsPrinter
 
 def publish_to_topic(topic_path: str):
     """Creates a publisher to a given topic and creates that topic.
@@ -16,11 +18,13 @@ def publish_to_topic(topic_path: str):
     Args:
         topic_path (str): topic we want to publish to or just create a topic
     """
-    publisher = PublisherClient()
+    publisher = pubsub_v1.PublisherClient()
+
     colored_topic_path = ColorsPrinter.get_color_string(
         topic_path,
         ColorsPrinter.OK_BLUE
     )
+
     #with publisher:
     try:
         # Check if the topic exists
@@ -33,27 +37,29 @@ def publish_to_topic(topic_path: str):
         ColorsPrinter.log_print_info(f'Topic created {colored_topic_path} ✔️')
     return publisher
 
-def subscribe_to_topic(pubsub_host : str, pubsub_project_id : str,
-                       pubsub_subscription_id : str, pubsub_subscription_topic_id : str,
-                       rec_msg_callback : Callable[[Message], None],
-                       unique_subscription_name=False):
+def subscribe_to_topic(unique_subscription_name: bool = False, send_callback=None):
     """Subscribes to a Pub/Sub topic.
 
     Args:
-        pubsub_host (str): host of the pubsub queue
-        pubsub_project_id (str): project id on pubsub
-        pubsub_subscription_id (str): subscription id on pubsub
-        pubsub_subscription_topic_id (str): subscription topic id on pubsub
-        rec_msg_callback (Callable[[Message], None]): callback on handling messages
-                    coming from subscription topic
         unique_subscription_name (bool, optional): Whether to create a unique subscription name.
-                This should be enabled for the interface services. Defaults to False.
-
-    Returns:
-        (tuple[SubscriberClient, StreamingPullFuture | Unbound]): 
-                subscriber client and streaming pull for async operations
+        This should be enabled for the interface services. Defaults to False.
     """
+
+    def callback(message: pubsub_v1.subscriber.message.Message):
+        """Acknowledges a Pub/Sub message. Used in the `subscribe()` function.
+
+        Args:
+            message (pubsub_v1.subscriber.message.Message): The message
+            to acknowledge.
+        """
+        message.ack()
+        ColorsPrinter.log_print_info(f'💬✔️ Received message: {message} ')
+        if send_callback is not None:
+            send_callback()
+            ColorsPrinter.log_print_info(f'Sent model! ✔️')
+
     # Create the client
+    pubsub_host = settings[VarNames.PUBSUB_EMULATOR_HOST.value]
     if pubsub_host is not None:
         colored_host = ColorsPrinter.get_color_string(pubsub_host, ColorsPrinter.OK_BLUE)
         ColorsPrinter.log_print_info(
@@ -62,22 +68,21 @@ def subscribe_to_topic(pubsub_host : str, pubsub_project_id : str,
         os.environ["PUBSUB_EMULATOR_HOST"] = pubsub_host
 
     ColorsPrinter.log_print_info('Connecting to Google Cloud PubSub')
-    subscriber = SubscriberClient()
+    subscriber = pubsub_v1.SubscriberClient()
 
     # Wrap the subscriber in a 'with' block to automatically call close() to
     # close the underlying gRPC channel when done.
     # Get the topic path
     topic_path = subscriber.topic_path(
-        pubsub_project_id,
-        pubsub_subscription_topic_id
-    )
+        settings[VarNames.PUBSUB_PROJECT_ID.value],
+        settings[VarNames.PUBSUB_DATA_TOPIC_ID.value])
     publish_to_topic(topic_path)
     # Suffix needed for unique names
     suffix = ("-" + str(uuid.uuid4())) if unique_subscription_name else ''
     # Get the subscriber path
     subscription_path = subscriber.subscription_path(
-        pubsub_project_id,
-        pubsub_subscription_id + suffix)
+        settings[VarNames.PUBSUB_PROJECT_ID.value],
+        settings[VarNames.PUBSUB_SUBSCRIPTION_ID.value] + suffix)
     # If the subscription name is unique, no need
     # To check if the topic already exists.
     colored_subscription_path = ColorsPrinter.get_color_string(
@@ -112,12 +117,12 @@ def subscribe_to_topic(pubsub_host : str, pubsub_project_id : str,
     # Subscribe to the topic
     ColorsPrinter.log_print_info(f'Subscribing to subscription {colored_subscription_path}')
     try:
-        streaming_pull_future = subscriber.subscribe(
-            subscription_path,
-            callback=rec_msg_callback,
-            await_callbacks_on_shutdown=True
-        )
+        streaming_pull_future = subscriber.subscribe(subscription_path, callback=callback)
         ColorsPrinter.log_print_info(f'Subscribed to {colored_subscription_path} ✔️')
     except NotFound:
         ColorsPrinter.log_print_fail(f'Failed to subscribe to {colored_subscription_path} ❌')
     return subscriber, streaming_pull_future
+
+
+if __name__ == '__main__':
+    subscribe_to_topic()
