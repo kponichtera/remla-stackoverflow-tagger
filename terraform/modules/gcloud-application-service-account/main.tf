@@ -12,18 +12,17 @@ resource "google_project_iam_member" "service_account_roles" {
 }
 
 resource "google_pubsub_topic_iam_member" "new_data_topic_member" {
-  topic = var.new_data_topic_name
-  role = "roles/pubsub.editor"
+  topic  = var.new_data_topic_name
+  role   = "roles/pubsub.editor"
   member = "serviceAccount:${google_service_account.service_account.email}"
 }
 
 resource "google_pubsub_topic_iam_member" "new_model_topic_name" {
-  topic = var.new_model_topic_name
-  role = "roles/pubsub.editor"
+  topic  = var.new_model_topic_name
+  role   = "roles/pubsub.editor"
   member = "serviceAccount:${google_service_account.service_account.email}"
 }
 
 resource "google_service_account_key" "key" {
   service_account_id = google_service_account.service_account.id
-  public_key_type    = "TYPE_X509_PEM_FILE"
 }

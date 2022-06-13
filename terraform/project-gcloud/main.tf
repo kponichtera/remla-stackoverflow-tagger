@@ -40,9 +40,9 @@ module "pubsub_new_model" {
 
 module "application_service_account" {
   source = "../modules/gcloud-application-service-account"
-  name = "stackoverflow-tagger-sa"
+  name   = "stackoverflow-tagger-sa"
 
-  new_data_topic_name = module.pubsub_new_data.name
+  new_data_topic_name  = module.pubsub_new_data.name
   new_model_topic_name = module.pubsub_new_model.name
 }
 

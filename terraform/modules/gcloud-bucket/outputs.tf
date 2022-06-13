@@ -3,6 +3,11 @@ output "id" {
   description = "The ID of created bucket"
 }
 
+output "name" {
+  value       = google_storage_bucket.bucket.name
+  description = "The name of created bucket"
+}
+
 output "self_link" {
   value       = google_storage_bucket.bucket.self_link
   description = "The URI of created bucket"
