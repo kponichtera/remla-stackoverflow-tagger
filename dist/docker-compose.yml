@@ -14,7 +14,7 @@ services:
       REMLA_OUTPUT_DIR: "/app/output"
       REMLA_OBJECT_STORAGE_ENDPOINT: "minio:10000"
       REMLA_OBJECT_STORAGE_ACCESS_KEY: "root"
-      REMLA_OBJECT_STORAGE_TLS: "remla2022"
+      REMLA_OBJECT_STORAGE_SECRET_KEY: "remla2022"
       REMLA_BUCKET_NAME: "stackoverflow-tagger"
       REMLA_MODEL_OBJECT_KEY: "model.joblib"
       REMLA_MODEL_LOCAL_PATH: "/app/output/model.joblib"
@@ -33,7 +33,7 @@ services:
     environment:
       REMLA_OBJECT_STORAGE_ENDPOINT: "minio:10000"
       REMLA_OBJECT_STORAGE_ACCESS_KEY: "root"
-      REMLA_OBJECT_STORAGE_TLS: "remla2022"
+      REMLA_OBJECT_STORAGE_SECRET_KEY: "remla2022"
       REMLA_BUCKET_NAME: "stackoverflow-tagger"
       REMLA_MODEL_OBJECT_KEY: "model.joblib"
       REMLA_MODEL_LOCAL_PATH: "/app/models/model.joblib"
