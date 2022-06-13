@@ -28,6 +28,21 @@ frontend:
     # Required for GKE Ingress
     type: NodePort
 
-gcloud:
-  podMonitoring:
-    enabled: true
+config:
+  gcloud:
+    # Create secret with the sa.json data field, containing the JSON service account key
+    serviceAccountKeySecret: ${APPLICATION_SERVICE_ACCOUNT_KEY_SECRET}
+    serviceAccountKeySecretKey: "sa.json"
+  pubsub:
+    projectId: ${GCLOUD_PROJECT_ID}
+    dataTopicId: ${PUBSUB_NEW_DATA_TOPIC_NAME}
+    modelTopicId: ${PUBSUB_NEW_MODEL_TOPIC_NAME}
+    dataSubscriptionId: "new-data"
+    newModelSubscriptionId: "new-model"
+  objectStorage:
+    endpoint: "https://storage.googleapis.com"
+    accessKey: ${DATA_MODEL_BUCKET_ACCESS_KEY}
+    secretKey: ${DATA_MODEL_BUCKET_SECRET_KEY}
+    tls: true
+    bucketName: ${DATA_MODEL_BUCKET_NAME}
+    modelObjectKey: "model.joblib"
