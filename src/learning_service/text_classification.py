@@ -13,6 +13,8 @@ from joblib import load, dump
 from learning_service.read_data import read_data_from_file
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import FunctionTransformer
 from sklearn.metrics import accuracy_score, f1_score, average_precision_score, roc_auc_score
 from prometheus_client import Gauge
 
@@ -191,8 +193,12 @@ def main():
         os.path.join(OUTPUT_PATH, f"{classifier_name}_misclassifications.csv")
     )
     # Store "best" classifier
-    dump(classifier, os.path.join(OUTPUT_PATH, f'{classifier_name}.joblib'))
-
+    classifier_pipeline = make_pipeline(
+        load(DATA_PREPROCESSOR),
+        FunctionTransformer(classifier.predict),
+        FunctionTransformer(label_preprocessor.inverse_transform)
+    )
+    dump(classifier_pipeline, os.path.join(OUTPUT_PATH, f'{classifier_name}.joblib'))
 
 if __name__ == "__main__":
     main()
