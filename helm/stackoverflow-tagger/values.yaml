@@ -146,3 +146,22 @@ frontend:
   nodeSelector: { }
   tolerations: [ ]
   affinity: { }
+
+config:
+  gcloud:
+    # Create secret with the sa.json data field, containing the JSON service account key
+    serviceAccountKeySecret: ""
+    serviceAccountKeySecretKey: "sa.json"
+  pubsub:
+    projectId: ""
+    dataTopicId: ""
+    modelTopicId: ""
+    dataSubscriptionId: ""
+    newModelSubscriptionId: ""
+  objectStorage:
+    endpoint: ""
+    accessKey: ""
+    secretKey: ""
+    tls: false
+    bucketName: ""
+    modelObjectKey: "model.joblib"

@@ -23,3 +23,10 @@ Create the name of the service account to use
 {{- default "default" .Values.interfaceService.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+ConfigMap name.
+*/}}
+{{- define "stackoverflow-tagger.interfaceService.configMap" -}}
+{{- printf "%s-config" (include "stackoverflow-tagger.interfaceService.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
