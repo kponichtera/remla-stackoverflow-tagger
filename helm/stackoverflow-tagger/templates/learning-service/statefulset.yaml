@@ -55,6 +55,9 @@ spec:
             - name: gcloud-service-account
               mountPath: /app/gcloud_sa
           ports:
+            - name: http
+              containerPort: 8010
+              protocol: TCP
             - name: metrics
               containerPort: 9010
               protocol: TCP
