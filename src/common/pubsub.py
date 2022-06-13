@@ -114,7 +114,8 @@ def subscribe_to_topic(pubsub_host : str, pubsub_project_id : str,
     try:
         streaming_pull_future = subscriber.subscribe(
             subscription_path,
-            callback=rec_msg_callback
+            callback=rec_msg_callback,
+            await_callbacks_on_shutdown=True
         )
         ColorsPrinter.log_print_info(f'Subscribed to {colored_subscription_path} ✔️')
     except NotFound:

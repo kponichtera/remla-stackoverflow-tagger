@@ -1,4 +1,5 @@
 """Main file for the FastAPI application."""
+from threading import Thread
 from typing import Set
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -29,6 +30,7 @@ def get_callback(app_object : FastAPI):
         app_object (FastAPI): The app which the model should be part of.
     """
     def receive_model_update_callback(message : Message):
+        print('downloading new model')
         message.ack()
         download_model(
             settings[VarNames.MODEL_LOCAL_PATH.value],
@@ -41,6 +43,15 @@ def get_callback(app_object : FastAPI):
         app_object.model = load_model(settings[VarNames.MODEL_LOCAL_PATH.value])
 
     return receive_model_update_callback
+
+
+def get_result(streaming_pull_future):
+    """Wrapper function for getting results from Pub/Sub.
+
+    Args:
+        streaming_pull_future: The stream from which to get the results.
+    """
+    streaming_pull_future.result()
 
 class InferenceApp(FastAPI):
     """Inference FastAPI application
@@ -67,7 +78,7 @@ class InferenceApp(FastAPI):
             pubsub_subscription_id,
             pubsub_subscription_topic_id,
             pubsub_handle_model_callback,
-            unique_subscription_name=False
+            unique_subscription_name=True
         )
         self.publish_topic = subscriber.topic_path(
             pubsub_project_id,
@@ -87,8 +98,11 @@ class InferenceApp(FastAPI):
                        settings[VarNames.OBJECT_STORAGE_SECRET_KEY.value],
                        settings[VarNames.OBJECT_STORAGE_TLS.value])
         self.model = load_model(settings[VarNames.MODEL_LOCAL_PATH.value])
-
         prometheus_client.start_http_server(9000)
+
+        # Create a new thread for the blockinb Pub/Sub call and start it
+        pubsub_thread = Thread(target=get_result, args=(streaming_pull_future,))
+        pubsub_thread.start()
 
 app = InferenceApp()
 
