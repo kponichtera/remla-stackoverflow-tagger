@@ -68,9 +68,9 @@ spec:
               port: http
           envFrom:
             - secretRef:
-                name: {{ include "stackoverflow-tagger.learningService.fullname" . }}
+                name: {{ include "stackoverflow-tagger.learningService.configMap" . }}
             - configMapRef:
-                name: {{ include "stackoverflow-tagger.learningService.fullname" . }}
+                name: {{ include "stackoverflow-tagger.learningService.configMap" . }}
           resources:
             {{- toYaml .Values.learningService.resources | nindent 12 }}
       {{- with .Values.learningService.nodeSelector }}

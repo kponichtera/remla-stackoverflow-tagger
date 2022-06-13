@@ -57,9 +57,9 @@ spec:
               port: http
           envFrom:
             - secretRef:
-                name: {{ include "stackoverflow-tagger.interfaceService.fullname" . }}
+                name: {{ include "stackoverflow-tagger.interfaceService.configMap" . }}
             - configMapRef:
-                name: {{ include "stackoverflow-tagger.interfaceService.fullname" . }}
+                name: {{ include "stackoverflow-tagger.interfaceService.configMap" . }}
           resources:
             {{- toYaml .Values.interfaceService.resources | nindent 12 }}
       {{- with .Values.interfaceService.nodeSelector }}
