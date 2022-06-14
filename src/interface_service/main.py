@@ -1,18 +1,17 @@
 """Main file for the FastAPI application."""
 from threading import Thread
 from typing import Set
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from google.cloud.pubsub_v1.subscriber.message import Message
 import prometheus_client
 
 from interface_service.config import settings
 from interface_service.var_names import VarNames
-from interface_service.bucket import download_model, load_model
 
 from common.color_module import ColorsPrinter
 from common.pubsub import subscribe_to_topic, publish_to_topic
-
+from common.bucket import download_model, load_model
 
 def receive_msg_callback(message : Message):
     """Acknowledges a Pub/Sub message. Used in the `subscribe()` function.
@@ -32,14 +31,18 @@ def get_callback(app_object : FastAPI):
     def receive_model_update_callback(message : Message):
         print('downloading new model')
         message.ack()
+        bucket_auth = (
+            settings[VarNames.OBJECT_STORAGE_ACCESS_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_SECRET_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_TLS.value]
+        )
         download_model(
             settings[VarNames.MODEL_LOCAL_PATH.value],
             settings[VarNames.BUCKET_NAME.value],
             settings[VarNames.MODEL_OBJECT_KEY.value],
             settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
-            settings[VarNames.OBJECT_STORAGE_ACCESS_KEY.value],
-            settings[VarNames.OBJECT_STORAGE_SECRET_KEY.value],
-            settings[VarNames.OBJECT_STORAGE_TLS.value])
+            *bucket_auth
+        )
         app_object.model = load_model(settings[VarNames.MODEL_LOCAL_PATH.value])
 
     return receive_model_update_callback
@@ -90,14 +93,20 @@ class InferenceApp(FastAPI):
         self.title = "Inference Service API"
         self.description = "Inference Service API for accessing models 🚀"
         self.version="0.0.1"
-        download_model(settings[VarNames.MODEL_LOCAL_PATH.value],
-                       settings[VarNames.BUCKET_NAME.value],
-                       settings[VarNames.MODEL_OBJECT_KEY.value],
-                       settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
-                       settings[VarNames.OBJECT_STORAGE_ACCESS_KEY.value],
-                       settings[VarNames.OBJECT_STORAGE_SECRET_KEY.value],
-                       settings[VarNames.OBJECT_STORAGE_TLS.value])
-        self.model = load_model(settings[VarNames.MODEL_LOCAL_PATH.value])
+        bucket_auth = (
+            settings[VarNames.OBJECT_STORAGE_ACCESS_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_SECRET_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_TLS.value]
+        )
+        success = download_model(
+            settings[VarNames.MODEL_LOCAL_PATH.value],
+            settings[VarNames.BUCKET_NAME.value],
+            settings[VarNames.MODEL_OBJECT_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
+            *bucket_auth
+        )
+        if success :
+            self.model = load_model(settings[VarNames.MODEL_LOCAL_PATH.value])
         prometheus_client.start_http_server(9000)
 
         # Create a new thread for the blockinb Pub/Sub call and start it
@@ -126,7 +135,6 @@ class PredictionResult(BaseModel):
     Defines the model of a prediction result.
     """
     title: str
-    classifier: str
     tags: Set[str]
 
 
@@ -137,10 +145,16 @@ async def predict_tags(request: PredictionRequest):
 
     - **title**: title of the StackOverflow question
     """
+    if app.model is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Model not found",
+            headers={"X-Error": "No model found"},
+        )
+    result = app.model.transform([request.title])
     return PredictionResult(
         title=request.title,
-        classifier="decision tree",
-        tags=["java", "OOP"],
+        tags=result[0],
     )
 
 

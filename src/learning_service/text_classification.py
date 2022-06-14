@@ -11,12 +11,15 @@ from learning_service.dir_util import get_directory_from_settings_or_default
 from typing import List, Any
 from joblib import load, dump
 from learning_service.read_data import read_data_from_file
+from learning_service.config import settings
+from learning_service.var_names import VarNames
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.metrics import accuracy_score, f1_score, average_precision_score, roc_auc_score
 from prometheus_client import Gauge
+from common.bucket import authenticate, upload_model
 
 setting_dir = VarNames.OUTPUT_DIR
 OUTPUT_PATH = get_directory_from_settings_or_default(
@@ -138,11 +141,12 @@ def get_evaluation_scores(
     }
 
 
-def main():
+def main(bucket_upload=False):
     """Main function run training
 
     Args:
-        plot (bool, optional): determines if result plots will be shown. Defaults to True.
+        bucket_upload (bool, optional): determined if the model should
+                be uploaded to a bucket. Defaults to True.
     """
     X_train = load(TRAIN_DATA_FILE_PATH)
     y_train = load(TRAIN_LABELS_FILE_PATH)
@@ -178,6 +182,16 @@ def main():
         encoding='utf-8'
         ) as outfile:
         json.dump(evaluation_scores, outfile, indent=2)
+    
+    with open(
+        os.path.join(
+            OUTPUT_PATH,
+            "evaluation.json"
+        ),
+        'w',
+        encoding='utf-8'
+        ) as outfile:
+        json.dump(evaluation_scores, outfile, indent=2)
 
     # Inverse transformed data
     misclassifications_dict = {
@@ -198,7 +212,23 @@ def main():
         FunctionTransformer(classifier.predict),
         FunctionTransformer(label_preprocessor.inverse_transform)
     )
-    dump(classifier_pipeline, os.path.join(OUTPUT_PATH, f'{classifier_name}.joblib'))
+    filename = f'{classifier_name}.joblib'
+    model_path = os.path.join(OUTPUT_PATH, filename)
+    dump(classifier_pipeline, model_path)
+
+    if bucket_upload:
+        auth = (
+            settings[VarNames.OBJECT_STORAGE_ACCESS_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_SECRET_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_TLS.value]
+        )
+        upload_model(
+            model_path,
+            settings[VarNames.BUCKET_NAME.value],
+            settings[VarNames.MODEL_OBJECT_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
+            *auth
+        )
 
 if __name__ == "__main__":
     main()

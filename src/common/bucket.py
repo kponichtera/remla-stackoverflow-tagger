@@ -6,12 +6,13 @@ import os
 
 from joblib import load
 from minio import Minio
+from minio.error import S3Error
 
 from common.color_module import ColorsPrinter
 
 def authenticate(object_storage_endpoint : str,
                  access_key : str, secret_key : str,
-                 secure : bool) -> Minio:
+                 secure : bool):
     """Authenticates to the object storage environment.
 
     Args:
@@ -54,8 +55,15 @@ def upload_model(model_path : str,
 
     client = authenticate(object_storage_endpoint, access_key, secret_key, secure)
     if not client.bucket_exists(bucket_name):
+        ColorsPrinter.log_print_info(f'Creating bucket : {bucket_name}')
         client.make_bucket(bucket_name)
-    client.fput_object(bucket_name, model_name, model_path)
+        ColorsPrinter.log_print_info('Creating creation succeeded ✔️')
+    try:
+        client.fput_object(bucket_name, model_name, model_path)
+    except S3Error as error:
+        err = ColorsPrinter.get_color_string(error, ColorsPrinter.FAIL)
+        ColorsPrinter.log_print_fail(f'Model upload failed ❌\n{err}')
+    ColorsPrinter.log_print_info('Model upload succeeded ✔️')
 
 
 def download_model(model_path : str,
@@ -63,8 +71,8 @@ def download_model(model_path : str,
                    model_name : str,
                    object_storage_endpoint : str,
                    access_key : str, secret_key : str,
-                   secure : bool) -> bool:
-    """Uploads a file to the object storage bucket.
+                   secure : bool):
+    """Downloads a file to the object storage bucket.
 
     Args:
         model_path (str): The local path of the model to upload
@@ -83,8 +91,14 @@ def download_model(model_path : str,
 
     client = authenticate(object_storage_endpoint, access_key, secret_key, secure)
     if not client.bucket_exists(bucket_name):
+        ColorsPrinter.log_print_fail(f'Model download failed, bucket {bucket_name} does not exist ❌')
         return False
-    client.fget_object(bucket_name, model_name, model_path)
+    try:
+        client.fget_object(bucket_name, model_name, model_path)
+    except S3Error as error:
+        err = ColorsPrinter.get_color_string(error, ColorsPrinter.FAIL)
+        ColorsPrinter.log_print_fail(f'Model download failed ❌\n{err}')
+    ColorsPrinter.log_print_info('Model download succeeded ✔️')
     return True
 
 def load_model(model_path : str):
@@ -98,9 +112,9 @@ def load_model(model_path : str):
     """
     ColorsPrinter.log_print_info('Attempting to load new model from bucket...')
     if not os.path.isfile(model_path):
-        ColorsPrinter.log_print_fail(f'No model available at {model_path}')
+        ColorsPrinter.log_print_fail(f'No model available at {model_path} ❌')
         return None
     model = load(model_path)
 
-    ColorsPrinter.log_print_info('Model loading succeeded')
+    ColorsPrinter.log_print_info('Model loading succeeded ✔️')
     return model

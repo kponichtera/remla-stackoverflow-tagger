@@ -1,28 +1,45 @@
 """Main file for the FastAPI application."""
-import time
+import os
+import json
 from fastapi import FastAPI
-from google.cloud import pubsub_v1
+from threading import Thread
 from learning_service.config import settings
 from common.color_module import ColorsPrinter
 from learning_service.var_names import VarNames
-from learning_service.text_classification import main
+from learning_service.text_preprocessing import main as preprocess_main
+from learning_service.text_classification import main as classification_main
+from learning_service.get_data import copy_data
+from learning_service.dir_util import get_directory_from_settings_or_default
 from google.cloud.pubsub_v1.subscriber.message import Message
 from common.pubsub import subscribe_to_topic, publish_to_topic
 import prometheus_client
 
-def dummy_wait_and_send():
-    """Stub method to publish a message.
+
+setting_dir = VarNames.OUTPUT_DIR
+OUTPUT_PATH = get_directory_from_settings_or_default(
+    setting_dir,
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
+)
+
+def train_and_send():
+    """Method to train and send a model.
     """
-    time.sleep(5)
+    copy_data()
+    preprocess_main()
+    classification_main(bucket_upload=True)
+    with open(
+        os.path.join(
+            OUTPUT_PATH,
+            "evaluation.json"
+        ),
+        'r',
+        encoding='utf-8'
+        ) as f:
+        evaluation_data = json.load(f)
     # EVERYTHING must be a string
-    data_to_publish = {
-        "name": "bbe46356-2a38-4554-a18d-8a239bb742d0_model.joblib",
-        "evaluation": str({
-            "accuracy_score": 0.3419,
-            "f1_score": 0.6530515001729919,
-            "average_precision_score": 0.36209831252366137,
-            "roc_auc": 0.9195568919487617
-        })
+    data_to_publish = { 
+        "name": settings[VarNames.MODEL_OBJECT_KEY.value],
+        "evaluation": str(evaluation_data)
     }
     app.publish_client.publish(
         app.publish_topic,
@@ -38,8 +55,17 @@ def receive_msg_callback(message : Message):
     """
     message.ack()
     ColorsPrinter.log_print_info(f'💬✔️ Received message: {message} ')
-    dummy_wait_and_send()
+    train_and_send()
     ColorsPrinter.log_print_info('Sent model! ✔️')
+
+
+def get_result(streaming_pull_future):
+    """Wrapper function for getting results from Pub/Sub.
+
+    Args:
+        streaming_pull_future: The stream from which to get the results.
+    """
+    streaming_pull_future.result()
 
 
 class LearningApp(FastAPI):
@@ -79,6 +105,10 @@ class LearningApp(FastAPI):
         self.version="0.0.1"
 
         prometheus_client.start_http_server(9010)
+        
+        # Create a new thread for the blockinb Pub/Sub call and start it
+        pubsub_thread = Thread(target=get_result, args=(streaming_pull_future,))
+        pubsub_thread.start()
 
 app = LearningApp()
 
