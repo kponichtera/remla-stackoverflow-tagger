@@ -118,3 +118,29 @@ async def ping():
     Used to test the connection.
     """
     return {}
+
+
+
+@app.get('/api/learn')
+async def learn():
+    """
+    Used to test the connection.
+    """
+    copy_data()
+    preprocess_main()
+    classification_main(bucket_upload=True)
+    with open(
+        os.path.join(
+            OUTPUT_PATH,
+            "evaluation.json"
+        ),
+        'r',
+        encoding='utf-8'
+        ) as f:
+        evaluation_data = json.load(f)
+
+    data_to_publish = { 
+        "name": settings[VarNames.MODEL_OBJECT_KEY.value],
+        "evaluation": evaluation_data
+    }
+    return data_to_publish
