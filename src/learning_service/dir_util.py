@@ -1,10 +1,12 @@
 """Directory utility file for getting the right directories.
 """
 import os
+from enum import Enum
+
 from learning_service.config import settings
 
 
-def get_directory_from_settings_or_default(setting : str, default: str):
+def get_directory_from_settings_or_default(setting: Enum, default: str):
     """Gets a directory either from dynaconf if it exists
     or a default fallback.
 

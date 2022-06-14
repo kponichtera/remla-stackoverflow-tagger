@@ -92,7 +92,6 @@ class InferenceApp(FastAPI):
         self.streaming_pull_future = streaming_pull_future
         self.title = "Inference Service API"
         self.description = "Inference Service API for accessing models 🚀"
-        self.version="0.0.1"
         bucket_auth = (
             settings[VarNames.OBJECT_STORAGE_ACCESS_KEY.value],
             settings[VarNames.OBJECT_STORAGE_SECRET_KEY.value],
@@ -122,6 +121,12 @@ async def ping():
     """
     return {}
 
+@app.get('/api/modelPresent')
+async def model_present():
+    """
+    Used to check if the model is present and application can be used.
+    """
+    return app.model is not None
 
 class PredictionRequest(BaseModel):
     """
@@ -147,9 +152,9 @@ async def predict_tags(request: PredictionRequest):
     """
     if app.model is None:
         raise HTTPException(
-            status_code=404,
-            detail="Model not found",
-            headers={"X-Error": "No model found"},
+            status_code=500,
+            detail="Model not available",
+            headers={"X-Error": "Model not available"},
         )
     result = app.model.transform([request.title])
     return PredictionResult(

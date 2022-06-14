@@ -8,7 +8,7 @@ from common.color_module import ColorsPrinter
 from learning_service.var_names import VarNames
 from learning_service.text_preprocessing import main as preprocess_main
 from learning_service.text_classification import main as classification_main
-from learning_service.get_data import copy_data
+from learning_service.get_data import copy_data, copy_data_from_resources
 from learning_service.dir_util import get_directory_from_settings_or_default
 from google.cloud.pubsub_v1.subscriber.message import Message
 from common.pubsub import subscribe_to_topic, publish_to_topic
@@ -102,7 +102,6 @@ class LearningApp(FastAPI):
         self.streaming_pull_future = streaming_pull_future
         self.title = "Learning Service API"
         self.description = "Learning Service API for learning models 📙🤖"
-        self.version="0.0.1"
 
         prometheus_client.start_http_server(9010)
         
@@ -124,9 +123,9 @@ async def ping():
 @app.get('/api/learn')
 async def learn():
     """
-    Used to test the connection.
+    Used to execute learning on the training data from the resources.
     """
-    copy_data()
+    copy_data_from_resources()
     preprocess_main()
     classification_main(bucket_upload=True)
     with open(
