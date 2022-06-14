@@ -143,4 +143,9 @@ async def learn():
         "name": settings[VarNames.MODEL_OBJECT_KEY.value],
         "evaluation": evaluation_data
     }
+    app.publish_client.publish(
+        app.publish_topic,
+        b'New model data',
+        **data_to_publish
+    )
     return data_to_publish
