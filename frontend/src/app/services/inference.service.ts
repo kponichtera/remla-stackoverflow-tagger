@@ -26,7 +26,7 @@ export class InferenceService {
   constructor(private http: HttpClient) { }
 
   checkModelPresence(): Observable<boolean> {
-    return this.http.get<boolean>('api/modelPresent');
+    return this.http.get<boolean>('api/model_present');
   }
 
   predict(request: PredictionRequest): Observable<PredictionResult> {
