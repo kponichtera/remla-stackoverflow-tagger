@@ -23,6 +23,7 @@ tasks:
   clean: "rm -rf {{.INTERFACE_SERVICE_VENV}}"
   lint: "pylint --rcfile=interface_service/.pylintrc interface_service"
   test: "pytest -n auto interface_service"
+  locust: "locust --config=locust.conf"
   build_builder:
     cmds: [ "docker build --target builder -f interface_service/Dockerfile -t {{.INTERFACE_SERVICE_BUILDER_IMAGE}} ." ]
   build_docker:
