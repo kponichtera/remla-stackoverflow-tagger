@@ -27,8 +27,9 @@ learningService:
     # If not set and create is true, a name is generated using the fullname template
     name: ""
   podAnnotations: {}
-  podSecurityContext: { }
-    # fsGroup: 2000
+  podSecurityContext:
+    # Used to let the containerized process to write to the attached volumes
+    fsGroup: 1000
   securityContext: { }
     # capabilities:
     #   drop:
