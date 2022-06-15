@@ -1,8 +1,12 @@
 name: Deploy
 
 on:
-  release:
-    types: [created]
+  workflow_call:
+    inputs:
+      chart_version:
+        description: 'Release tag to deploy'
+        type: string
+        required: true
   workflow_dispatch:
     inputs:
       tag:
@@ -29,7 +33,7 @@ jobs:
         name: Determine version from tag
         uses: ./.github/actions/read_tag
         with:
-          tag: ${{ inputs.tag != 0 && inputs.tag || github.ref_name }}
+          tag: ${{ inputs.tag }}
       - name: Deploy Terraform
         uses: ./.github/actions/deploy
         with:
@@ -51,7 +55,7 @@ jobs:
         name: Determine version from tag
         uses: ./.github/actions/read_tag
         with:
-          tag: ${{ inputs.tag != 0 && inputs.tag || github.ref_name }}
+          tag: ${{ inputs.tag }}
       - name: Deploy Terraform
         uses: ./.github/actions/deploy
         with:
