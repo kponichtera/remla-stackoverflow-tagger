@@ -2,22 +2,21 @@
 Preprocess the data to be trained by the learning algorithm.
 Creates files `preprocessor.joblib` and `preprocessed_data.joblib`
 """
+import json
 import os
 import re
+
 import nltk
-import json
 import numpy as np
 import pandas as pd
-
+from joblib import dump, load
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import MultiLabelBinarizer
-from joblib import dump, load
 
+from learning_service.config import settings, VarNames
 from learning_service.read_data import read_data_from_file, read_unlabeled_data_from_file
-from learning_service.var_names import VarNames
-from learning_service.dir_util import get_directory_from_settings_or_default
 
 nltk.download('stopwords')
 
@@ -28,11 +27,7 @@ STOP_WORDS = set(stopwords.words('english'))
 PREPROCESSOR_DATA_FILE_NAME = "preprocessor_data.joblib"
 PREPROCESSOR_LABELS_FILE_NAME = "preprocessor_labels.joblib"
 
-setting_dir = VarNames.OUTPUT_DIR
-OUTPUT_PATH = get_directory_from_settings_or_default(
-    setting_dir,
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
-)
+OUTPUT_PATH = settings[VarNames.OUTPUT_DIR.value]
 
 np.random.seed(12321)
 

@@ -20,7 +20,10 @@ tasks:
     cmds:
       - "{{.LEARNING_SERVICE_VENV}}/bin/pip install --upgrade pip wheel"
       - "{{.LEARNING_SERVICE_VENV}}/bin/pip install -r learning_service/requirements.txt"
-  clean: "rm -rf {{.LEARNING_SERVICE_VENV}}"
+  clean:
+    - "rm -rf {{.LEARNING_SERVICE_VENV}}"
+    - "rm -rf learning_service/output"
+    - "rm -rf learning_service/dataset"
   lint: "pylint --rcfile=learning_service/.pylintrc learning_service"
   test: "pytest -n auto learning_service"
   mllint: "mllint learning_service"

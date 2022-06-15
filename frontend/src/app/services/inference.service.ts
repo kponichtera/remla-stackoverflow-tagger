@@ -25,8 +25,8 @@ export class InferenceService {
 
   constructor(private http: HttpClient) { }
 
-  ping(): Observable<any> {
-    return this.http.get('api/ping');
+  checkModelPresence(): Observable<boolean> {
+    return this.http.get<boolean>('api/model_present');
   }
 
   predict(request: PredictionRequest): Observable<PredictionResult> {

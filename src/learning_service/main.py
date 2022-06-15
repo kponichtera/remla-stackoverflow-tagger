@@ -1,34 +1,28 @@
 """Main file for the FastAPI application."""
-import time
-from fastapi import FastAPI
-from google.cloud import pubsub_v1
-from learning_service.config import settings
-from common.color_module import ColorsPrinter
-from learning_service.var_names import VarNames
-from learning_service.text_classification import main
-from google.cloud.pubsub_v1.subscriber.message import Message
-from common.pubsub import subscribe_to_topic, publish_to_topic
-import prometheus_client
+import json
+import os
+from threading import Thread
 
-def dummy_wait_and_send():
-    """Stub method to publish a message.
+import prometheus_client
+from fastapi import FastAPI
+from google.cloud.pubsub_v1.subscriber.message import Message
+
+from common.logger import Logger
+from common.pubsub import subscribe_to_topic, publish_to_topic
+from learning_service.config import settings, VarNames
+from learning_service.get_data import copy_data, copy_data_from_resources
+from learning_service.text_classification import main as classification_main
+from learning_service.text_preprocessing import main as preprocess_main
+
+OUTPUT_PATH = settings[VarNames.OUTPUT_DIR.value]
+
+def train_and_send():
+    """Method to train and send a model.
     """
-    time.sleep(5)
-    # EVERYTHING must be a string
-    data_to_publish = {
-        "name": "bbe46356-2a38-4554-a18d-8a239bb742d0_model.joblib",
-        "evaluation": str({
-            "accuracy_score": 0.3419,
-            "f1_score": 0.6530515001729919,
-            "average_precision_score": 0.36209831252366137,
-            "roc_auc": 0.9195568919487617
-        })
-    }
-    app.publish_client.publish(
-        app.publish_topic,
-        b'New model data',
-        **data_to_publish
-    )
+    copy_data()
+    preprocess_main()
+    classification_main(bucket_upload=True)
+    app.publish_client.publish(app.publish_topic, b'New model available')
 
 def receive_msg_callback(message : Message):
     """Acknowledges a Pub/Sub message. Used in the `subscribe()` function.
@@ -37,9 +31,18 @@ def receive_msg_callback(message : Message):
         message (pubsub_v1.subscriber.message.Message): The message to acknowledge.
     """
     message.ack()
-    ColorsPrinter.log_print_info(f'💬✔️ Received message: {message} ')
-    dummy_wait_and_send()
-    ColorsPrinter.log_print_info('Sent model! ✔️')
+    Logger.info(f'💬✔️ Received message: {message} ')
+    train_and_send()
+    Logger.info('Sent model! ✔️')
+
+
+def get_result(streaming_pull_future):
+    """Wrapper function for getting results from Pub/Sub.
+
+    Args:
+        streaming_pull_future: The stream from which to get the results.
+    """
+    streaming_pull_future.result()
 
 
 class LearningApp(FastAPI):
@@ -76,9 +79,12 @@ class LearningApp(FastAPI):
         self.streaming_pull_future = streaming_pull_future
         self.title = "Learning Service API"
         self.description = "Learning Service API for learning models 📙🤖"
-        self.version="0.0.1"
 
         prometheus_client.start_http_server(9010)
+        
+        # Create a new thread for the blockinb Pub/Sub call and start it
+        pubsub_thread = Thread(target=get_result, args=(streaming_pull_future,), daemon=True)
+        pubsub_thread.start()
 
 app = LearningApp()
 
@@ -88,3 +94,29 @@ async def ping():
     Used to test the connection.
     """
     return {}
+
+
+
+@app.get('/api/learn')
+async def learn():
+    """
+    Used to execute learning on the training data from the resources.
+    """
+    copy_data_from_resources()
+    preprocess_main()
+    classification_main(bucket_upload=True)
+    with open(
+        os.path.join(
+            OUTPUT_PATH,
+            "evaluation.json"
+        ),
+        'r',
+        encoding='utf-8'
+        ) as f:
+        evaluation_data = json.load(f)
+
+    app.publish_client.publish(app.publish_topic, b'New model available')
+    return {
+        "name": settings[VarNames.MODEL_OBJECT_KEY.value],
+        "evaluation": evaluation_data
+    }

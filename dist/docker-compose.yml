@@ -1,5 +1,14 @@
 services:
-  learning_service:
+  learning-service-init:
+    image: busybox:1.35
+    entrypoint: >
+      sh -c "
+        chmod a+rwx /app/data
+      "
+    volumes:
+      - learning-service-data:/app/data
+  learning-service:
+    restart: on-failure
     build:
       context: src
       dockerfile: learning_service/Dockerfile
@@ -23,7 +32,11 @@ services:
       REMLA_PUBSUB_DATA_TOPIC_ID: "new-data"
       REMLA_PUBSUB_MODEL_TOPIC_ID: "new-model"
       REMLA_PUBSUB_SUBSCRIPTION_ID: "learning-service-new-model"
-  interface_service:
+    depends_on:
+      learning-service-init:
+        condition: service_completed_successfully
+  interface-service:
+    restart: on-failure
     build:
       context: src
       dockerfile: interface_service/Dockerfile
@@ -43,13 +56,14 @@ services:
       REMLA_PUBSUB_MODEL_TOPIC_ID: "new-model"
       REMLA_PUBSUB_SUBSCRIPTION_ID: "interface-service-new-model"
   frontend:
+    restart: on-failure
     build:
       context: frontend
     ports:
       - 8080:80
     environment:
       NGINX_ENVSUBST_TEMPLATE_DIR: /etc/nginx/templates/dev
-      INTERFACE_SERVICE_PROXY_PASS_URL: http://interface_service:8000
+      INTERFACE_SERVICE_PROXY_PASS_URL: http://interface-service:8000
 
 volumes:
   learning-service-data: {}

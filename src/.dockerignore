@@ -1,3 +1,6 @@
+learning_service/output
+learning_service/dataset
+
 **/*_venv
 
 **/.dvc/
@@ -152,3 +155,4 @@
 **/.pyre/
 
 **/.DS_STORE
+*.joblib
