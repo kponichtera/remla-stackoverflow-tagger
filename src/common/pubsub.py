@@ -5,7 +5,7 @@ import os
 import uuid
 from typing import Callable
 from google.api_core.exceptions import NotFound
-from common.color_module import ColorsPrinter
+from common.logger import Logger
 from google.cloud.pubsub_v1.subscriber.message import Message
 from google.cloud.pubsub_v1 import PublisherClient, SubscriberClient
 
@@ -17,20 +17,20 @@ def publish_to_topic(topic_path: str):
         topic_path (str): topic we want to publish to or just create a topic
     """
     publisher = PublisherClient()
-    colored_topic_path = ColorsPrinter.get_color_string(
+    colored_topic_path = Logger.get_color_string(
         topic_path,
-        ColorsPrinter.OK_BLUE
+        Logger.OK_BLUE
     )
     #with publisher:
     try:
         # Check if the topic exists
         publisher.get_topic(request={"topic": topic_path})
-        ColorsPrinter.log_print_warning(f'Topic {colored_topic_path} exists ⚠️')
+        Logger.info(f'Topic {colored_topic_path} exists ⚠️')
     except NotFound:
         # If the topic doesn't exist, create it
-        ColorsPrinter.log_print_info(f'Creating topic {colored_topic_path}')
+        Logger.info(f'Creating topic {colored_topic_path}')
         publisher.create_topic(request={"name": topic_path})
-        ColorsPrinter.log_print_info(f'Topic created {colored_topic_path} ✔️')
+        Logger.info(f'Topic created {colored_topic_path} ✔️')
     return publisher
 
 def subscribe_to_topic(pubsub_host : str, pubsub_project_id : str,
@@ -55,13 +55,13 @@ def subscribe_to_topic(pubsub_host : str, pubsub_project_id : str,
     """
     # Create the client
     if pubsub_host is not None:
-        colored_host = ColorsPrinter.get_color_string(pubsub_host, ColorsPrinter.OK_BLUE)
-        ColorsPrinter.log_print_info(
+        colored_host = Logger.get_color_string(pubsub_host, Logger.OK_BLUE)
+        Logger.info(
             f'Using PubSub emulator on host: {colored_host}'
         )
         os.environ["PUBSUB_EMULATOR_HOST"] = pubsub_host
 
-    ColorsPrinter.log_print_info('Connecting to Google Cloud PubSub')
+    Logger.info('Connecting to Google Cloud PubSub')
     subscriber = SubscriberClient()
 
     # Wrap the subscriber in a 'with' block to automatically call close() to
@@ -80,17 +80,17 @@ def subscribe_to_topic(pubsub_host : str, pubsub_project_id : str,
         pubsub_subscription_id + suffix)
     # If the subscription name is unique, no need
     # To check if the topic already exists.
-    colored_subscription_path = ColorsPrinter.get_color_string(
+    colored_subscription_path = Logger.get_color_string(
         subscription_path,
-        ColorsPrinter.OK_BLUE
+        Logger.OK_BLUE
     )
-    colored_topic_path = ColorsPrinter.get_color_string(
+    colored_topic_path = Logger.get_color_string(
         topic_path,
-        ColorsPrinter.OK_BLUE
+        Logger.OK_BLUE
     )
     if unique_subscription_name:
         # Create the subscription
-        ColorsPrinter.log_print_info(
+        Logger.info(
             f'Creating subscription {colored_subscription_path} on topic {colored_topic_path}'
         )
         subscriber.create_subscription(
@@ -103,21 +103,21 @@ def subscribe_to_topic(pubsub_host : str, pubsub_project_id : str,
             print(f'Subscription {colored_subscription_path} exists ⚠️')
         except NotFound:
             # If it does not exist, create the subscription
-            ColorsPrinter.log_print_info(
+            Logger.info(
                 f'Creating subscription {colored_subscription_path} on topic {colored_topic_path}'
             )
             subscriber.create_subscription(
                 request={"name": subscription_path, "topic": topic_path}
             )
     # Subscribe to the topic
-    ColorsPrinter.log_print_info(f'Subscribing to subscription {colored_subscription_path}')
+    Logger.info(f'Subscribing to subscription {colored_subscription_path}')
     try:
         streaming_pull_future = subscriber.subscribe(
             subscription_path,
             callback=rec_msg_callback,
             await_callbacks_on_shutdown=True
         )
-        ColorsPrinter.log_print_info(f'Subscribed to {colored_subscription_path} ✔️')
+        Logger.info(f'Subscribed to {colored_subscription_path} ✔️')
     except NotFound:
-        ColorsPrinter.log_print_fail(f'Failed to subscribe to {colored_subscription_path} ❌')
+        Logger.fail(f'Failed to subscribe to {colored_subscription_path} ❌')
     return subscriber, streaming_pull_future

@@ -2,7 +2,7 @@
 """
 from enum import Enum
 
-class ColorsPrinter(Enum):
+class Logger(Enum):
     """
     Color class.
     """
@@ -17,48 +17,48 @@ class ColorsPrinter(Enum):
     UNDERLINE = '\033[4m'
 
     @staticmethod
-    def log_print_info(text : str):
+    def info(text : str):
         """Method to print log information.
 
         Args:
             text (str): string to print
         """
-        print(f"{ColorsPrinter.OK_GREEN.value}INFO{ColorsPrinter.END_CHAR.value}:     {text}")
+        print(f"{Logger.OK_GREEN.value}INFO{Logger.END_CHAR.value}:     {text}")
 
     @staticmethod
-    def log_print_warning(text : str):
+    def warning(text : str):
         """Method to print a warning.
 
         Args:
             text (str): string to print
         """
-        print(f"{ColorsPrinter.WARNING.value}WARN{ColorsPrinter.END_CHAR.value}:     {text}")
+        print(f"{Logger.WARNING.value}WARN{Logger.END_CHAR.value}:     {text}")
 
     @staticmethod
-    def log_print_fail(text : str):
+    def fail(text : str):
         """Method to print a failure or warning.
 
         Args:
             text (str): string to print
         """
-        print(f"{ColorsPrinter.FAIL.value}ERROR{ColorsPrinter.END_CHAR.value}:     {text}")
+        print(f"{Logger.FAIL.value}ERROR{Logger.END_CHAR.value}:     {text}")
 
     @staticmethod
-    def log_print_custom(colored_text : str, color):
+    def log(colored_text : str, color):
         """Method to print with a custom color.
 
         Args:
             colored_text (str): string to print
-            color (ColorsPrinter): color from ColorsPrinter class
+            color (Logger): color from ColorsPrinter class
         """
-        print(f"{color.value}{colored_text}{ColorsPrinter.END_CHAR.value}")
+        print(f"{color.value}{colored_text}{Logger.END_CHAR.value}")
 
     @staticmethod
-    def get_color_string(text_to_color : str, color):
+    def get_color_string(text_to_color : str, color) -> str:
         """Add color string.
 
         Args:
             text_to_color (str): _description_
-            color (ColorsPrinter): color from ColorsPrinter class
+            color (Logger): color from ColorsPrinter class
         """
-        return f"{color.value}{text_to_color}{ColorsPrinter.END_CHAR.value}"
+        return f"{color.value}{text_to_color}{Logger.END_CHAR.value}"

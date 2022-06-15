@@ -7,7 +7,7 @@ import prometheus_client
 from fastapi import FastAPI
 from google.cloud.pubsub_v1.subscriber.message import Message
 
-from common.color_module import ColorsPrinter
+from common.logger import Logger
 from common.pubsub import subscribe_to_topic, publish_to_topic
 from learning_service.config import settings, VarNames
 from learning_service.get_data import copy_data, copy_data_from_resources
@@ -31,9 +31,9 @@ def receive_msg_callback(message : Message):
         message (pubsub_v1.subscriber.message.Message): The message to acknowledge.
     """
     message.ack()
-    ColorsPrinter.log_print_info(f'💬✔️ Received message: {message} ')
+    Logger.info(f'💬✔️ Received message: {message} ')
     train_and_send()
-    ColorsPrinter.log_print_info('Sent model! ✔️')
+    Logger.info('Sent model! ✔️')
 
 
 def get_result(streaming_pull_future):

@@ -4,7 +4,7 @@ Copy data into dataset directory.
 import os
 import shutil
 
-from common.color_module import ColorsPrinter
+from common.logger import Logger
 from learning_service.config import settings, VarNames
 
 DATASET_DIR = settings[VarNames.DATASET_FOR_TRAINING_DIR.value]
@@ -18,7 +18,7 @@ def copy_data():
     a `dataset/` folder which dvc will read from.
     """
     if not os.path.exists(DATASET_DIR):
-        ColorsPrinter.log_print_info(f'Directory {DATASET_DIR} does not exist - creating')
+        Logger.info(f'Directory {DATASET_DIR} does not exist - creating')
         os.mkdir(DATASET_DIR)
     shutil.copytree(DATA_PATH, DATASET_DIR, dirs_exist_ok=True)
 
@@ -29,7 +29,7 @@ def copy_data_from_resources():
     a `dataset/` folder which dvc will read from.
     """
     if not os.path.exists(DATASET_DIR):
-        ColorsPrinter.log_print_info(f'Directory {DATASET_DIR} does not exist - creating')
+        Logger.info(f'Directory {DATASET_DIR} does not exist - creating')
         os.mkdir(DATASET_DIR)
     shutil.copytree(RESOURCES_DATA_PATH, DATASET_DIR, dirs_exist_ok=True)
 

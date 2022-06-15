@@ -8,7 +8,7 @@ import prometheus_client
 
 from interface_service.config import settings, VarNames
 
-from common.color_module import ColorsPrinter
+from common.logger import Logger
 from common.pubsub import subscribe_to_topic, publish_to_topic
 from common.bucket import download_model, load_model
 
@@ -19,7 +19,7 @@ def receive_msg_callback(message : Message):
         message (pubsub_v1.subscriber.message.Message): The message to acknowledge.
     """
     message.ack()
-    ColorsPrinter.log_print_info(f'💬✔️ Received message: {message} ')
+    Logger.info(f'💬✔️ Received message: {message} ')
 
 def get_callback(app_object : FastAPI):
     """Creates a callback that updates the model from object storage.
