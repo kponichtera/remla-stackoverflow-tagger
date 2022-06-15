@@ -11,10 +11,12 @@ def get_directory_from_settings_or_default(setting: Enum, default: str):
     or a default fallback.
 
     Args:
-        setting (str): dynaconf setting
+        setting (Enum): dynaconf setting
         default (str): default fallback path.
     """
     settings_value = settings.get(setting.value)
+    if os.path.exists(settings_value):
+        return settings_value
     if settings_value is None:
         return default
     full_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), settings_value)
