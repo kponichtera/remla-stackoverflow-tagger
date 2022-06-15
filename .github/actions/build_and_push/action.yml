@@ -36,7 +36,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: /tmp/.buildx-cache
-        key: ${{ inputs.cache_key }}-${{ github.sha }}
+        key: ${{ inputs.cache_key }}
         restore-keys: |
           ${{ inputs.cache_key }}
           ${{ runner.os }}-${{ github.workflow }}-${{ github.job }}-
