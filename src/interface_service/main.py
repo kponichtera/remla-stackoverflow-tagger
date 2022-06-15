@@ -8,7 +8,6 @@ import prometheus_client
 
 from interface_service.config import settings, VarNames
 
-from common.logger import Logger
 from common.pubsub import subscribe_to_topic, publish_to_topic
 from common.bucket import download_model, load_model
 
