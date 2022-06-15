@@ -10,16 +10,16 @@ inputs:
 outputs:
   version:
     description: Latest git tag (with semver-friendly suffix in case there was no tag with the current commit)
-    value: ${{ steps.determine-version.outputs.version }}
+    value: ${{ steps.version-from-git.outputs.version != 0 && steps.version-from-git.outputs.version || steps.version-from-input.outputs.version }}
 
 runs:
   using: composite
   steps:
-    - id: determine-version
-      if: inputs.tag != ""
+    - id: version-from-input
+      if: inputs.tag != 0
       shell: bash
       run: echo "::set-output name=verison::$(echo '${{ inputs.tag }}' | sed 's/v//')"
-    - id: determine-version
-      if: inputs.tag == ""
+    - id: version-from-git
+      if: inputs.tag == 0
       shell: bash
       run: echo "::set-output name=version::$(git describe --tags --always --first-parent | sed 's/v//')"
