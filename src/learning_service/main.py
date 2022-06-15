@@ -89,7 +89,7 @@ class LearningApp(FastAPI):
 app = LearningApp()
 
 @app.get('/api/ping')
-async def ping():
+def ping():
     """
     Used to test the connection.
     """
@@ -98,7 +98,7 @@ async def ping():
 
 
 @app.get('/api/learn')
-async def learn():
+def learn():
     """
     Used to execute learning on the training data from the resources.
     """

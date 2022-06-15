@@ -33,11 +33,9 @@ resource "helm_release" "release" {
   repository   = "https://remla2022.github.io/stackoverflow-tagger"
   namespace    = var.namespace
   force_update = true
+  atomic       = true
 
   values = [local.chart_values]
-
-  # TODO: Consider changing to true if all services are able to startup immediately
-  wait = false
 
   depends_on = [kubernetes_secret.application_service_account_key]
 }

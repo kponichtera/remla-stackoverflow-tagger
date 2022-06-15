@@ -40,7 +40,7 @@ config:
     dataSubscriptionId: "new-data"
     newModelSubscriptionId: "new-model"
   objectStorage:
-    endpoint: "https://storage.googleapis.com"
+    endpoint: "storage.googleapis.com"
     accessKey: ${DATA_MODEL_BUCKET_ACCESS_KEY}
     secretKey: ${DATA_MODEL_BUCKET_SECRET_KEY}
     tls: true

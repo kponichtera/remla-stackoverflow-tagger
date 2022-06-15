@@ -12,15 +12,6 @@ from common.logger import Logger
 from common.pubsub import subscribe_to_topic, publish_to_topic
 from common.bucket import download_model, load_model
 
-def receive_msg_callback(message : Message):
-    """Acknowledges a Pub/Sub message. Used in the `subscribe()` function.
-
-    Args:
-        message (pubsub_v1.subscriber.message.Message): The message to acknowledge.
-    """
-    message.ack()
-    Logger.info(f'💬✔️ Received message: {message} ')
-
 def get_callback(app_object : FastAPI):
     """Creates a callback that updates the model from object storage.
 
@@ -114,14 +105,14 @@ class InferenceApp(FastAPI):
 app = InferenceApp()
 
 @app.get('/api/ping')
-async def ping():
+def ping():
     """
     Used to test the connection.
     """
     return {}
 
 @app.get('/api/model_present')
-async def model_present():
+def model_present():
     """
     Used to check if the model is present and application can be used.
     """
@@ -143,7 +134,7 @@ class PredictionResult(BaseModel):
 
 
 @app.post('/api/predict')
-async def predict_tags(request: PredictionRequest):
+def predict_tags(request: PredictionRequest):
     """
     Create a prediction of tags for the given StackOverflow title.
 
@@ -174,7 +165,7 @@ class CorrectionRequest(BaseModel):
 
 
 @app.post('/api/correct', summary="Correct the tags to the model", )
-async def correct_prediction(request: CorrectionRequest):
+def correct_prediction(request: CorrectionRequest):
     """
     Correct a prediction of tags for models to learn in the future.
 
