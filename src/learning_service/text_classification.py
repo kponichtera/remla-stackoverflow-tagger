@@ -1,31 +1,26 @@
 """
 Train the model.
 """
+import json
 import os
 import uuid
-import json
-import scipy
-import pandas as pd
-from learning_service.var_names import VarNames
-from learning_service.dir_util import get_directory_from_settings_or_default
 from typing import List, Any
+
+import pandas as pd
+import scipy
 from joblib import load, dump
-from learning_service.read_data import read_data_from_file
-from learning_service.config import settings
-from learning_service.var_names import VarNames
-from sklearn.multiclass import OneVsRestClassifier
+from prometheus_client import Gauge
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, f1_score, average_precision_score, roc_auc_score
+from sklearn.multiclass import OneVsRestClassifier
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import FunctionTransformer
-from sklearn.metrics import accuracy_score, f1_score, average_precision_score, roc_auc_score
-from prometheus_client import Gauge
-from common.bucket import authenticate, upload_model
 
-setting_dir = VarNames.OUTPUT_DIR
-OUTPUT_PATH = get_directory_from_settings_or_default(
-    setting_dir,
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
-)
+from common.bucket import upload_model
+from learning_service.config import settings, VarNames
+from learning_service.read_data import read_data_from_file
+
+OUTPUT_PATH = settings[VarNames.OUTPUT_DIR.value]
 
 TRAIN_DATA_FILE_PATH = os.path.join(OUTPUT_PATH, "train_preprocessed_data.joblib")
 TRAIN_LABELS_FILE_PATH = os.path.join(OUTPUT_PATH, "train_preprocessed_labels.joblib")

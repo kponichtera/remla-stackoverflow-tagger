@@ -3,18 +3,14 @@ File that presents and shows information about data and statistics about it.
 """
 import os
 from ast import literal_eval
+
 import pandas as pd
 import tensorflow_data_validation as tfdv
 from termgraph import termgraph as tg
 
-from learning_service.var_names import VarNames
-from learning_service.dir_util import get_directory_from_settings_or_default
+from learning_service.config import settings, VarNames
 
-setting_dir = VarNames.DATASET_FOR_TRAINING_DIR
-DATASET_DIR = get_directory_from_settings_or_default(
-    setting_dir,
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataset")
-)
+DATASET_DIR = settings[VarNames.DATASET_FOR_TRAINING_DIR.value]
 
 TRAIN_DATA_FILE = 'train.tsv'
 VALIDATION_DATA_FILE = 'validation.tsv'

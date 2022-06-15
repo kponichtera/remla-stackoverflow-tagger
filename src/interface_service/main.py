@@ -6,8 +6,7 @@ from pydantic import BaseModel
 from google.cloud.pubsub_v1.subscriber.message import Message
 import prometheus_client
 
-from interface_service.config import settings
-from interface_service.var_names import VarNames
+from interface_service.config import settings, VarNames
 
 from common.color_module import ColorsPrinter
 from common.pubsub import subscribe_to_topic, publish_to_topic
@@ -109,7 +108,7 @@ class InferenceApp(FastAPI):
         prometheus_client.start_http_server(9000)
 
         # Create a new thread for the blockinb Pub/Sub call and start it
-        pubsub_thread = Thread(target=get_result, args=(streaming_pull_future,))
+        pubsub_thread = Thread(target=get_result, args=(streaming_pull_future,), daemon=True)
         pubsub_thread.start()
 
 app = InferenceApp()
