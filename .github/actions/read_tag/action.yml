@@ -1,14 +1,25 @@
 name: Read tag
 description: Read the latest Git tag
 
-outputs:
+inputs:
   tag:
+    description: "Tag to parse. Will be taken from Git if not provided"
+    required: false
+    default: ""
+
+outputs:
+  version:
     description: Latest git tag (with semver-friendly suffix in case there was no tag with the current commit)
-    value: ${{ steps.tag.outputs.tag }}
+    value: ${{ steps.determine-version.outputs.version }}
 
 runs:
   using: composite
   steps:
-    - id: tag
+    - id: determine-version
+      if: inputs.tag != ""
       shell: bash
-      run: echo "::set-output name=tag::$(git describe --tags --always --first-parent | sed 's/v//')"
+      run: echo "::set-output name=verison::$(echo '${{ inputs.tag }}' | sed 's/v//')"
+    - id: determine-version
+      if: inputs.tag == ""
+      shell: bash
+      run: echo "::set-output name=version::$(git describe --tags --always --first-parent | sed 's/v//')"

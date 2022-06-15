@@ -1,16 +1,12 @@
 name: Deploy
 
 on:
-  workflow_call:
-    inputs:
-      chart_version:
-        description: 'Version of Helm Chart to deploy'
-        type: string
-        required: true
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
-      chart_version:
-        description: 'Version of Helm Chart to deploy'
+      tag:
+        description: 'Release tag to deploy'
         type: string
         required: true
       environment:
@@ -29,12 +25,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: docker/setup-buildx-action@v2
+      - id: version
+        name: Determine version from tag
+        uses: ./.github/actions/read_tag
+        with:
+          tag: ${{ inputs.tag != 0 && inputs.tag || github.ref_name }}
       - name: Deploy Terraform
         uses: ./.github/actions/deploy
         with:
           project_id: remla2022-test
           tfvars_file: test.tfvars
           terraform_sa_key_base64: ${{ secrets.TERRAFORM_SA_KEY_BASE64 }}
+          chart_version: ${{ steps.version.outputs.version }}
   deploy_production:
     name: 'Deploy production'
     # inputs.environment equal to 0 means that the workflow was executed with workflow_call
@@ -45,9 +47,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: docker/setup-buildx-action@v2
+      - id: version
+        name: Determine version from tag
+        uses: ./.github/actions/read_tag
+        with:
+          tag: ${{ inputs.tag != 0 && inputs.tag || github.ref_name }}
       - name: Deploy Terraform
         uses: ./.github/actions/deploy
         with:
           project_id: remla2022-prod
           tfvars_file: production.tfvars
           terraform_sa_key_base64: ${{ secrets.TERRAFORM_SA_KEY_BASE64 }}
+          chart_version: ${{ steps.version.outputs.version }}

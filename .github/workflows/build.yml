@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ master ]
   push:
-    tags: [ 'v*.*.*' ]
+    branches: [ master ]
 
 env:
   IMAGE_NAME_BASE: ghcr.io/${{ github.repository }}
@@ -74,7 +74,7 @@ jobs:
   helm:
     name: Package and publish Helm Chart
     runs-on: ubuntu-20.04
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && github.ref_type == 'tag'
     needs:
       - learning-service
       - interface-service
@@ -109,20 +109,10 @@ jobs:
         uses: ./.github/actions/builder_run
         with:
           image: ${{ env.HELM_BUILDER_NAME }}
-          command: task helm:package VERSION=${{ steps.version.outputs.tag }}
+          command: task helm:package VERSION=${{ steps.version.outputs.version }}
       - name: Upload release
         run: cr upload
         # Necessary until https://github.com/helm/chart-releaser/issues/187 is fixed
       - run: mkdir .cr-index
       - name: Update Helm repository index
         run: cr index --push
-    outputs:
-      chart_version: ${{ steps.version.outputs.tag }}
-  deploy:
-    if: github.event_name != 'pull_request'
-    needs: [helm]
-    uses: ./.github/workflows/deploy.yml
-    secrets: inherit
-    with:
-      chart_version: ${{ needs.helm.outputs.chart_version }}
-
