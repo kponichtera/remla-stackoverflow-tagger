@@ -22,9 +22,9 @@ module "data_model_bucket" {
   depends_on = [module.gcloud_services]
 }
 
-module "pubsub_feedback" {
+module "pubsub_new_data" {
   source                     = "../modules/gcloud-pubsub"
-  name                       = "feedback"
+  name                       = "new-data"
   message_retention_duration = "432000s" # 5 days
 
   depends_on = [module.gcloud_services]
@@ -36,6 +36,14 @@ module "pubsub_new_model" {
   message_retention_duration = "3600s" # 1 hour
 
   depends_on = [module.gcloud_services]
+}
+
+module "application_service_account" {
+  source = "../modules/gcloud-application-service-account"
+  name   = "stackoverflow-tagger-sa"
+
+  new_data_topic_name  = module.pubsub_new_data.name
+  new_model_topic_name = module.pubsub_new_model.name
 }
 
 module "ingress_address" {

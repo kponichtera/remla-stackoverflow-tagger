@@ -14,10 +14,20 @@ module "prometheus" {
 
 module "stackoverflow_tagger_helm_chart" {
   source                           = "../modules/helm-stackoverflow-tagger"
-  ingress_static_ip_name           = data.terraform_remote_state.gcloud.outputs.ingress_static_ip_name
   chart_version                    = var.chart_version
   ingress_host                     = var.ingress_host
   ingress_managed_certificate_name = module.managed_certificate.name
+
+  gcloud_project_id                      = var.project_id
+  ingress_static_ip_name                 = data.terraform_remote_state.gcloud.outputs.ingress_static_ip_name
+  application_service_account_key_base64 = data.terraform_remote_state.gcloud.outputs.application_service_account_key_base64
+
+  data_model_bucket_name       = data.terraform_remote_state.gcloud.outputs.data_model_bucket_name
+  data_model_bucket_access_key = data.terraform_remote_state.gcloud.outputs.data_model_bucket_access_key
+  data_model_bucket_secret_key = data.terraform_remote_state.gcloud.outputs.data_model_bucket_secret_key
+
+  pubsub_new_data_topic_name  = data.terraform_remote_state.gcloud.outputs.pubsub_new_data_topic_name
+  pubsub_new_model_topic_name = data.terraform_remote_state.gcloud.outputs.pubsub_new_model_topic_name
 }
 
 module "managed_certificate" {

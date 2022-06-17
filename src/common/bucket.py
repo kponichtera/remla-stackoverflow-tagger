@@ -24,7 +24,6 @@ def authenticate(object_storage_endpoint : str,
     Returns:
         Minio: The Minio client
     """
-
     # Get credentials from env variables
     return Minio(
         object_storage_endpoint,

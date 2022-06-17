@@ -23,3 +23,10 @@ Create the name of the service account to use
 {{- default "default" .Values.learningService.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+ConfigMap name.
+*/}}
+{{- define "stackoverflow-tagger.learningService.configMap" -}}
+{{- printf "%s-config" (include "stackoverflow-tagger.learningService.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}

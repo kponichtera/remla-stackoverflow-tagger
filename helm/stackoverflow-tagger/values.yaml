@@ -27,8 +27,9 @@ learningService:
     # If not set and create is true, a name is generated using the fullname template
     name: ""
   podAnnotations: {}
-  podSecurityContext: { }
-    # fsGroup: 2000
+  podSecurityContext:
+    # Used to let the containerized process to write to the attached volumes
+    fsGroup: 1000
   securityContext: { }
     # capabilities:
     #   drop:
@@ -146,3 +147,22 @@ frontend:
   nodeSelector: { }
   tolerations: [ ]
   affinity: { }
+
+config:
+  gcloud:
+    # Create secret with the sa.json data field, containing the JSON service account key
+    serviceAccountKeySecret: ""
+    serviceAccountKeySecretKey: "sa.json"
+  pubsub:
+    projectId: ""
+    dataTopicId: ""
+    modelTopicId: ""
+    dataSubscriptionId: ""
+    newModelSubscriptionId: ""
+  objectStorage:
+    endpoint: ""
+    accessKey: ""
+    secretKey: ""
+    tls: false
+    bucketName: ""
+    modelObjectKey: "model.joblib"

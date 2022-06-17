@@ -31,12 +31,11 @@ VALIDATION_LABELS_FILE_PATH = os.path.join(OUTPUT_PATH, "val_preprocessed_labels
 LABEL_PREPROCESSOR = os.path.join(OUTPUT_PATH, "preprocessor_labels.joblib")
 DATA_PREPROCESSOR = os.path.join(OUTPUT_PATH, "preprocessor_data.joblib")
 
-ACCURACY_SCORE = Gauge('accuracy_score', 'Model accuracy score')
-F1_SCORE = Gauge('f1_score', 'F1-score')
-AVERAGE_PRECISION_SCORE = Gauge('average_precision_score', 'Average precision score')
-ROC_AUC = Gauge('roc_auc', 'Area under the Receiver operating characteristic curve')
-LATEST_MODEL_UPDATE = Gauge('latest_model_update', 'Unix timestamp of the latest model update time')
-
+ACCURACY_SCORE = Gauge('stackoverflow_tagger_accuracy_score', 'Model accuracy score')
+F1_SCORE = Gauge('stackoverflow_tagger_f1_score', 'F1-score')
+AVERAGE_PRECISION_SCORE = Gauge('stackoverflow_tagger_average_precision_score', 'Average precision score')
+ROC_AUC = Gauge('stackoverflow_tagger_roc_auc', 'Area under the Receiver operating characteristic curve')
+LATEST_MODEL_UPDATE = Gauge('stackoverflow_tagger_latest_model_update', 'Unix timestamp of the latest model update time')
 
 def train_classifier(X_train, y_train, penalty='l1', C=1.0):
     """Create and fit LogisticRegression wrapped into OneVsRestClassifier

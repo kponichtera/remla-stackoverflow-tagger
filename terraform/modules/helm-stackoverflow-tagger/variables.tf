@@ -27,3 +27,25 @@ variable "interface_service_replica_count" {
 variable "frontend_replica_count" {
   default = "3"
 }
+
+variable "gcloud_project_id" {
+}
+
+variable "application_service_account_key_base64" {
+}
+
+variable "data_model_bucket_name" {
+}
+
+variable "data_model_bucket_access_key" {
+}
+
+variable "data_model_bucket_secret_key" {
+}
+
+variable "pubsub_new_data_topic_name" {
+}
+
+variable "pubsub_new_model_topic_name" {
+}
+

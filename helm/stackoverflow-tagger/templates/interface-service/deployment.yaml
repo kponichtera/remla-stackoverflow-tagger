@@ -27,15 +27,28 @@ spec:
       serviceAccountName: {{ include "stackoverflow-tagger.interfaceService.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.interfaceService.podSecurityContext | nindent 8 }}
+      volumes:
+        - name: gcloud-service-account
+          secret:
+            secretName: {{ .Values.config.gcloud.serviceAccountKeySecret | quote }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.interfaceService.securityContext | nindent 12 }}
           image: "{{ .Values.interfaceService.image.repository }}:{{ .Values.interfaceService.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.interfaceService.image.pullPolicy }}
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /app/gcloud_sa/{{ .Values.config.gcloud.serviceAccountKeySecretKey }}
+          volumeMounts:
+            - name: gcloud-service-account
+              mountPath: /app/gcloud_sa
           ports:
             - name: http
               containerPort: 8000
+              protocol: TCP
+            - name: metrics
+              containerPort: 9000
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -45,6 +58,11 @@ spec:
             httpGet:
               path: /api/ping
               port: http
+          envFrom:
+            - secretRef:
+                name: {{ include "stackoverflow-tagger.interfaceService.configMap" . }}
+            - configMapRef:
+                name: {{ include "stackoverflow-tagger.interfaceService.configMap" . }}
           resources:
             {{- toYaml .Values.interfaceService.resources | nindent 12 }}
       {{- with .Values.interfaceService.nodeSelector }}

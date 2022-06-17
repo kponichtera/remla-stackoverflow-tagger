@@ -25,7 +25,6 @@ resource "google_storage_bucket_iam_member" "service_account_member" {
   member = "serviceAccount:${google_service_account.service_account.email}"
 }
 
-# HMAC key
 resource "google_storage_hmac_key" "key" {
   service_account_email = google_service_account.service_account.email
 }
