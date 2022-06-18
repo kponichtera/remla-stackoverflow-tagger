@@ -15,3 +15,5 @@ development:
   PUBSUB_DATA_TOPIC_ID: new-data
   PUBSUB_MODEL_TOPIC_ID: new-model
   PUBSUB_SUBSCRIPTION_ID: learning-service-new-model
+  PUBSUB_DATA_TEMP_FILE: ./learning_service/incoming.tsv
+  LEARNING_MESSAGE_THRESHOLD: 10

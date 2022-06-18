@@ -28,6 +28,8 @@ class VarNames(Enum):
     PUBSUB_DATA_TOPIC_ID = "PUBSUB_DATA_TOPIC_ID"
     PUBSUB_MODEL_TOPIC_ID = "PUBSUB_MODEL_TOPIC_ID"
     PUBSUB_SUBSCRIPTION_ID = "PUBSUB_SUBSCRIPTION_ID"
+    LEARNING_MESSAGE_THRESHOLD = "LEARNING_MESSAGE_THRESHOLD"
+    PUBSUB_DATA_TEMP_FILE = "PUBSUB_DATA_TEMP_FILE"
 
 
 settings = Dynaconf(
@@ -55,6 +57,8 @@ settings.validators.register(
     Validator(VarNames.BUCKET_NAME.value, must_exist=True),
     Validator(VarNames.MODEL_OBJECT_KEY.value, must_exist=True),
     Validator(VarNames.MODEL_LOCAL_PATH.value, must_exist=True),
+    Validator(VarNames.LEARNING_MESSAGE_THRESHOLD.value, must_exist=True),
+    Validator(VarNames.PUBSUB_DATA_TEMP_FILE.value, must_exist=True),
 
     Validator(VarNames.PUBSUB_EMULATOR_HOST.value, default=None),
     Validator(VarNames.PUBSUB_PROJECT_ID.value, must_exist=True),

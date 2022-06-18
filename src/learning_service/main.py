@@ -1,7 +1,7 @@
 """Main file for the FastAPI application."""
 import json
 import os
-from threading import Thread
+from threading import Thread, Lock
 
 import prometheus_client
 from fastapi import FastAPI
@@ -24,16 +24,60 @@ def train_and_send():
     classification_main(bucket_upload=True)
     app.publish_client.publish(app.publish_topic, b'New model available')
 
-def receive_msg_callback(message : Message):
-    """Acknowledges a Pub/Sub message. Used in the `subscribe()` function.
+def get_callback(lock : Lock, message_threshold : int, temp_file : str, train_file : str):
+    """Generates a callback that processes the receives that by re-training
 
     Args:
-        message (pubsub_v1.subscriber.message.Message): The message to acknowledge.
+        lock (Lock): The lock used to ensure atomic operations on the files and models
+        message_threshold (int): The number of received messages required to trigger training
+        temp_file (str): The file in which to temprarily store the received messages
+        train_file (str): The file in which to move the messages for learning
     """
-    message.ack()
-    Logger.info(f'💬✔️ Received message: {message} ')
-    train_and_send()
-    Logger.info('Sent model! ✔️')
+
+    def receive_msg_callback(message : Message):
+        """Acknowledges a Pub/Sub message. Used in the `subscribe()` function.
+
+        Args:
+            message (pubsub_v1.subscriber.message.Message): The message to acknowledge.
+        """
+        message.ack()
+        Logger.info(f'💬✔️ Received message: {message} ')
+        lock.acquire()
+        try:
+            # Open the file and append to it
+            if not (os.path.exists(temp_file) and os.path.isfile(temp_file)):
+                open(temp_file, 'w+').close()
+
+            with open(temp_file, 'a') as f:
+                tags = [tag[1:-1] for tag in message.attributes['actual'][1:-1].split(', ')]
+                line = f'{message.attributes["title"]}\t{tags}'
+                f.write(line + '\n')
+            
+            with open(temp_file, 'r') as f:
+                lines = f.readlines()
+
+            Logger.info(f'Wrote line {line} to {temp_file}. File now has {len(lines)} lines')
+
+            # If the threshold has been reached, trigger re-learning
+            if len(lines) >= message_threshold:
+                with open(train_file, 'r') as tf:
+                    Logger.info(f'Updating train data file. Old number of lines {len(tf.readlines())}')
+
+                with open(train_file, 'a') as tf:
+                    tf.writelines(lines)
+
+                with open(train_file, 'r') as tf:
+                    Logger.info(f'Now has {len(tf.readlines())}')
+                # Empty the temporary file
+                open(temp_file, 'w').close()
+                
+                Logger.info('Training')
+                # Perform learning
+                train_and_send()
+        finally:
+            lock.release()
+        Logger.info('Sent model! ✔️')
+    return receive_msg_callback
 
 
 def get_result(streaming_pull_future):
@@ -62,12 +106,19 @@ class LearningApp(FastAPI):
         pubsub_publish_topic_id = settings[VarNames.PUBSUB_MODEL_TOPIC_ID.value]
         pubsub_subscription_topic_id = settings[VarNames.PUBSUB_DATA_TOPIC_ID.value]
 
+        self.lock = Lock()
+
+        callback = get_callback(self.lock,
+                                settings[VarNames.LEARNING_MESSAGE_THRESHOLD.value],
+                                settings[VarNames.PUBSUB_DATA_TEMP_FILE.value],
+                                settings[VarNames.DATA_DIR.value] + "/train.tsv")
+
         subscriber, streaming_pull_future = subscribe_to_topic(
             pubsub_host,
             pubsub_project_id,
             pubsub_subscription_id,
             pubsub_subscription_topic_id,
-            receive_msg_callback,
+            callback,
             unique_subscription_name=True
         )
         self.publish_topic = subscriber.topic_path(
@@ -82,7 +133,7 @@ class LearningApp(FastAPI):
 
         prometheus_client.start_http_server(9010)
         
-        # Create a new thread for the blockinb Pub/Sub call and start it
+        # Create a new thread for the blocking Pub/Sub call and start it
         pubsub_thread = Thread(target=get_result, args=(streaming_pull_future,), daemon=True)
         pubsub_thread.start()
 
@@ -98,11 +149,7 @@ def ping():
 
 
 @app.get('/api/learn')
-<<<<<<< HEAD
-async def learn():
-=======
 def learn():
->>>>>>> master
     """
     Used to execute learning on the training data from the resources.
     """

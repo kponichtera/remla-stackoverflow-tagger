@@ -32,6 +32,8 @@ services:
       REMLA_PUBSUB_DATA_TOPIC_ID: "new-data"
       REMLA_PUBSUB_MODEL_TOPIC_ID: "new-model"
       REMLA_PUBSUB_SUBSCRIPTION_ID: "learning-service-new-model"
+      REMLA_PUBSUB_DATA_TEMP_FILE: /app/incoming.tsv
+      REMLA_LEARNING_MESSAGE_THRESHOLD: 100
     depends_on:
       learning-service-init:
         condition: service_completed_successfully
