@@ -6,25 +6,33 @@ from threading import Thread, Lock
 import prometheus_client
 from fastapi import FastAPI
 from google.cloud.pubsub_v1.subscriber.message import Message
+from sklearn.multiclass import OneVsRestClassifier
 
+from common.bucket import download_model, load_model
 from common.logger import Logger
 from common.pubsub import subscribe_to_topic, publish_to_topic
 from learning_service.config import settings, VarNames
 from learning_service.get_data import copy_data, copy_data_from_resources
 from learning_service.text_classification import main as classification_main
-from learning_service.text_preprocessing import main as preprocess_main
+from learning_service.text_preprocessing import main as preprocess_main, prepocess_incoming_data
 
 OUTPUT_PATH = settings[VarNames.OUTPUT_DIR.value]
 
-def train_and_send():
+def train_and_send(app : FastAPI, train_file = "train.tsv", model = None):
     """Method to train and send a model.
     """
     copy_data()
-    preprocess_main()
-    classification_main(bucket_upload=True)
+    if model is None:
+        preprocess_main(train_file=train_file)
+    else:
+        prepocess_incoming_data('/'.join(settings[VarNames.PREPROCESSOR_DATA_PATH.value].split('/')[:-1]),
+                                '/'.join(settings[VarNames.PREPROCESSOR_LABELS_PATH.value].split('/')[:-1]),
+                                settings[VarNames.PREPROCESSOR_LABELS_PATH.value].split('/')[-1],
+                                train_file)
+    classification_main(bucket_upload=True, classifier=model)
     app.publish_client.publish(app.publish_topic, b'New model available')
 
-def get_callback(lock : Lock, message_threshold : int, temp_file : str, train_file : str):
+def get_callback(lock : Lock, message_threshold : int, temp_file : str, train_file : str, app : FastAPI):
     """Generates a callback that processes the receives that by re-training
 
     Args:
@@ -46,7 +54,8 @@ def get_callback(lock : Lock, message_threshold : int, temp_file : str, train_fi
         try:
             # Open the file and append to it
             if not (os.path.exists(temp_file) and os.path.isfile(temp_file)):
-                open(temp_file, 'w+').close()
+                with open(temp_file, 'w+') as f:
+                    f.write("title\ttags\n")
 
             with open(temp_file, 'a') as f:
                 tags = [tag[1:-1] for tag in message.attributes['actual'][1:-1].split(', ')]
@@ -60,25 +69,19 @@ def get_callback(lock : Lock, message_threshold : int, temp_file : str, train_fi
 
             # If the threshold has been reached, trigger re-learning
             if len(lines) >= message_threshold:
-                with open(train_file, 'r') as tf:
-                    Logger.info(f'Updating train data file. Old number of lines {len(tf.readlines())}')
+                # Perform learning
+                train_and_send(app, temp_file.split('/')[-1], app.model)
 
-                with open(train_file, 'a') as tf:
-                    tf.writelines(lines)
-
-                with open(train_file, 'r') as tf:
-                    Logger.info(f'Now has {len(tf.readlines())}')
                 # Empty the temporary file
-                open(temp_file, 'w').close()
+                with open(temp_file, 'w') as f:
+                    f.write("title\ttags\n")
                 
                 Logger.info('Training')
-                # Perform learning
-                train_and_send()
+                
         finally:
             lock.release()
         Logger.info('Sent model! ✔️')
     return receive_msg_callback
-
 
 def get_result(streaming_pull_future):
     """Wrapper function for getting results from Pub/Sub.
@@ -111,7 +114,8 @@ class LearningApp(FastAPI):
         callback = get_callback(self.lock,
                                 settings[VarNames.LEARNING_MESSAGE_THRESHOLD.value],
                                 settings[VarNames.PUBSUB_DATA_TEMP_FILE.value],
-                                settings[VarNames.DATA_DIR.value] + "/train.tsv")
+                                settings[VarNames.DATA_DIR.value] + "/train.tsv",
+                                self)
 
         subscriber, streaming_pull_future = subscribe_to_topic(
             pubsub_host,
@@ -132,6 +136,35 @@ class LearningApp(FastAPI):
         self.description = "Learning Service API for learning models 📙🤖"
 
         prometheus_client.start_http_server(9010)
+        train_and_send(self)
+        bucket_auth = (
+            settings[VarNames.OBJECT_STORAGE_ACCESS_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_SECRET_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_TLS.value]
+        )
+        success = download_model(
+            settings[VarNames.CLASSIFIER_LOCAL_PATH.value],
+            settings[VarNames.BUCKET_NAME.value],
+            settings[VarNames.CLASSIFIER_OBJECT_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
+            *bucket_auth
+        )
+        success = download_model(
+            settings[VarNames.PREPROCESSOR_DATA_PATH.value],
+            settings[VarNames.BUCKET_NAME.value],
+            settings[VarNames.PREPROCESSOR_DATA_OBJECT_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
+            *bucket_auth
+        )
+        success = download_model(
+            settings[VarNames.PREPROCESSOR_LABELS_PATH.value],
+            settings[VarNames.BUCKET_NAME.value],
+            settings[VarNames.PREPROCESSOR_LABELS_OBJECT_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
+            *bucket_auth
+        )
+        if success :
+            self.model = load_model(settings[VarNames.CLASSIFIER_LOCAL_PATH.value])
         
         # Create a new thread for the blocking Pub/Sub call and start it
         pubsub_thread = Thread(target=get_result, args=(streaming_pull_future,), daemon=True)
