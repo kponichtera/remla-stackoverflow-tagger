@@ -14,8 +14,9 @@ def load_file(filename):
         sep="\t",
         dtype={"title": "str"},
     )
-    loaded_data["predicted"] = loaded_data["predicted"].apply(literal_eval)
-    loaded_data["actual"] = loaded_data["actual"].apply(literal_eval)
+    loaded_data = loaded_data[["title", "tags"]]
+
+    loaded_data["tags"] = loaded_data["tags"].apply(literal_eval)
     return loaded_data
 
 
@@ -23,8 +24,8 @@ def send_data(data):
     for i in data.index:
         params = {
             "title": data["title"][i],
-            "predicted": data["predicted"][i],
-            "actual": data["actual"][i],
+            "predicted": data["tags"][i],
+            "actual": data["tags"][i],
         }
         requests.post(url=URL, json=params)  # maybe check status code
 
