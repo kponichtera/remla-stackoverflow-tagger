@@ -17,8 +17,8 @@ development:
   PREPROCESSOR_LABELS_PATH: learning_service/output/preprocessor_labels.joblib
   PREPROCESSOR_LABELS_OBJECT_KEY: preprocessor_labels.joblib
   STATISTICS_OBJECT_KEY: statistics.json
-  # PUBSUB_EMULATOR_HOST: localhost:8085
-  PUBSUB_PROJECT_ID: buckettesting-352212
+  PUBSUB_EMULATOR_HOST: localhost:8085
+  PUBSUB_PROJECT_ID: testlocal-123
   PUBSUB_DATA_TOPIC_ID: new-data
   PUBSUB_MODEL_TOPIC_ID: new-model
   PUBSUB_SUBSCRIPTION_ID: learning-service-new-model
