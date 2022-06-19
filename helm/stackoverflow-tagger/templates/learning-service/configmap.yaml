@@ -16,5 +16,6 @@ data:
   REMLA_PREPROCESSOR_LABELS_PATH: "/app/output/preprocessor_labels.joblib"
   REMLA_PREPROCESSOR_LABELS_OBJECT_KEY: "preprocessor_labels.joblib"
   REMLA_PUBSUB_DATA_TEMP_FILE: "/app/data/incoming.tsv"
+  REMLA_LEARNING_MESSAGE_THRESHOLD: {{ .Values.config.learningMessageThreshold | quote }}
   {{- include "stackoverflow-tagger.config.objectStorage" . | nindent 2 }}
   {{- include "stackoverflow-tagger.config.pubsub" . | nindent 2 }}
