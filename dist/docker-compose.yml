@@ -27,12 +27,19 @@ services:
       REMLA_BUCKET_NAME: "stackoverflow-tagger"
       REMLA_MODEL_OBJECT_KEY: "model.joblib"
       REMLA_MODEL_LOCAL_PATH: "/app/output/model.joblib"
+      REMLA_CLASSIFIER_OBJECT_KEY: classifier.joblib
+      REMLA_CLASSIFIER_LOCAL_PATH: /app/output/classifier.joblib
+      REMLA_PREPROCESSOR_DATA_PATH: /app/output/preprocessor_data.joblib
+      REMLA_PREPROCESSOR_DATA_OBJECT_KEY: preprocessor_data.joblib
+      REMLA_PREPROCESSOR_LABELS_PATH: /app/output/preprocessor_labels.joblib
+      REMLA_PREPROCESSOR_LABELS_OBJECT_KEY: preprocessor_labels.joblib
+      REMLA_STATISTICS_OBJECT_KEY: statistics.json
       REMLA_PUBSUB_EMULATOR_HOST: "pubsub:8085"
       REMLA_PUBSUB_PROJECT_ID: "testlocal-123"
       REMLA_PUBSUB_DATA_TOPIC_ID: "new-data"
       REMLA_PUBSUB_MODEL_TOPIC_ID: "new-model"
       REMLA_PUBSUB_SUBSCRIPTION_ID: "learning-service-new-model"
-      REMLA_PUBSUB_DATA_TEMP_FILE: /app/incoming.tsv
+      REMLA_PUBSUB_DATA_TEMP_FILE: /app/output/incoming.tsv
       REMLA_LEARNING_MESSAGE_THRESHOLD: 100
     depends_on:
       learning-service-init:

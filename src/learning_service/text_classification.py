@@ -144,7 +144,12 @@ def get_evaluation_scores(
 def retrain_model(classifier):
     pass
 
-def main(bucket_upload=False, train_data_file = TRAIN_DATA_FILE_PATH, train_labels_file = TRAIN_LABELS_FILE_PATH, classifier = None):
+def main(bucket_upload=False,
+         train_data_file = TRAIN_DATA_FILE_PATH,
+         train_labels_file = TRAIN_LABELS_FILE_PATH,
+         validation_data_file = VALIDATION_DATA_FILE_PATH,
+         validation_labels_file = VALIDATION_LABELS_FILE_PATH,
+         classifier = None):
     """Main function run training
 
     Args:
@@ -154,8 +159,8 @@ def main(bucket_upload=False, train_data_file = TRAIN_DATA_FILE_PATH, train_labe
     X_train = load(train_data_file)
     y_train = load(train_labels_file)
 
-    X_val = load(VALIDATION_DATA_FILE_PATH)
-    y_val = load(VALIDATION_LABELS_FILE_PATH)
+    X_val = load(validation_data_file)
+    y_val = load(validation_labels_file)
 
     label_preprocessor = load(LABEL_PREPROCESSOR)
 

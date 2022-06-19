@@ -136,7 +136,7 @@ class LearningApp(FastAPI):
         self.description = "Learning Service API for learning models 📙🤖"
 
         prometheus_client.start_http_server(9010)
-        train_and_send(self)
+        # train_and_send(self)
         bucket_auth = (
             settings[VarNames.OBJECT_STORAGE_ACCESS_KEY.value],
             settings[VarNames.OBJECT_STORAGE_SECRET_KEY.value],

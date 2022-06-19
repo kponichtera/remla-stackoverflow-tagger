@@ -9,9 +9,9 @@ development:
   OBJECT_STORAGE_TLS: false
   BUCKET_NAME: stackoverflow-tagger
   MODEL_OBJECT_KEY: model.joblib
-  MODEL_LOCAL_PATH: filename
+  MODEL_LOCAL_PATH: learning_service/output/model.joblib
   CLASSIFIER_OBJECT_KEY: classifier.joblib
-  CLASSIFIER_LOCAL_PATH: filename
+  CLASSIFIER_LOCAL_PATH: learning_service/output/classifier.joblib
   PREPROCESSOR_DATA_PATH: learning_service/output/preprocessor_data.joblib
   PREPROCESSOR_DATA_OBJECT_KEY: preprocessor_data.joblib
   PREPROCESSOR_LABELS_PATH: learning_service/output/preprocessor_labels.joblib
