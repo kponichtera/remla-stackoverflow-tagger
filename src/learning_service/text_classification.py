@@ -269,6 +269,7 @@ def main(bucket_upload=False,
             settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
             *auth
         )
+    return classifier
 
 
 if __name__ == "__main__":

@@ -188,7 +188,7 @@ def learn():
     """
     copy_data_from_resources()
     preprocess_main()
-    classification_main(bucket_upload=True)
+    app.model = classification_main(bucket_upload=True)
     with open(
         os.path.join(
             OUTPUT_PATH,
@@ -198,7 +198,6 @@ def learn():
         encoding='utf-8'
         ) as f:
         evaluation_data = json.load(f)
-
     app.publish_client.publish(app.publish_topic, b'New model available')
     return {
         "name": settings[VarNames.MODEL_OBJECT_KEY.value],
