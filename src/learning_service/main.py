@@ -13,7 +13,7 @@ from common.logger import Logger
 from common.pubsub import subscribe_to_topic, publish_to_topic
 from learning_service.config import settings, VarNames
 from learning_service.get_data import copy_data, copy_data_from_resources
-from learning_service.text_classification import main as classification_main
+from learning_service.text_classification import main as classification_main, update_scores_from_file
 from learning_service.text_preprocessing import main as preprocess_main, prepocess_incoming_data
 
 OUTPUT_PATH = settings[VarNames.OUTPUT_DIR.value]
@@ -190,6 +190,7 @@ class LearningApp(FastAPI):
         if success :
             print('ok!')
             self.model = load_model(settings[VarNames.CLASSIFIER_LOCAL_PATH.value])
+            update_scores_from_file(settings[VarNames.STATISTICS_PATH.value])
         
         # Create a new thread for the blocking Pub/Sub call and start it
         pubsub_thread = Thread(target=get_result, args=(streaming_pull_future,), daemon=True)
