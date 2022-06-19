@@ -9,6 +9,7 @@ data:
   REMLA_DATASET_FOR_TRAINING_DIR: "/app/training"
   REMLA_OUTPUT_DIR: "/app/output"
   REMLA_MODEL_LOCAL_PATH: "/app/output/model.joblib"
+  REMLA_STATISTICS_OBJECT_KEY: "statistics.json"
   REMLA_CLASSIFIER_OBJECT_KEY: "classifier.joblib"
   REMLA_CLASSIFIER_LOCAL_PATH: "/app/output/classifier.joblib"
   REMLA_PREPROCESSOR_DATA_PATH: "/app/output/preprocessor_data.joblib"
