@@ -37,7 +37,11 @@ class VarNames(Enum):
     PREPROCESSOR_LABELS_PATH = "PREPROCESSOR_LABELS_PATH"
     PREPROCESSOR_LABELS_OBJECT_KEY = "PREPROCESSOR_LABELS_OBJECT_KEY"
     STATISTICS_OBJECT_KEY = "STATISTICS_OBJECT_KEY"
-
+    STATISTICS_PATH = "STATISTICS_PATH"
+    PREPROCESSOR_VAL_DATA_OBJECT_KEY = "PREPROCESSOR_VAL_DATA_OBJECT_KEY"
+    PREPROCESSOR_VAL_DATA_PATH = "PREPROCESSOR_VAL_DATA_PATH"
+    PREPROCESSOR_VAL_LABELS_OBJECT_KEY = "PREPROCESSOR_VAL_LABELS_OBJECT_KEY"
+    PREPROCESSOR_VAL_LABELS_PATH = "PREPROCESSOR_VAL_LABELS_PATH"
 
 settings = Dynaconf(
     # variables exported in .env as `REMLA_FOO=bar` becomes `settings.FOO == "bar"`
@@ -75,7 +79,13 @@ settings.validators.register(
     Validator(VarNames.PREPROCESSOR_LABELS_PATH.value, must_exist=True),
     Validator(VarNames.PREPROCESSOR_LABELS_OBJECT_KEY.value, must_exist=True),
 
+    Validator(VarNames.PREPROCESSOR_VAL_DATA_OBJECT_KEY.value, must_exist=True),
+    Validator(VarNames.PREPROCESSOR_VAL_DATA_PATH.value, must_exist=True),
+    Validator(VarNames.PREPROCESSOR_VAL_LABELS_OBJECT_KEY.value, must_exist=True),
+    Validator(VarNames.PREPROCESSOR_VAL_LABELS_PATH.value, must_exist=True),
+
     Validator(VarNames.STATISTICS_OBJECT_KEY.value, must_exist=True),
+    Validator(VarNames.STATISTICS_PATH.value, must_exist=True),
 
     Validator(VarNames.PUBSUB_EMULATOR_HOST.value, default=None),
     Validator(VarNames.PUBSUB_PROJECT_ID.value, must_exist=True),

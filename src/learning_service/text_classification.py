@@ -263,6 +263,20 @@ def main(bucket_upload=False,
             *auth
         )
         upload_model(
+            VALIDATION_DATA_FILE_PATH,
+            settings[VarNames.BUCKET_NAME.value],
+            settings[VarNames.PREPROCESSOR_VAL_DATA_OBJECT_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
+            *auth
+        )
+        upload_model(
+            VALIDATION_LABELS_FILE_PATH,
+            settings[VarNames.BUCKET_NAME.value],
+            settings[VarNames.PREPROCESSOR_VAL_LABELS_OBJECT_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
+            *auth
+        )
+        upload_model(
             os.path.join(OUTPUT_PATH, "evaluation.json"),
             settings[VarNames.BUCKET_NAME.value],
             settings[VarNames.STATISTICS_OBJECT_KEY.value],

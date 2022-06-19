@@ -151,21 +151,44 @@ class LearningApp(FastAPI):
             settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
             *bucket_auth
         )
-        success = download_model(
+        success = success and download_model(
             settings[VarNames.PREPROCESSOR_DATA_PATH.value],
             settings[VarNames.BUCKET_NAME.value],
             settings[VarNames.PREPROCESSOR_DATA_OBJECT_KEY.value],
             settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
             *bucket_auth
         )
-        success = download_model(
+        success = success and download_model(
             settings[VarNames.PREPROCESSOR_LABELS_PATH.value],
             settings[VarNames.BUCKET_NAME.value],
             settings[VarNames.PREPROCESSOR_LABELS_OBJECT_KEY.value],
             settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
             *bucket_auth
         )
+        success = success and download_model(
+            settings[VarNames.PREPROCESSOR_VAL_DATA_PATH.value],
+            settings[VarNames.BUCKET_NAME.value],
+            settings[VarNames.PREPROCESSOR_VAL_DATA_OBJECT_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
+            *bucket_auth
+        )
+        success = success and download_model(
+            settings[VarNames.PREPROCESSOR_VAL_LABELS_PATH.value],
+            settings[VarNames.BUCKET_NAME.value],
+            settings[VarNames.PREPROCESSOR_VAL_LABELS_OBJECT_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
+            *bucket_auth
+        )
+        success = success and download_model(
+            settings[VarNames.STATISTICS_PATH.value],
+            settings[VarNames.BUCKET_NAME.value],
+            settings[VarNames.STATISTICS_OBJECT_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
+            *bucket_auth
+        )
+        
         if success :
+            print('ok!')
             self.model = load_model(settings[VarNames.CLASSIFIER_LOCAL_PATH.value])
         
         # Create a new thread for the blocking Pub/Sub call and start it

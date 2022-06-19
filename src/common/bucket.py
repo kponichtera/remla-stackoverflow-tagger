@@ -93,13 +93,18 @@ def download_model(model_path : str,
     if not client.bucket_exists(bucket_name):
         Logger.fail(f'Model download failed, bucket {bucket_name} does not exist ❌')
         return False
+    success = True
     try:
         client.fget_object(bucket_name, model_name, model_path)
     except S3Error as error:
+        success = False
         err = Logger.get_color_string(error, Logger.FAIL)
         Logger.fail(f'Model download failed ❌\n{err}')
-    Logger.info('Model download succeeded ✔️')
-    return True
+    
+    if success:
+        Logger.info('Model download succeeded ✔️')
+
+    return success
 
 def load_model(model_path : str):
     """Loads a model from the specified path.
