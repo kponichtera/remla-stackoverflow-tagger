@@ -111,7 +111,7 @@ def ping():
     return {}
 
 @app.get('/api/model_present')
-def model_present():
+async def model_present():
     """
     Used to check if the model is present and application can be used.
     """

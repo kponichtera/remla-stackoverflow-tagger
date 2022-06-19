@@ -2,6 +2,7 @@
 Preprocess the data to be trained by the learning algorithm.
 Creates files `preprocessor.joblib` and `preprocessed_data.joblib`
 """
+from importlib.resources import path
 import json
 import os
 import re
@@ -173,12 +174,35 @@ def create_multi_label_binarizer(labels:pd.DataFrame):
     mlb = MultiLabelBinarizer(classes=sorted(tags_counts.keys()))
     return mlb
 
-def main():
+def prepocess_incoming_data(data_preprocessor_path,
+                            label_preprocessor_path,
+                            label_preprocessor_name,
+                            incoming_data_file,
+                            incoming_data_path):
+    data = read_data_from_file(incoming_data_file, root_path=incoming_data_path)
+
+    transformed_data = prepare_data_from_processor(
+                            data['title'],
+                            data_preprocessor_path
+                        )
+    dump(transformed_data, os.path.join(OUTPUT_PATH, 'train_preprocessed_data.joblib'))
+    mlb = load(os.path.join(label_preprocessor_path, label_preprocessor_name))
+
+    # preprocess labels
+    prepare_labels(
+        data['tags'],
+        mlb,
+        save_path=OUTPUT_PATH,
+        labels_name='train'
+    )
+
+def main(train_file = "train.tsv", val_file = "validation.tsv", test_file = "test.tsv"):
     """Main function to run preprocessors.
     """
-    train_data = read_data_from_file("train.tsv")
-    validation_data = read_data_from_file("validation.tsv")
-    test_data = read_unlabeled_data_from_file("test.tsv")
+
+    train_data = read_data_from_file(train_file)
+    validation_data = read_data_from_file(val_file)
+    test_data = read_unlabeled_data_from_file(test_file)
     print('\n################### Processed Messages ###################\n')
     with pd.option_context('expand_frame_repr', False):
         print('\n################### train_data ###################\n')
@@ -211,6 +235,7 @@ def main():
     dump(test_preprocessed_data, os.path.join(OUTPUT_PATH, 'test_preprocessed_data.joblib'))
 
     mlb = create_multi_label_binarizer(train_data['tags'])
+
     # preprocess labels
     prepare_labels(
         train_data['tags'],

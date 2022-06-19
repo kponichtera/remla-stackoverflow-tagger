@@ -7,7 +7,7 @@ from typing import Callable
 from google.api_core.exceptions import NotFound
 from common.logger import Logger
 from google.cloud.pubsub_v1.subscriber.message import Message
-from google.cloud.pubsub_v1 import PublisherClient, SubscriberClient
+from google.cloud.pubsub_v1 import PublisherClient, SubscriberClient, types
 
 
 def publish_to_topic(topic_path: str):
@@ -93,9 +93,15 @@ def subscribe_to_topic(pubsub_host : str, pubsub_project_id : str,
         Logger.info(
             f'Creating subscription {colored_subscription_path} on topic {colored_topic_path}'
         )
-        subscriber.create_subscription(
-            request={"name": subscription_path, "topic": topic_path}
-        )
+
+        request={"name": subscription_path, "topic": topic_path}
+
+        # Make subscriptions expire after 24h
+        if unique_subscription_name:
+            request["expiration_policy"] = types.ExpirationPolicy = types.ExpirationPolicy(ttl=types.Duration(seconds=86400))
+
+        # Create the subscription
+        subscriber.create_subscription(request=request)
     else:
         try:
             # Check if the subscription exists

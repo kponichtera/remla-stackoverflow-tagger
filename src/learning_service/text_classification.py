@@ -10,7 +10,7 @@ import pandas as pd
 import scipy
 from joblib import load, dump
 from prometheus_client import Gauge
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import accuracy_score, f1_score, average_precision_score, roc_auc_score
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.pipeline import make_pipeline
@@ -52,11 +52,18 @@ def train_classifier(X_train, y_train, penalty='l1', C=1.0):
     Returns:
         OneVsRestClassifier: classifier
     """
-    clf = LogisticRegression(
+    # clf = LogisticRegression(
+    #     penalty=penalty,
+    #     C=C,
+    #     dual=False,
+    #     solver='liblinear',
+    #     verbose=1,
+    #     n_jobs=-1
+    # )
+
+    clf = SGDClassifier(
         penalty=penalty,
-        C=C,
-        dual=False,
-        solver='liblinear',
+        max_iter=5000,
         verbose=1,
         n_jobs=-1
     )
@@ -134,26 +141,33 @@ def get_evaluation_scores(
         "roc_auc": roc_auc_score_num,
     }
 
+def retrain_model(classifier):
+    pass
 
-def main(bucket_upload=False):
+def main(bucket_upload=False,
+         train_data_file = TRAIN_DATA_FILE_PATH,
+         train_labels_file = TRAIN_LABELS_FILE_PATH,
+         validation_data_file = VALIDATION_DATA_FILE_PATH,
+         validation_labels_file = VALIDATION_LABELS_FILE_PATH,
+         classifier = None):
     """Main function run training
 
     Args:
         bucket_upload (bool, optional): determined if the model should
                 be uploaded to a bucket. Defaults to True.
     """
-    X_train = load(TRAIN_DATA_FILE_PATH)
-    y_train = load(TRAIN_LABELS_FILE_PATH)
+    X_train = load(train_data_file)
+    y_train = load(train_labels_file)
 
-    X_val = load(VALIDATION_DATA_FILE_PATH)
-    y_val = load(VALIDATION_LABELS_FILE_PATH)
+    X_val = load(validation_data_file)
+    y_val = load(validation_labels_file)
 
     label_preprocessor = load(LABEL_PREPROCESSOR)
 
     raw_data = read_data_from_file("validation.tsv")
     raw_titles = raw_data["title"].values
 
-    classifier = train_classifier(X_train, y_train)
+    classifier = train_classifier(X_train, y_train) if classifier is None else classifier.partial_fit(X_train, y_train)
     classifier_name = f'{str(uuid.uuid4())}_model'
 
     # Non inverse transformed data
@@ -207,8 +221,12 @@ def main(bucket_upload=False):
         FunctionTransformer(label_preprocessor.inverse_transform)
     )
     filename = f'{classifier_name}.joblib'
+    classifier_filename = f'{classifier_name}_classifier.joblib'
     model_path = os.path.join(OUTPUT_PATH, filename)
+    classifier_path = os.path.join(OUTPUT_PATH, classifier_filename)
     dump(classifier_pipeline, model_path)
+
+    dump(classifier, classifier_path)
 
     if bucket_upload:
         auth = (
@@ -223,6 +241,36 @@ def main(bucket_upload=False):
             settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
             *auth
         )
+        upload_model(
+            classifier_path,
+            settings[VarNames.BUCKET_NAME.value],
+            settings[VarNames.CLASSIFIER_OBJECT_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
+            *auth
+        )
+        upload_model(
+            DATA_PREPROCESSOR,
+            settings[VarNames.BUCKET_NAME.value],
+            settings[VarNames.PREPROCESSOR_DATA_OBJECT_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
+            *auth
+        )
+        upload_model(
+            LABEL_PREPROCESSOR,
+            settings[VarNames.BUCKET_NAME.value],
+            settings[VarNames.PREPROCESSOR_LABELS_OBJECT_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
+            *auth
+        )
+        upload_model(
+            os.path.join(OUTPUT_PATH, "evaluation.json"),
+            settings[VarNames.BUCKET_NAME.value],
+            settings[VarNames.STATISTICS_OBJECT_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
+            *auth
+        )
+    return classifier
+
 
 if __name__ == "__main__":
     main()
