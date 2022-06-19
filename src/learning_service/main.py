@@ -28,7 +28,8 @@ def train_and_send(app : FastAPI, train_file = "train.tsv", model = None):
         prepocess_incoming_data('/'.join(settings[VarNames.PREPROCESSOR_DATA_PATH.value].split('/')[:-1]),
                                 '/'.join(settings[VarNames.PREPROCESSOR_LABELS_PATH.value].split('/')[:-1]),
                                 settings[VarNames.PREPROCESSOR_LABELS_PATH.value].split('/')[-1],
-                                train_file)
+                                train_file,
+                                '/'.join(settings[VarNames.PUBSUB_DATA_TEMP_FILE.value].split('/')[:-1]))
     classification_main(bucket_upload=True, classifier=model)
     app.publish_client.publish(app.publish_topic, b'New model available')
 

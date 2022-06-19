@@ -177,8 +177,9 @@ def create_multi_label_binarizer(labels:pd.DataFrame):
 def prepocess_incoming_data(data_preprocessor_path,
                             label_preprocessor_path,
                             label_preprocessor_name,
-                            incoming_data_file):
-    data = read_data_from_file(incoming_data_file)
+                            incoming_data_file,
+                            incoming_file_path):
+    data = read_data_from_file(incoming_data_file, root_path=data_preprocessor_path, root_path=incoming_file_path)
 
     transformed_data = prepare_data_from_processor(
                             data['title'],
