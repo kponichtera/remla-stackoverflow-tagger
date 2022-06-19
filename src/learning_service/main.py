@@ -18,7 +18,7 @@ from learning_service.text_preprocessing import main as preprocess_main, prepoce
 
 OUTPUT_PATH = settings[VarNames.OUTPUT_DIR.value]
 
-def train_and_send(app : FastAPI, train_file = "train.tsv", model = None):
+def train_and_send(app : FastAPI, train_file = "train.tsv", train_file_path : str = "/app/data/", model = None):
     """Method to train and send a model.
     """
     copy_data()
@@ -29,7 +29,7 @@ def train_and_send(app : FastAPI, train_file = "train.tsv", model = None):
                                 '/'.join(settings[VarNames.PREPROCESSOR_LABELS_PATH.value].split('/')[:-1]),
                                 settings[VarNames.PREPROCESSOR_LABELS_PATH.value].split('/')[-1],
                                 train_file,
-                                '/'.join(settings[VarNames.PUBSUB_DATA_TEMP_FILE.value].split('/')[:-1]))
+                                train_file_path)
     classification_main(bucket_upload=True, classifier=model)
     app.publish_client.publish(app.publish_topic, b'New model available')
 
@@ -71,7 +71,8 @@ def get_callback(lock : Lock, message_threshold : int, temp_file : str, train_fi
             # If the threshold has been reached, trigger re-learning
             if len(lines) >= message_threshold:
                 # Perform learning
-                train_and_send(app, temp_file.split('/')[-1], app.model)
+                train_and_send(app, temp_file.split('/')[-1],
+                               '/'.join(temp_file.split('/')[:-1]), app.model)
 
                 # Empty the temporary file
                 with open(temp_file, 'w') as f:
