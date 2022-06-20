@@ -166,3 +166,4 @@ config:
     tls: false
     bucketName: ""
     modelObjectKey: "model.joblib"
+  learningMessageThreshold: "100"
