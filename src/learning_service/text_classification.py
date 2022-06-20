@@ -95,6 +95,19 @@ def predict_labels(
     test_pred_inverse = inverse_transformer.inverse_transform(test_predictions)
     return test_pred_inverse
 
+def update_scores_from_file(filename : str):
+    """Updates the Prometheus gauges from a json file.
+
+    Args:
+        filename (str): the file in which the statistics are stored
+    """
+    with open(filename) as f:
+        json_stats = json.load(f)
+        ACCURACY_SCORE.set(json_stats['accuracy_score'])
+        F1_SCORE.set(json_stats['f1_score'])
+        AVERAGE_PRECISION_SCORE.set(json_stats['average_precision_score'])
+        ROC_AUC.set(json_stats['roc_auc'])
+        LATEST_MODEL_UPDATE.set_to_current_time()
 
 def get_evaluation_scores(
     predicted_labels : scipy.sparse.csr.csr_matrix,
@@ -259,6 +272,20 @@ def main(bucket_upload=False,
             LABEL_PREPROCESSOR,
             settings[VarNames.BUCKET_NAME.value],
             settings[VarNames.PREPROCESSOR_LABELS_OBJECT_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
+            *auth
+        )
+        upload_model(
+            VALIDATION_DATA_FILE_PATH,
+            settings[VarNames.BUCKET_NAME.value],
+            settings[VarNames.PREPROCESSOR_VAL_DATA_OBJECT_KEY.value],
+            settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
+            *auth
+        )
+        upload_model(
+            VALIDATION_LABELS_FILE_PATH,
+            settings[VarNames.BUCKET_NAME.value],
+            settings[VarNames.PREPROCESSOR_VAL_LABELS_OBJECT_KEY.value],
             settings[VarNames.OBJECT_STORAGE_ENDPOINT.value],
             *auth
         )

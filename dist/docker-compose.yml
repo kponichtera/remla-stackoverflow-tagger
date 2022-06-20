@@ -34,6 +34,11 @@ services:
       REMLA_PREPROCESSOR_LABELS_PATH: /app/output/preprocessor_labels.joblib
       REMLA_PREPROCESSOR_LABELS_OBJECT_KEY: preprocessor_labels.joblib
       REMLA_STATISTICS_OBJECT_KEY: statistics.json
+      REMLA_STATISTICS_PATH: /app/statistics.json
+      REMLA_PREPROCESSOR_VAL_DATA_PATH: /app/output/preprocessor_val.joblib
+      REMLA_PREPROCESSOR_VAL_DATA_OBJECT_KEY: preprocessor_val.joblib
+      REMLA_PREPROCESSOR_VAL_LABELS_PATH: /app/output/preprocessor_val_labels.joblib
+      REMLA_PREPROCESSOR_VAL_LABELS_OBJECT_KEY: preprocessor_val_labels.joblib
       REMLA_PUBSUB_EMULATOR_HOST: "pubsub:8085"
       REMLA_PUBSUB_PROJECT_ID: "testlocal-123"
       REMLA_PUBSUB_DATA_TOPIC_ID: "new-data"
