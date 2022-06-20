@@ -14,6 +14,7 @@ locals {
     APPLICATION_SERVICE_ACCOUNT_KEY_SECRET = local.application_service_account_key_secret_name
     PUBSUB_NEW_DATA_TOPIC_NAME             = var.pubsub_new_data_topic_name
     PUBSUB_NEW_MODEL_TOPIC_NAME            = var.pubsub_new_model_topic_name
+    LEARNING_MESSAGE_THRESHOLD             = var.learning_message_threshold
   })
 }
 

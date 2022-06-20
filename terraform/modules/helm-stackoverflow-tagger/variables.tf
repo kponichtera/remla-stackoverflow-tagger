@@ -49,3 +49,6 @@ variable "pubsub_new_data_topic_name" {
 variable "pubsub_new_model_topic_name" {
 }
 
+variable "learning_message_threshold" {
+}
+
