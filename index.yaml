@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   stackoverflow-tagger:
   - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2022-06-20T20:24:57.168857542Z"
+    description: StackOverflow Tagger system
+    digest: 4d72b62ec769a5dcaea164c54ab2378893035eaf36c671b8429da652d907d0d4
+    name: stackoverflow-tagger
+    type: application
+    urls:
+    - https://github.com/remla2022/stackoverflow-tagger/releases/download/v1.0.0/stackoverflow-tagger-1.0.0.tgz
+    version: 1.0.0
+  - apiVersion: v2
     appVersion: 0.2.4
     created: "2022-06-20T01:06:40.157485336Z"
     description: StackOverflow Tagger system
@@ -281,4 +291,4 @@ entries:
     urls:
     - https://github.com/remla2022/stackoverflow-tagger/releases/download/v0.0.4/stackoverflow-tagger-0.0.4.tgz
     version: 0.0.4
-generated: "2022-06-20T01:06:40.157740341Z"
+generated: "2022-06-20T20:24:57.169259055Z"
