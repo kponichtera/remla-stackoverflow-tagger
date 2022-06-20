@@ -4,7 +4,7 @@
 
 # StackOverflow Tagger
 
-Project for [Release Engineering for Machine Learning Applications](https://se.ewi.tudelft.nl/remla/2022/)
+Project for 2022 edition of [Release Engineering for Machine Learning Applications](https://se.ewi.tudelft.nl/remla/2022/)
 (REMLA) course at TU Delft.
 
 ## System components
