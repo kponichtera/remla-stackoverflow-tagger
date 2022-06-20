@@ -28,6 +28,8 @@ module "stackoverflow_tagger_helm_chart" {
 
   pubsub_new_data_topic_name  = data.terraform_remote_state.gcloud.outputs.pubsub_new_data_topic_name
   pubsub_new_model_topic_name = data.terraform_remote_state.gcloud.outputs.pubsub_new_model_topic_name
+
+  learning_message_threshold = var.learning_message_threshold
 }
 
 module "managed_certificate" {

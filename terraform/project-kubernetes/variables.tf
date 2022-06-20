@@ -10,3 +10,7 @@ variable "ingress_host" {
 variable "chart_version" {
   default = ""
 }
+
+variable "learning_message_threshold" {
+  default = 100
+}

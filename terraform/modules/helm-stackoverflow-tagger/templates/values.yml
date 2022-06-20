@@ -46,3 +46,4 @@ config:
     tls: true
     bucketName: ${DATA_MODEL_BUCKET_NAME}
     modelObjectKey: "model.joblib"
+  learningMessageThreshold: ${LEARNING_MESSAGE_THRESHOLD}
