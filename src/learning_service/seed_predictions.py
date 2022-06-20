@@ -5,7 +5,7 @@ from ast import literal_eval
 import requests
 import pandas as pd
 
-URL = "http://localhost:8000/api/correct"
+URL = "https://remla-test.ponichtera.dev/api/correct"
 
 
 def load_file(filename):
@@ -27,6 +27,7 @@ def send_data(data):
             "predicted": data["tags"][i],
             "actual": data["tags"][i],
         }
+        print(f'{i}/{len(data.index)}:', params)
         requests.post(url=URL, json=params)  # maybe check status code
 
 

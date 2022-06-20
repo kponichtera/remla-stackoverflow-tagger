@@ -9,5 +9,19 @@ data:
   REMLA_DATASET_FOR_TRAINING_DIR: "/app/training"
   REMLA_OUTPUT_DIR: "/app/output"
   REMLA_MODEL_LOCAL_PATH: "/app/output/model.joblib"
+  REMLA_STATISTICS_OBJECT_KEY: "statistics.json"
+  REMLA_STATISTICS_PATH: "/app/output/statistics.json"
+  REMLA_PREPROCESSOR_VAL_DATA_PATH: "/app/output/preprocessor_val.joblib"
+  REMLA_PREPROCESSOR_VAL_DATA_OBJECT_KEY: "preprocessor_val.joblib"
+  REMLA_PREPROCESSOR_VAL_LABELS_PATH: "/app/output/preprocessor_val_labels.joblib"
+  REMLA_PREPROCESSOR_VAL_LABELS_OBJECT_KEY: "preprocessor_val_labels.joblib"
+  REMLA_CLASSIFIER_OBJECT_KEY: "classifier.joblib"
+  REMLA_CLASSIFIER_LOCAL_PATH: "/app/output/classifier.joblib"
+  REMLA_PREPROCESSOR_DATA_PATH: "/app/output/preprocessor_data.joblib"
+  REMLA_PREPROCESSOR_DATA_OBJECT_KEY: "preprocessor_data.joblib"
+  REMLA_PREPROCESSOR_LABELS_PATH: "/app/output/preprocessor_labels.joblib"
+  REMLA_PREPROCESSOR_LABELS_OBJECT_KEY: "preprocessor_labels.joblib"
+  REMLA_PUBSUB_DATA_TEMP_FILE: "/app/data/incoming.tsv"
+  REMLA_LEARNING_MESSAGE_THRESHOLD: {{ .Values.config.learningMessageThreshold | quote }}
   {{- include "stackoverflow-tagger.config.objectStorage" . | nindent 2 }}
   {{- include "stackoverflow-tagger.config.pubsub" . | nindent 2 }}

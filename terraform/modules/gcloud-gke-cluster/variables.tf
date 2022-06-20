@@ -17,7 +17,7 @@ variable "primary_node_pool_size" {
 }
 
 variable "primary_node_pool_machine_type" {
-  default     = "e2-small"
+  default     = "e2-medium"
   description = "The machine type for nodes in the primary node pool."
 }
 
@@ -37,7 +37,7 @@ variable "preemptible_node_pool_size" {
 }
 
 variable "preemptible_node_pool_machine_type" {
-  default     = "e2-small"
+  default     = "e2-medium"
   description = "The machine type for nodes in the preemptible node pool."
 }
 
